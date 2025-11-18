@@ -539,9 +539,7 @@ const getNextDay = (dateStr: string): string => {
 export const deleteTest = async (
   testId: string, 
   lotNumber?: string, 
-  testType?: import('./types').TestType,
-  msalInstance?: any,
-  scopes?: string[]
+  testType?: import('./types').TestType
 ): Promise<void> => {
   // Eliminar de local primero (siempre)
   try {
@@ -568,19 +566,26 @@ export const deleteTest = async (
     // No lanzar error - el test ya fue eliminado localmente
   }
 
-  // Intentar eliminar carpeta de OneDrive si se proporcionan los datos
-  if (lotNumber && testType && msalInstance && scopes) {
+  // Intentar eliminar carpeta de Google Drive si se proporcionan los datos
+  if (lotNumber && testType) {
     try {
-      const { deleteLotFolderFromOneDrive } = await import('./graphService');
-      await deleteLotFolderFromOneDrive(msalInstance, scopes, lotNumber, testType);
-      console.log(`✅ Carpeta ${lotNumber} eliminada de OneDrive`);
-    } catch (oneDriveError: any) {
-      console.error('❌ Error al eliminar de OneDrive:', oneDriveError);
-      console.warn('⚠️ Test eliminado de Firestore, pero no de OneDrive');
+      // Usar la API de Drive para eliminar archivos
+      const response = await fetch(`/api/drive/lot?lotNumber=${encodeURIComponent(lotNumber)}&testType=${testType}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        console.log(`✅ Carpeta ${lotNumber} eliminada de Google Drive`);
+      } else {
+        console.warn('⚠️ No se pudo eliminar de Google Drive');
+      }
+    } catch (driveError: any) {
+      console.error('❌ Error al eliminar de Google Drive:', driveError);
+      console.warn('⚠️ Test eliminado de Firestore, pero no de Google Drive');
       // No lanzar error - el test ya fue eliminado de Firestore
     }
   } else {
-    console.warn('ℹ️ No se eliminó de OneDrive (faltan parámetros)');
+    console.warn('ℹ️ No se eliminó de Google Drive (faltan parámetros)');
   }
 };
 

@@ -122,8 +122,7 @@ export const getAnalysesByDate = async (date: string): Promise<QualityAnalysis[]
   try {
     const q = query(
       collection(db, ANALYSES_COLLECTION),
-      where('date', '==', date),
-      orderBy('createdAt', 'desc')
+      where('date', '==', date)
     );
     
     const querySnapshot = await getDocs(q);
@@ -131,6 +130,15 @@ export const getAnalysesByDate = async (date: string): Promise<QualityAnalysis[]
     
     querySnapshot.forEach((doc) => {
       analyses.push(doc.data() as QualityAnalysis);
+    });
+    
+    // Ordenar en memoria por createdAt (más recientes primero)
+    analyses.sort((a, b) => {
+      const timeA = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 
+                    (a.createdAt as any)?.toMillis ? (a.createdAt as any).toMillis() : 0;
+      const timeB = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 
+                    (b.createdAt as any)?.toMillis ? (b.createdAt as any).toMillis() : 0;
+      return timeB - timeA;
     });
     
     return analyses;
@@ -189,8 +197,7 @@ export const getAnalysesByShift = async (
     const q = query(
       collection(db, ANALYSES_COLLECTION),
       where('date', '==', date),
-      where('shift', '==', shift),
-      orderBy('createdAt', 'desc')
+      where('shift', '==', shift)
     );
     
     const querySnapshot = await getDocs(q);
@@ -198,6 +205,15 @@ export const getAnalysesByShift = async (
     
     querySnapshot.forEach((doc) => {
       analyses.push(doc.data() as QualityAnalysis);
+    });
+    
+    // Ordenar en memoria por createdAt (más recientes primero)
+    analyses.sort((a, b) => {
+      const timeA = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : 
+                    (a.createdAt as any)?.toMillis ? (a.createdAt as any).toMillis() : 0;
+      const timeB = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : 
+                    (b.createdAt as any)?.toMillis ? (b.createdAt as any).toMillis() : 0;
+      return timeB - timeA;
     });
     
     return analyses;

@@ -1,5 +1,40 @@
 // ============================================
-// TIPOS DE PRODUCTO
+// TIPOS DEL SISTEMA DE RESISTENCIAS (Legacy)
+// ============================================
+
+export type TestType = 'MATERIA_PRIMA' | 'PRODUCTO_TERMINADO';
+
+export interface Sample {
+  id: string;
+  timeSlot: number;
+  rawUnits?: number;
+  cookedUnits?: number;
+  photoUrl?: string;
+  rotation?: number;
+  isUploading?: boolean;
+}
+
+export interface ResistanceTest {
+  id: string;
+  date: string;
+  startTime: string;
+  lotNumber: string;
+  provider: string;
+  pool: string;
+  certificationType: 'ASC' | 'CONVENCIONAL';
+  testType: TestType;
+  responsable: string;
+  so2Residuals?: number;
+  so2Bf?: number;
+  createdBy: string;
+  observations?: string;
+  samples: Sample[];
+  isCompleted: boolean;
+  completedAt?: string;
+}
+
+// ============================================
+// TIPOS DE PRODUCTO (Nuevo Sistema Análisis)
 // ============================================
 
 /**

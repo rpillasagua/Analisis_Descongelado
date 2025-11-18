@@ -28,6 +28,12 @@ class GoogleDriveService {
    */
   async initialize() {
     try {
+      // Importar el servicio de autenticación
+      const { googleAuthService } = await import('./googleAuthService');
+      
+      // Obtener y configurar el token de acceso
+      this.accessToken = await googleAuthService.ensureValidToken();
+      
       // Si ya tenemos un rootFolderId configurado, usarlo
       if (this.config.rootFolderId) {
         this.rootFolderId = this.config.rootFolderId;
