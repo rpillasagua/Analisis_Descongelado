@@ -68,8 +68,10 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                 alt={label}
                 className="w-20 h-20 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer hover:border-blue-500 transition-all"
                 onClick={handleImageClick}
+                referrerPolicy="no-referrer"
                 onError={(e) => {
                   console.warn(`⚠️ No se pudo cargar la imagen ${label}:`, photoUrl);
+                  // Si es una URL de blob, puede haber expirado. Si es de Drive, puede ser permisos/cookies.
                   setImageError(true);
                 }}
               />
@@ -107,10 +109,35 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
             className={`flex items-center gap-2 px-4 py-2 ${imageError ? 'bg-red-50 border-red-300 text-red-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'} rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border`}
           >
             {imageError ? (
-              <>
-                <ImageOff className="w-5 h-5" />
-                <span className="text-sm">Error al cargar - Reintentar</span>
-              </>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-2 text-red-600 mb-1">
+                  <ImageOff className="w-5 h-5" />
+                  <span className="text-sm font-medium">Error de carga</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImageError(false); // Reintentar carga
+                    }}
+                    className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-gray-700"
+                  >
+                    Reintentar
+                  </button>
+                  {photoUrl && photoUrl.startsWith('http') && (
+                    <a 
+                      href={photoUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs bg-blue-100 hover:bg-blue-200 px-2 py-1 rounded text-blue-700"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Ver enlace
+                    </a>
+                  )}
+                </div>
+              </div>
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,6 +170,12 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
             alt={label}
             className="w-full h-full object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              console.warn(`⚠️ Error cargando imagen en modal ${label}`);
+              // No seteamos imageError aquí para no cerrar el modal abruptamente,
+              // pero podríamos mostrar un mensaje dentro del modal.
+            }}
           />
           <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
             <p className="text-center font-medium">{label}</p>
