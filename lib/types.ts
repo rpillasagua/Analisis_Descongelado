@@ -237,6 +237,10 @@ export interface QualityAnalysis {
   shift: WorkShift;
   date: string; // YYYY-MM-DD
   
+  // Estado del análisis
+  status?: 'EN_PROGRESO' | 'COMPLETADO';
+  completedAt?: string;
+  
   // Observaciones
   observations?: string;
 }

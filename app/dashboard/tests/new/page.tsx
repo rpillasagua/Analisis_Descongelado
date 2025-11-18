@@ -18,6 +18,9 @@ import {
   DEFECTO_LABELS 
 } from '@/lib/types';
 import { getWorkShift, formatDate, generateId } from '@/lib/utils';
+import { getAnalysisById } from '@/lib/analysisService';
+
+export const dynamic = 'force-dynamic';
 
 // Componentes UI
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
@@ -59,50 +62,101 @@ const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
 
 export default function NewAnalysisPage() {
   const router = useRouter();
+  const [editId, setEditId] = useState<string | null>(null);
   const [productType, setProductType] = useState<ProductType>();
   const [formData, setFormData] = useState<Partial<QualityAnalysis>>({});
   const [photos, setPhotos] = useState<{[key: string]: File}>({});
   const [pesosBrutos, setPesosBrutos] = useState<PesoBrutoRegistro[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [isDocumentCreated, setIsDocumentCreated] = useState(false);
   const { viewMode, setViewMode, isLoaded } = useViewMode();
 
-  // Generar ID al montar el componente
+  // Obtener ID del URL en el cliente
   useEffect(() => {
-    setAnalysisId(generateId());
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    setEditId(id);
   }, []);
+
+  // Cargar análisis existente o generar nuevo ID
+  useEffect(() => {
+    if (editId) {
+      loadExistingAnalysis(editId);
+    } else if (editId === null && !analysisId) {
+      setAnalysisId(generateId());
+    }
+  }, [editId]);
+
+  const loadExistingAnalysis = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const analysis = await getAnalysisById(id);
+      if (analysis) {
+        setAnalysisId(analysis.id);
+        setProductType(analysis.productType);
+        setFormData(analysis);
+        if (analysis.pesosBrutos) {
+          setPesosBrutos(analysis.pesosBrutos);
+        }
+        setIsDocumentCreated(true); // Ya existe en Firestore
+      } else {
+        alert('Análisis no encontrado');
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Error cargando análisis:', error);
+      alert('Error al cargar el análisis');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Auto-guardado
   const handleAutoSave = async (data: Partial<QualityAnalysis>) => {
     if (!analysisId) return;
     
-    const { updateAnalysis } = await import('@/lib/analysisService');
-    const { googleAuthService } = await import('@/lib/googleAuthService');
-    const user = googleAuthService.getUser();
-    const now = new Date();
+    try {
+      const { saveAnalysis, updateAnalysis } = await import('@/lib/analysisService');
+      const { googleAuthService } = await import('@/lib/googleAuthService');
+      const user = googleAuthService.getUser();
+      const now = new Date();
 
-    const analysis: QualityAnalysis = {
-      id: analysisId,
-      productType: productType!,
-      lote: data.lote || '',
-      codigo: data.codigo || '',
-      talla: data.talla,
-      pesoBruto: data.pesoBruto,
-      pesoCongelado: data.pesoCongelado,
-      pesoNeto: data.pesoNeto,
-      conteo: data.conteo,
-      uniformidad: data.uniformidad,
-      defectos: data.defectos,
-      fotoCalidad: data.fotoCalidad,
-      observations: data.observations,
-      createdAt: data.createdAt || now.toISOString(),
-      updatedAt: now.toISOString(),
-      createdBy: user?.email || 'unknown',
-      shift: getWorkShift(now),
-      date: formatDate(now)
-    };
+      const analysis: QualityAnalysis = {
+        id: analysisId,
+        productType: productType!,
+        lote: data.lote || '',
+        codigo: data.codigo || '',
+        talla: data.talla,
+        pesoBruto: data.pesoBruto,
+        pesoCongelado: data.pesoCongelado,
+        pesoNeto: data.pesoNeto,
+        pesosBrutos: productType === 'CONTROL_PESOS' ? pesosBrutos : undefined,
+        conteo: data.conteo,
+        uniformidad: data.uniformidad,
+        defectos: data.defectos,
+        fotoCalidad: data.fotoCalidad,
+        observations: data.observations,
+        createdAt: data.createdAt || now.toISOString(),
+        updatedAt: now.toISOString(),
+        createdBy: user?.email || 'unknown',
+        shift: getWorkShift(now),
+        date: formatDate(now),
+        status: 'EN_PROGRESO'
+      };
 
-    await updateAnalysis(analysisId, analysis);
+      // Si es la primera vez, crear el documento con setDoc
+      if (!isDocumentCreated) {
+        await saveAnalysis(analysis);
+        setIsDocumentCreated(true);
+      } else {
+        // Si ya existe, solo actualizar con updateDoc
+        await updateAnalysis(analysisId, analysis);
+      }
+    } catch (error) {
+      console.error('Error en auto-guardado:', error);
+    }
   };
 
   const autoSaveState = useAutoSaveAnalysis({
@@ -112,24 +166,166 @@ export default function NewAnalysisPage() {
     enabled: !!productType && !!formData.codigo && !!formData.lote
   });
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  // Helper para obtener valores anidados (ej: "pesoBruto.fotoUrl")
+  const getNestedValue = (obj: any, path: string): any => {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
   };
 
-  const handlePhotoCapture = (field: string, file: File) => {
-    setPhotos(prev => ({ ...prev, [field]: file }));
+  // Helper para setear valores anidados (ej: "pesoBruto.fotoUrl")
+  const setNestedValue = (obj: any, path: string, value: any): any => {
+    const keys = path.split('.');
+    const lastKey = keys.pop()!;
+    const target = keys.reduce((current, key) => {
+      if (!current[key]) current[key] = {};
+      return current[key];
+    }, obj);
+    target[lastKey] = value;
+    return { ...obj };
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    if (field.includes('.')) {
+      // Campo anidado (ej: "pesoBruto.fotoUrl")
+      setFormData(prev => setNestedValue({ ...prev }, field, value));
+    } else {
+      // Campo simple
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const handleFieldBlur = async () => {
+    if (productType && formData.codigo && formData.lote && analysisId) {
+      await handleAutoSave({ ...formData, productType });
+    }
+  };
+
+  const handlePhotoCapture = async (field: string, file: File) => {
+    console.log(`📸 Capturando foto para campo: ${field}`);
+    console.log(`📁 Archivo: ${file.name} (${file.type}, ${file.size} bytes)`);
+    
+    // Obtener URL anterior de la foto antes de reemplazarla
+    const oldPhotoUrl = getNestedValue(formData, field);
+    console.log(`🔗 URL anterior:`, oldPhotoUrl);
+
+    // Revocar URL blob anterior si existe para liberar memoria
+    if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
+      // Retrasar la revocación para evitar errores de carga en la UI antes de que se actualice el estado
+      setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
+    }
+    
     // Crear URL temporal para preview inmediato
     const tempUrl = URL.createObjectURL(file);
+    console.log(`🖼️ URL temporal creada:`, tempUrl);
+    
     handleInputChange(field, tempUrl);
+    setPhotos(prev => ({ ...prev, [field]: file }));
+
+    // Subir foto inmediatamente a Google Drive
+    try {
+      const { googleDriveService } = await import('@/lib/googleDriveService');
+      const { googleAuthService } = await import('@/lib/googleAuthService');
+      
+      if (!googleAuthService.isAuthenticated()) {
+        console.warn('⚠️ Usuario no autenticado, foto no se subirá');
+        return;
+      }
+
+      console.log(`⬆️ Subiendo foto a Google Drive...`);
+      await googleDriveService.initialize();
+      
+      const codigo = formData.codigo || 'temp';
+      const lote = formData.lote || 'temp';
+      const photoType = field.replace(/\./g, '_');
+      
+      // Pasar la URL anterior para que se elimine
+      const driveUrl = await googleDriveService.uploadAnalysisPhoto(
+        file,
+        codigo,
+        lote,
+        photoType,
+        oldPhotoUrl
+      );
+      
+      console.log(`✅ Foto ${photoType} subida a Drive:`, driveUrl);
+      
+      // Actualizar con URL de Drive
+      handleInputChange(field, driveUrl);
+      console.log(`📝 Estado actualizado con URL de Drive`);
+      
+      // Guardar automáticamente con la nueva URL
+      if (analysisId && productType && formData.codigo && formData.lote) {
+        console.log(`💾 Auto-guardando análisis...`);
+        await handleFieldBlur();
+        console.log(`✅ Auto-guardado completado`);
+      }
+    } catch (error: any) {
+      console.error('❌ Error subiendo foto:', error);
+      
+      // Manejar error de sesión expirada
+      if (error.message?.includes('Sesión expirada') || error.message?.includes('Token inválido')) {
+        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        // Opcional: router.push('/');
+      } else {
+        alert('Error al subir la foto. Revisa tu conexión a internet.');
+      }
+    }
   };
 
-  const handlePesoBrutoPhotoCapture = (registroId: string, file: File) => {
-    setPhotos(prev => ({ ...prev, [`pesoBruto_${registroId}`]: file }));
+  const handlePesoBrutoPhotoCapture = async (registroId: string, file: File) => {
+    // Obtener URL anterior de la foto del registro
+    const oldPhotoUrl = pesosBrutos.find(r => r.id === registroId)?.fotoUrl;
+    
+    // Revocar URL blob anterior si existe
+    if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
+      setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
+    }
+
     // Crear URL temporal para preview inmediato
     const tempUrl = URL.createObjectURL(file);
     setPesosBrutos(prev => prev.map(r => 
       r.id === registroId ? { ...r, fotoUrl: tempUrl } : r
     ));
+    setPhotos(prev => ({ ...prev, [`pesoBruto_${registroId}`]: file }));
+
+    // Subir foto inmediatamente a Google Drive
+    try {
+      const { googleDriveService } = await import('@/lib/googleDriveService');
+      const { googleAuthService } = await import('@/lib/googleAuthService');
+      
+      if (!googleAuthService.isAuthenticated()) {
+        console.warn('Usuario no autenticado, foto no se subirá');
+        return;
+      }
+
+      await googleDriveService.initialize();
+      
+      const codigo = formData.codigo || 'temp';
+      const lote = formData.lote || 'temp';
+      const photoType = `pesoBruto_${registroId}`;
+      
+      // Pasar la URL anterior para que se elimine
+      const driveUrl = await googleDriveService.uploadAnalysisPhoto(
+        file,
+        codigo,
+        lote,
+        photoType,
+        oldPhotoUrl
+      );
+      
+      console.log(`✅ Foto peso bruto subida a Drive:`, driveUrl);
+      
+      // Actualizar con URL de Drive
+      setPesosBrutos(prev => prev.map(r => 
+        r.id === registroId ? { ...r, fotoUrl: driveUrl } : r
+      ));
+      
+      // Guardar automáticamente con la nueva URL
+      if (analysisId && productType && formData.codigo && formData.lote) {
+        await handleFieldBlur();
+      }
+    } catch (error) {
+      console.error('Error subiendo foto de peso bruto:', error);
+    }
   };
 
   const handleDefectoChange = (defecto: string, value: string) => {
@@ -149,6 +345,8 @@ export default function NewAnalysisPage() {
       case 'ENTERO': return DEFECTOS_ENTERO;
       case 'COLA': return DEFECTOS_COLA;
       case 'VALOR_AGREGADO': return DEFECTOS_VALOR_AGREGADO;
+      case 'CONTROL_PESOS': return [];
+      default: return [];
     }
   };
 
@@ -161,91 +359,44 @@ export default function NewAnalysisPage() {
       const codigo = formData.codigo || '';
       const lote = formData.lote || '';
 
-      // Subir fotos a Google Drive si existen
-      const { googleDriveService } = await import('@/lib/googleDriveService');
-      await googleDriveService.initialize();
-
-      const photoUrls: { [key: string]: string } = {};
-      
-      for (const [field, file] of Object.entries(photos)) {
-        try {
-          const photoType = field.replace(/\./g, '_');
-          const url = await googleDriveService.uploadAnalysisPhoto(
-            file,
-            codigo,
-            lote,
-            photoType
-          );
-          photoUrls[field] = url;
-          console.log(`✅ Foto ${photoType} subida:`, url);
-        } catch (error) {
-          console.error(`Error subiendo foto ${field}:`, error);
-        }
-      }
-
-      // Actualizar URLs en pesos brutos con fotos subidas
-      const pesosBrutosActualizados = pesosBrutos.map(pb => {
-        const photoKey = `pesoBruto_${pb.id}`;
-        if (photoUrls[photoKey]) {
-          return { ...pb, fotoUrl: photoUrls[photoKey] };
-        }
-        return pb;
-      });
-
-      // Actualizar URLs en formData
-      const updatedFormData = { ...formData };
-      if (photoUrls['pesoBruto.fotoUrl']) {
-        updatedFormData.pesoBruto = { ...updatedFormData.pesoBruto, fotoUrl: photoUrls['pesoBruto.fotoUrl'] };
-      }
-      if (photoUrls['pesoCongelado.fotoUrl']) {
-        updatedFormData.pesoCongelado = { ...updatedFormData.pesoCongelado, fotoUrl: photoUrls['pesoCongelado.fotoUrl'] };
-      }
-      if (photoUrls['pesoNeto.fotoUrl']) {
-        updatedFormData.pesoNeto = { ...updatedFormData.pesoNeto, fotoUrl: photoUrls['pesoNeto.fotoUrl'] };
-      }
-      if (photoUrls['uniformidad.grandes.fotoUrl']) {
-        updatedFormData.uniformidad = {
-          ...updatedFormData.uniformidad,
-          grandes: { ...updatedFormData.uniformidad?.grandes, fotoUrl: photoUrls['uniformidad.grandes.fotoUrl'] }
-        };
-      }
-      if (photoUrls['uniformidad.pequenos.fotoUrl']) {
-        updatedFormData.uniformidad = {
-          ...updatedFormData.uniformidad,
-          pequenos: { ...updatedFormData.uniformidad?.pequenos, fotoUrl: photoUrls['uniformidad.pequenos.fotoUrl'] }
-        };
-      }
-      if (photoUrls['fotoCalidad']) {
-        updatedFormData.fotoCalidad = photoUrls['fotoCalidad'];
-      }
-
+      // Verificar autenticación
       const { googleAuthService } = await import('@/lib/googleAuthService');
       const user = googleAuthService.getUser();
+      
+      if (!user) {
+        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+        router.push('/');
+        return;
+      }
+
+      // Las fotos ya están subidas, solo usar formData y pesosBrutos actuales
 
       const analysis: QualityAnalysis = {
-        id: generateId(),
+        id: analysisId || generateId(),
         productType: productType!,
         lote: lote,
         codigo: codigo,
-        talla: updatedFormData.talla,
-        pesoBruto: updatedFormData.pesoBruto,
-        pesoCongelado: updatedFormData.pesoCongelado,
-        pesoNeto: updatedFormData.pesoNeto,
-        pesosBrutos: productType === 'CONTROL_PESOS' ? pesosBrutosActualizados : undefined,
-        conteo: updatedFormData.conteo,
-        uniformidad: updatedFormData.uniformidad,
-        defectos: updatedFormData.defectos,
-        fotoCalidad: updatedFormData.fotoCalidad,
-        observations: updatedFormData.observations,
+        talla: formData.talla,
+        pesoBruto: formData.pesoBruto,
+        pesoCongelado: formData.pesoCongelado,
+        pesoNeto: formData.pesoNeto,
+        pesosBrutos: productType === 'CONTROL_PESOS' ? pesosBrutos : undefined,
+        conteo: formData.conteo,
+        uniformidad: formData.uniformidad,
+        defectos: formData.defectos,
+        fotoCalidad: formData.fotoCalidad,
+        observations: formData.observations,
         createdAt: now.toISOString(),
-        createdBy: user?.email || 'unknown',
+        createdBy: user.email || 'unknown',
         shift: getWorkShift(now),
-        date: formatDate(now)
+        date: formatDate(now),
+        status: 'COMPLETADO',
+        completedAt: now.toISOString()
       };
 
       // Guardar en Firestore
-      const { createAnalysis } = await import('@/lib/analysisService');
-      await createAnalysis(analysis);
+      const { saveAnalysis } = await import('@/lib/analysisService');
+      await saveAnalysis(analysis);
 
       alert('Análisis guardado exitosamente');
       router.push('/');
@@ -257,18 +408,44 @@ export default function NewAnalysisPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Cargando análisis...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <main className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle>Nuevo Análisis de Calidad</CardTitle>
-              <CardDescription>
-                Complete la información del producto a analizar
-              </CardDescription>
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Header fijo superior */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700 shadow-md">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
+                  {editId ? '✏️ Editar Análisis' : '📋 Nuevo Análisis de Calidad'}
+                </h1>
+                {formData.codigo && formData.lote && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {formData.codigo} - {formData.lote} {formData.talla && `| Talla: ${formData.talla}`}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex items-center gap-3">
               {productType && formData.codigo && formData.lote && (
                 <AutoSaveIndicatorNew 
                   isSaving={autoSaveState.isSaving}
@@ -278,20 +455,48 @@ export default function NewAnalysisPage() {
               )}
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className={viewMode === 'COMPACTA' ? 'space-y-3' : 'space-y-6'}>
-            {/* Selector de tipo de producto */}
+        </div>
+      </div>
+
+      {/* Contenido principal con layout de 2 columnas en pantallas grandes */}
+      <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
+            <Card className="bg-white dark:bg-gray-800">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">Tipo de Producto</CardTitle>
+              </CardHeader>
+              <CardContent>
             <ProductTypeSelector 
               selectedType={productType} 
               onSelect={setProductType} 
             />
+          </CardContent>
+        </Card>
 
             {productType && (
-              <>
-                {/* Información básica */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <div className="space-y-2">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                {/* Columna izquierda - Información principal (8 columnas en XL) */}
+                <div className="xl:col-span-8 space-y-6">
+                  {/* Información básica */}
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">📝 Información Básica</CardTitle>
+                        {isLoaded && (
+                          <select
+                            value={viewMode}
+                            onChange={(e) => setViewMode(e.target.value as 'SUELTA' | 'COMPACTA')}
+                            className="px-3 py-1.5 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="SUELTA">📏 Vista Espaciosa</option>
+                            <option value="COMPACTA">📐 Vista Compacta</option>
+                          </select>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
                     <Label htmlFor="lote">Lote *</Label>
                     <Input 
                       id="lote" 
@@ -299,42 +504,33 @@ export default function NewAnalysisPage() {
                       required 
                       value={formData.lote || ''}
                       onChange={(e) => handleInputChange('lote', e.target.value)}
+                      onBlur={handleFieldBlur}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="codigo">Código *</Label>
-                    <Input 
-                      id="codigo" 
-                      placeholder="Ej: C-789" 
-                      required 
-                      value={formData.codigo || ''}
-                      onChange={(e) => handleInputChange('codigo', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="talla">Talla</Label>
-                    <Input 
-                      id="talla" 
-                      placeholder="Ej: 16/20" 
-                      value={formData.talla || ''}
-                      onChange={(e) => handleInputChange('talla', e.target.value)}
-                    />
-                  </div>
-                  {isLoaded && (
-                    <div className="space-y-2">
-                      <Label htmlFor="apariencia">Apariencia</Label>
-                      <select
-                        id="apariencia"
-                        value={viewMode}
-                        onChange={(e) => setViewMode(e.target.value as 'SUELTA' | 'COMPACTA')}
-                        className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 dark:border-gray-600 dark:bg-slate-700 dark:text-white shadow-sm transition-all"
-                      >
-                        <option value="SUELTA">Suelta</option>
-                        <option value="COMPACTA">Compacta</option>
-                      </select>
-                    </div>
-                  )}
-                </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="codigo">Código *</Label>
+                          <Input 
+                            id="codigo" 
+                            placeholder="Ej: C-789" 
+                            required 
+                            value={formData.codigo || ''}
+                            onChange={(e) => handleInputChange('codigo', e.target.value)}
+                            onBlur={handleFieldBlur}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="talla">Talla</Label>
+                          <Input 
+                            id="talla" 
+                            placeholder="Ej: 16/20" 
+                            value={formData.talla || ''}
+                            onChange={(e) => handleInputChange('talla', e.target.value)}
+                            onBlur={handleFieldBlur}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                 {/* Control de Pesos Brutos (Solo para tipo CONTROL_PESOS) */}
                 {productType === 'CONTROL_PESOS' && (
@@ -362,6 +558,7 @@ export default function NewAnalysisPage() {
                           ...formData.pesoBruto, 
                           valor: parseFloat(e.target.value) 
                         })}
+                        onBlur={handleFieldBlur}
                       />
                       <PhotoCapture 
                         label="Peso Bruto"
@@ -381,6 +578,7 @@ export default function NewAnalysisPage() {
                           ...formData.pesoCongelado, 
                           valor: parseFloat(e.target.value) 
                         })}
+                        onBlur={handleFieldBlur}
                       />
                       <PhotoCapture 
                         label="Peso Congelado"
@@ -400,6 +598,7 @@ export default function NewAnalysisPage() {
                           ...formData.pesoNeto, 
                           valor: parseFloat(e.target.value) 
                         })}
+                        onBlur={handleFieldBlur}
                       />
                       <PhotoCapture 
                         label="Peso Neto"
@@ -415,6 +614,7 @@ export default function NewAnalysisPage() {
                         type="number" 
                         value={formData.conteo || ''}
                         onChange={(e) => handleInputChange('conteo', parseInt(e.target.value))}
+                        onBlur={handleFieldBlur}
                       />
                     </div>
                   </div>
@@ -437,6 +637,7 @@ export default function NewAnalysisPage() {
                           ...formData.uniformidad,
                           grandes: { ...formData.uniformidad?.grandes, valor: parseFloat(e.target.value) }
                         })}
+                        onBlur={handleFieldBlur}
                       />
                       <PhotoCapture 
                         label="Grandes"
@@ -455,6 +656,7 @@ export default function NewAnalysisPage() {
                           ...formData.uniformidad,
                           pequenos: { ...formData.uniformidad?.pequenos, valor: parseFloat(e.target.value) }
                         })}
+                        onBlur={handleFieldBlur}
                       />
                       <PhotoCapture 
                         label="Pequeños"
@@ -474,13 +676,14 @@ export default function NewAnalysisPage() {
                   <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${viewMode === 'COMPACTA' ? 'gap-2' : 'gap-4'}`}>
                     {getDefectosForProductType().map((defecto) => (
                       <div key={defecto} className="space-y-1">
-                        <Label htmlFor={defecto}>{DEFECTO_LABELS[defecto]}</Label>
+                        <Label htmlFor={defecto}>{DEFECTO_LABELS[defecto] || defecto}</Label>
                         <Input 
                           id={defecto}
                           type="number" 
                           min="0"
                           value={formData.defectos?.[defecto] || ''}
                           onChange={(e) => handleDefectoChange(defecto, e.target.value)}
+                          onBlur={handleFieldBlur}
                         />
                       </div>
                     ))}
@@ -488,43 +691,68 @@ export default function NewAnalysisPage() {
                 </div>
                 )}
 
-                {/* Foto de calidad general */}
-                {productType !== 'CONTROL_PESOS' && (
-                <div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-purple-50 dark:bg-purple-900/20 rounded-lg`}>
-                  <h3 className={`font-semibold ${viewMode === 'COMPACTA' ? 'text-base' : 'text-lg'}`}>Foto de Calidad General</h3>
-                  <PhotoCapture 
-                    label="Calidad"
-                    photoUrl={formData.fotoCalidad}
-                    onPhotoCapture={(file) => handlePhotoCapture('fotoCalidad', file)}
-                  />
-                </div>
-                )}
-
-                {/* Observaciones */}
-                <div className="space-y-2">
-                  <Label htmlFor="observations">Observaciones</Label>
-                  <Textarea 
-                    id="observations" 
-                    placeholder="Observaciones adicionales..."
-                    value={formData.observations || ''}
-                    onChange={(e) => handleInputChange('observations', e.target.value)}
-                  />
                 </div>
 
-                {/* Botones */}
-                <div className="flex gap-4 justify-end pt-4">
-                  <Button type="button" variant="outline" onClick={() => router.back()}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isSaving}>
-                    {isSaving ? 'Guardando...' : 'Guardar Análisis'}
-                  </Button>
+                {/* Columna derecha - Acciones y Observaciones (4 columnas en XL) */}
+                <div className="xl:col-span-4 space-y-6">
+                  
+                  {/* Panel de Acciones - Sticky */}
+                  <div className="sticky top-24 z-10">
+                    <Card className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800 shadow-lg">
+                      <CardHeader className="pb-2 border-b border-gray-100 dark:border-gray-700">
+                        <CardTitle className="text-lg">Acciones</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4 space-y-4">
+                        <Button type="submit" disabled={isSaving} className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 shadow-md transition-all hover:scale-[1.02]">
+                          {isSaving ? 'Guardando...' : '💾 Guardar Análisis'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => router.back()} className="w-full">
+                          Cancelar
+                        </Button>
+                        <div className="text-xs text-center text-gray-500 dark:text-gray-400">
+                          {autoSaveState.lastSaved ? `Guardado: ${autoSaveState.lastSaved.toLocaleTimeString()}` : 'Cambios sin guardar'}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Observaciones */}
+                  <Card className="bg-white dark:bg-gray-800">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">📝 Observaciones</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Textarea 
+                        id="observations" 
+                        placeholder="Escribe aquí cualquier observación relevante..."
+                        value={formData.observations || ''}
+                        onChange={(e) => handleInputChange('observations', e.target.value)}
+                        onBlur={handleFieldBlur}
+                        className="min-h-[150px]"
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Foto de calidad general */}
+                  {productType !== 'CONTROL_PESOS' && (
+                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">📸 Foto General</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <PhotoCapture 
+                          label="Calidad General"
+                          photoUrl={formData.fotoCalidad}
+                          onPhotoCapture={(file) => handlePhotoCapture('fotoCalidad', file)}
+                        />
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
-              </>
+              </div>
             )}
           </form>
-        </CardContent>
-      </Card>
+      </div>
     </main>
   );
 }

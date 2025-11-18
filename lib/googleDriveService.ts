@@ -187,6 +187,31 @@ class GoogleDriveService {
   }
 
   /**
+   * Hace un archivo público para que pueda ser visualizado
+   */
+  private async makeFilePublic(fileId: string): Promise<void> {
+    try {
+      await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            role: 'reader',
+            type: 'anyone'
+          })
+        }
+      );
+    } catch (error) {
+      console.error('Error making file public:', error);
+      // No lanzar error, continuar aunque no se pueda hacer público
+    }
+  }
+
+  /**
    * Sube un archivo a Google Drive
    * @param file Archivo a subir
    * @param fileName Nombre del archivo
@@ -216,11 +241,33 @@ class GoogleDriveService {
       );
 
       const data = await response.json();
-      return data.webViewLink || data.webContentLink;
+      
+      // Hacer el archivo público para que se pueda visualizar
+      await this.makeFilePublic(data.id);
+      
+      // Retornar URL directa de visualización
+      return `https://drive.google.com/uc?export=view&id=${data.id}`;
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;
     }
+  }
+
+  /**
+   * Extrae el ID de archivo de una URL de Google Drive
+   */
+  private extractFileIdFromUrl(url: string): string | null {
+    if (!url) return null;
+    
+    // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
+    const match = url.match(/[?&]id=([^&]+)/);
+    if (match) return match[1];
+    
+    // Formato: https://drive.google.com/file/d/FILE_ID/view
+    const match2 = url.match(/\/file\/d\/([^/]+)/);
+    if (match2) return match2[1];
+    
+    return null;
   }
 
   /**
@@ -229,14 +276,30 @@ class GoogleDriveService {
    * @param codigo Código del análisis
    * @param lote Lote del análisis
    * @param photoType Tipo de foto (ej: 'peso_bruto', 'uniformidad_grandes')
+   * @param oldPhotoUrl URL de la foto anterior (opcional, se eliminará si existe)
    */
   async uploadAnalysisPhoto(
     file: File,
     codigo: string,
     lote: string,
-    photoType: string
+    photoType: string,
+    oldPhotoUrl?: string
   ): Promise<string> {
     try {
+      // Si hay una foto anterior, eliminarla primero
+      if (oldPhotoUrl) {
+        const oldFileId = this.extractFileIdFromUrl(oldPhotoUrl);
+        if (oldFileId) {
+          try {
+            await this.deleteFile(oldFileId);
+            console.log(`🗑️ Foto anterior eliminada: ${oldFileId}`);
+          } catch (error) {
+            console.warn('No se pudo eliminar la foto anterior:', error);
+            // Continuar aunque falle la eliminación
+          }
+        }
+      }
+
       // Asegurar que la carpeta raíz "descongelado" existe
       if (!this.rootFolderId) {
         await this.initialize();

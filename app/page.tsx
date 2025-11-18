@@ -26,36 +26,31 @@ const useGoogleAuth = () => {
       try {
         await googleAuthService.initialize();
         
-        const isAuth = googleAuthService.isAuthenticated();
-        const user = googleAuthService.getUser();
-        
-        setAuthState({
-          isAuthenticated: isAuth,
-          user: user || null,
-          loading: false
+        // Suscribirse a cambios
+        const unsubscribe = googleAuthService.subscribe((user) => {
+          setAuthState({
+            isAuthenticated: !!user,
+            user: user,
+            loading: false
+          });
         });
+
+        return unsubscribe;
       } catch (error: any) {
         console.error('Error inicializando Google Auth:', error);
-        setAuthState({
-          isAuthenticated: false,
-          user: null,
-          loading: false
-        });
+        setAuthState(prev => ({ ...prev, loading: false }));
       }
     };
 
-    initAuth();
+    const cleanupPromise = initAuth();
+    return () => {
+      cleanupPromise.then(cleanup => cleanup && cleanup());
+    };
   }, []);
 
   const login = async () => {
     try {
       await googleAuthService.login();
-      const user = googleAuthService.getUser();
-      setAuthState({
-        isAuthenticated: true,
-        user: user || null,
-        loading: false
-      });
     } catch (error) {
       console.error('Error en login:', error);
     }
@@ -63,11 +58,6 @@ const useGoogleAuth = () => {
 
   const logout = () => {
     googleAuthService.logout();
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      loading: false
-    });
   };
 
   return { ...authState, login, logout };
@@ -99,7 +89,7 @@ const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
             <User className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-2xl">Sistema de Análisis de Descongelado</CardTitle>
-          <CardDescription>Control de Calidad - Aquagold</CardDescription>
+          <CardDescription>Control de Calidad</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -137,9 +127,6 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               🦐 Análisis de Descongelado
             </h1>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Aquagold S.A.
-            </p>
           </div>
           
           <div className="flex items-center gap-3">
@@ -175,6 +162,8 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
 };
 
 // Componente principal
+const NO_OP = () => {};
+
 export default function Home() {
   const { isAuthenticated, user, loading, login, logout } = useGoogleAuth();
 
@@ -185,7 +174,7 @@ export default function Home() {
 
   // Not authenticated - show login
   if (!isAuthenticated || !user) {
-    return <LoginPage onLogin={login} />;
+    return <LoginPage onLogin={NO_OP} />;
   }
 
   // Authenticated - show dashboard

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, FileText, Search, Edit2, Trash2 } from 'lucide-react';
-import { getAnalysesByDate, deleteAnalysis } from '@/lib/analysisService';
+import { getAnalysesByDate, deleteAnalysis, updateAnalysis } from '@/lib/analysisService';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS, SHIFT_LABELS } from '@/lib/types';
 import DailyReportModal from '@/components/DailyReportModalNew';
 
@@ -15,6 +15,7 @@ export default function AnalysisDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'TODOS' | 'EN_PROGRESO' | 'COMPLETADO'>('TODOS');
 
   useEffect(() => {
     loadAnalyses();
@@ -44,14 +45,55 @@ export default function AnalysisDashboard() {
     }
   };
 
-  const handleEdit = (id: string) => {
-    router.push(`/dashboard/tests/edit?id=${id}`);
+  const handleComplete = async (id: string) => {
+    try {
+      const now = new Date().toISOString();
+      await updateAnalysis(id, {
+        status: 'COMPLETADO',
+        completedAt: now
+      });
+      
+      // Actualizar la lista local
+      setAnalyses(prev => prev.map(a => 
+        a.id === id 
+          ? { ...a, status: 'COMPLETADO' as const, completedAt: now }
+          : a
+      ));
+      
+      alert('Análisis marcado como completado');
+    } catch (error) {
+      console.error('Error completando análisis:', error);
+      alert('Error al completar el análisis');
+    }
   };
 
-  const filteredAnalyses = analyses.filter(analysis => 
-    analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    analysis.lote.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleEdit = (id: string, status?: string) => {
+    // Si está EN_PROGRESO o no tiene estado, abrir en la página de creación para editar
+    if (!status || status === 'EN_PROGRESO') {
+      router.push(`/dashboard/tests/new?id=${id}`);
+    } else {
+      // Si está COMPLETADO, abrir en modo solo lectura
+      router.push(`/dashboard/tests/edit?id=${id}`);
+    }
+  };
+
+  const filteredAnalyses = analyses.filter(analysis => {
+    // Filtro por búsqueda
+    const matchesSearch = analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         analysis.lote.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por estado
+    const matchesStatus = filterStatus === 'TODOS' || 
+                         (filterStatus === 'EN_PROGRESO' && (!analysis.status || analysis.status === 'EN_PROGRESO')) ||
+                         (filterStatus === 'COMPLETADO' && analysis.status === 'COMPLETADO');
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const groupedByStatus = {
+    EN_PROGRESO: filteredAnalyses.filter(a => !a.status || a.status === 'EN_PROGRESO'),
+    COMPLETADO: filteredAnalyses.filter(a => a.status === 'COMPLETADO')
+  };
 
   const groupedByShift = {
     DIA: filteredAnalyses.filter(a => a.shift === 'DIA'),
@@ -59,8 +101,8 @@ export default function AnalysisDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-[1920px] mx-auto">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -95,7 +137,7 @@ export default function AnalysisDashboard() {
 
         {/* Filtros */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Fecha
@@ -123,6 +165,44 @@ export default function AnalysisDashboard() {
                 />
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Estado
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFilterStatus('TODOS')}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    filterStatus === 'TODOS'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  onClick={() => setFilterStatus('EN_PROGRESO')}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    filterStatus === 'EN_PROGRESO'
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  En Progreso
+                </button>
+                <button
+                  onClick={() => setFilterStatus('COMPLETADO')}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    filterStatus === 'COMPLETADO'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  Completados
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -135,17 +215,17 @@ export default function AnalysisDashboard() {
             </div>
           </div>
           
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm p-6 border-2 border-blue-200 dark:border-blue-800">
-            <div className="text-blue-600 dark:text-blue-400 text-sm mb-1">Turno Día</div>
-            <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-              {groupedByShift.DIA.length}
+          <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg shadow-sm p-6 border-2 border-orange-200 dark:border-orange-800">
+            <div className="text-orange-600 dark:text-orange-400 text-sm mb-1">En Progreso</div>
+            <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
+              {groupedByStatus.EN_PROGRESO.length}
             </div>
           </div>
           
-          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg shadow-sm p-6 border-2 border-purple-200 dark:border-purple-800">
-            <div className="text-purple-600 dark:text-purple-400 text-sm mb-1">Turno Noche</div>
-            <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-              {groupedByShift.NOCHE.length}
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg shadow-sm p-6 border-2 border-green-200 dark:border-green-800">
+            <div className="text-green-600 dark:text-green-400 text-sm mb-1">Completados</div>
+            <div className="text-3xl font-bold text-green-700 dark:text-green-300">
+              {groupedByStatus.COMPLETADO.length}
             </div>
           </div>
         </div>
@@ -190,19 +270,31 @@ export default function AnalysisDashboard() {
                     </span>
                   </h2>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                     {shiftAnalyses.map((analysis) => (
                       <div
                         key={analysis.id}
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all p-4"
+                        onClick={() => analysis.status !== 'COMPLETADO' && handleEdit(analysis.id, analysis.status)}
+                        className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-all p-4 ${
+                          analysis.status !== 'COMPLETADO' ? 'cursor-pointer' : ''
+                        }`}
                       >
                         <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(analysis.createdAt).toLocaleTimeString('es-EC', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(analysis.createdAt).toLocaleTimeString('es-EC', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                              <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                                analysis.status === 'COMPLETADO'
+                                  ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                                  : 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200'
+                              }`}>
+                                {analysis.status === 'COMPLETADO' ? '✓ Completado' : '⏳ En Progreso'}
+                              </span>
                             </div>
                             <div className="font-semibold text-lg text-gray-900 dark:text-white">
                               {analysis.codigo}
@@ -235,27 +327,52 @@ export default function AnalysisDashboard() {
                           )}
                         </div>
                         
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(analysis.id)}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            Editar
-                          </button>
-                          
-                          {deleteConfirm === analysis.id ? (
-                            <div className="flex gap-1">
-                              <button
-                                onClick={() => handleDelete(analysis.id)}
-                                className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                                title="Confirmar"
-                              >
-                                ✓
-                              </button>
-                              <button
-                                onClick={() => setDeleteConfirm(null)}
-                                className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                        {analysis.status !== 'COMPLETADO' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleComplete(analysis.id);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                              title="Marcar como completado"
+                            >
+                              ✓ Completar
+                            </button>
+                          </div>
+                        )}
+                        
+                        {analysis.status === 'COMPLETADO' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(analysis.id, analysis.status);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              Ver
+                            </button>
+                            
+                            {deleteConfirm === analysis.id ? (
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(analysis.id);
+                                  }}
+                                  className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                  title="Confirmar"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteConfirm(null);
+                                  }}
+                                  className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                                 title="Cancelar"
                               >
                                 ✕
@@ -263,7 +380,10 @@ export default function AnalysisDashboard() {
                             </div>
                           ) : (
                             <button
-                              onClick={() => setDeleteConfirm(analysis.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteConfirm(analysis.id);
+                              }}
                               className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                               title="Eliminar"
                             >
@@ -271,6 +391,7 @@ export default function AnalysisDashboard() {
                             </button>
                           )}
                         </div>
+                        )}
                       </div>
                     ))}
                   </div>

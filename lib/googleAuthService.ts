@@ -14,6 +14,7 @@ class GoogleAuthService {
   private tokenClient: any = null;
   private accessToken: string | null = null;
   private user: any = null;
+  private listeners: ((user: any) => void)[] = [];
 
   constructor() {
     this.config = {
@@ -114,6 +115,7 @@ class GoogleAuthService {
     this.user = null;
     sessionStorage.removeItem('google_access_token');
     sessionStorage.removeItem('google_user');
+    this.notifyListeners();
   }
 
   /**
@@ -145,6 +147,7 @@ class GoogleAuthService {
       sessionStorage.setItem('google_user', JSON.stringify(this.user));
 
       console.log('✅ Usuario autenticado:', this.user.name);
+      this.notifyListeners();
     } catch (error) {
       console.error('Error obteniendo información del usuario:', error);
       this.logout();
@@ -197,6 +200,22 @@ class GoogleAuthService {
       this.logout();
       throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }
+  }
+
+  /**
+   * Suscribe a cambios en el estado de autenticación
+   */
+  subscribe(listener: (user: any) => void) {
+    this.listeners.push(listener);
+    // Emitir estado actual inmediatamente
+    listener(this.user);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach(listener => listener(this.user));
   }
 }
 

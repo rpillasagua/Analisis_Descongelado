@@ -18,10 +18,15 @@ export default function GoogleLoginButton({ onLoginSuccess }: GoogleLoginButtonP
       try {
         await googleAuthService.initialize();
         
-        // Verificar si ya hay sesión
-        if (googleAuthService.isAuthenticated()) {
-          onLoginSuccess?.();
-        }
+        // Suscribirse a cambios de autenticación
+        const unsubscribe = googleAuthService.subscribe((user) => {
+          if (user) {
+            onLoginSuccess?.();
+            setIsLoading(false);
+          }
+        });
+
+        return unsubscribe;
       } catch (error) {
         console.error('Error inicializando Google Auth:', error);
       } finally {
@@ -29,22 +34,17 @@ export default function GoogleLoginButton({ onLoginSuccess }: GoogleLoginButtonP
       }
     };
 
-    init();
+    const cleanupPromise = init();
+    return () => {
+      cleanupPromise.then(cleanup => cleanup && cleanup());
+    };
   }, [onLoginSuccess]);
 
   const handleLogin = async () => {
     setIsLoading(true);
     try {
       await googleAuthService.login();
-      // El callback de Google Auth llamará a onLoginSuccess
-      setTimeout(() => {
-        if (googleAuthService.isAuthenticated()) {
-          onLoginSuccess?.();
-        } else {
-          console.error('Autenticación no completada después de 1 segundo');
-        }
-        setIsLoading(false);
-      }, 1000);
+      // El estado se actualizará a través de la suscripción
     } catch (error: any) {
       console.error('Error al iniciar sesión:', error);
       const errorMessage = error?.message || 'Error desconocido';
