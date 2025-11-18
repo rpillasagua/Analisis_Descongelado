@@ -86,7 +86,7 @@ if (isFirebaseConfigured) {
     console.log('✅ Firebase Firestore inicializado correctamente');
     console.log('📊 Proyecto:', firebaseConfig.projectId);
     console.log('🌐 Modo offline habilitado (persistencia local)');
-    console.log('📝 Nota: Las fotos se guardan en OneDrive, no en Firebase Storage');
+    console.log('📝 Nota: Las fotos se guardan en Google Drive, no en Firebase Storage');
   } catch (error) {
     console.error('❌ Firebase no pudo inicializarse:', error);
     console.warn('⚠️ La app funcionará sin base de datos.');
