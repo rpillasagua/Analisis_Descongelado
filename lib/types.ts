@@ -40,7 +40,7 @@ export interface ResistanceTest {
 /**
  * Tipo de producto a analizar
  */
-export type ProductType = 'ENTERO' | 'COLA' | 'VALOR_AGREGADO';
+export type ProductType = 'ENTERO' | 'COLA' | 'VALOR_AGREGADO' | 'CONTROL_PESOS';
 
 /**
  * Etiquetas para mostrar en UI
@@ -48,7 +48,8 @@ export type ProductType = 'ENTERO' | 'COLA' | 'VALOR_AGREGADO';
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   ENTERO: 'Entero',
   COLA: 'Cola',
-  VALOR_AGREGADO: 'Valor Agregado'
+  VALOR_AGREGADO: 'Valor Agregado',
+  CONTROL_PESOS: 'Control de Pesos Brutos'
 };
 
 /**
@@ -123,7 +124,10 @@ export const DEFECTOS_VALOR_AGREGADO = [
   'FALTA_DE_CORTE',
   'OJAL',
   'LOMO_DANADO',
-  'PEGADOS_Y_AGRUPADOS'
+  'PEGADOS_Y_AGRUPADOS',
+  'SEMI_ROSADO',
+  'ROSADOS',
+  'ROJOS'
 ] as const;
 
 export const DEFECTO_LABELS: Record<string, string> = {
@@ -188,6 +192,17 @@ export interface Defectos {
   [key: string]: number; // Cantidad de defectos por tipo
 }
 
+/**
+ * Registro individual de peso bruto
+ */
+export interface PesoBrutoRegistro {
+  id: string;
+  talla?: string;
+  peso: number;
+  fotoUrl?: string;
+  timestamp: string;
+}
+
 export interface QualityAnalysis {
   id: string;
   productType: ProductType;
@@ -199,6 +214,9 @@ export interface QualityAnalysis {
   pesoBruto?: PesoConFoto;
   pesoCongelado?: PesoConFoto;
   pesoNeto?: PesoConFoto;
+  
+  // Control de pesos brutos (múltiples registros)
+  pesosBrutos?: PesoBrutoRegistro[];
   
   // Conteo
   conteo?: number;

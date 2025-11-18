@@ -48,7 +48,7 @@ function EditAnalysisContent() {
     try {
       await updateAnalysis(analysisId, analysis);
       alert('Análisis actualizado exitosamente');
-      router.push('/dashboard');
+      router.push('/');
     } catch (error) {
       console.error('Error actualizando análisis:', error);
       alert('Error al actualizar el análisis');

@@ -11,7 +11,7 @@ interface ProductTypeSelectorProps {
 
 export default function ProductTypeSelector({ selectedType, onSelect }: ProductTypeSelectorProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const productTypes: ProductType[] = ['ENTERO', 'COLA', 'VALOR_AGREGADO'];
+  const productTypes: ProductType[] = ['ENTERO', 'COLA', 'VALOR_AGREGADO', 'CONTROL_PESOS'];
 
   // Si ya hay un tipo seleccionado y no estamos editando, mostrar solo el seleccionado
   if (selectedType && !isEditing) {
@@ -27,6 +27,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {selectedType === 'ENTERO' && '🦐'}
                 {selectedType === 'COLA' && '🍤'}
                 {selectedType === 'VALOR_AGREGADO' && '📦'}
+                {selectedType === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <div>
                 <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
@@ -64,7 +65,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
           </p>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {productTypes.map((type) => (
           <button
             key={type}
@@ -90,6 +91,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {type === 'ENTERO' && '🦐'}
                 {type === 'COLA' && '🍤'}
                 {type === 'VALOR_AGREGADO' && '📦'}
+                {type === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <span className={`
                 text-lg font-semibold
