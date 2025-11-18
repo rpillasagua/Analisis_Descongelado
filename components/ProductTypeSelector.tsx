@@ -65,7 +65,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
           </p>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {productTypes.map((type) => (
           <button
             key={type}
@@ -75,16 +75,16 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
               setIsEditing(false);
             }}
             className={`
-              relative p-6 rounded-lg border-2 transition-all duration-200
+              relative p-4 sm:p-6 rounded-lg border-2 transition-all duration-200
               ${selectedType === type
                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg'
                 : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-gray-800'
               }
             `}
           >
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center text-center">
               <div className={`
-                text-4xl mb-3
+                text-3xl sm:text-4xl mb-2 sm:mb-3
                 ${selectedType === type ? 'scale-110' : 'scale-100'}
                 transition-transform duration-200
               `}>
@@ -94,7 +94,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {type === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <span className={`
-                text-lg font-semibold
+                text-base sm:text-lg font-semibold leading-tight
                 ${selectedType === type
                   ? 'text-blue-700 dark:text-blue-300'
                   : 'text-gray-700 dark:text-gray-300'

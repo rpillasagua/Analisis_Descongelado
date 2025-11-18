@@ -1,21 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProductTypeSelector from '@/components/ProductTypeSelector';
 import PhotoCapture from '@/components/PhotoCapture';
 import ControlPesosBrutos from '@/components/ControlPesosBrutos';
-import ViewModeSelector, { useViewMode } from '@/components/ViewModeSelector';
 import AutoSaveIndicatorNew from '@/components/AutoSaveIndicatorNew';
+import DefectSelector from '@/components/DefectSelector';
 import { useAutoSaveAnalysis } from '@/lib/useAutoSaveAnalysis';
 import { 
   ProductType, 
   QualityAnalysis,
-  PesoBrutoRegistro,
-  DEFECTOS_ENTERO, 
-  DEFECTOS_COLA, 
-  DEFECTOS_VALOR_AGREGADO,
-  DEFECTO_LABELS 
+  PesoBrutoRegistro
 } from '@/lib/types';
 import { getWorkShift, formatDate, generateId } from '@/lib/utils';
 import { getAnalysisById } from '@/lib/analysisService';
@@ -71,7 +67,12 @@ export default function NewAnalysisPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [isDocumentCreated, setIsDocumentCreated] = useState(false);
-  const { viewMode, setViewMode, isLoaded } = useViewMode();
+  const [uploadingPhotos, setUploadingPhotos] = useState<Set<string>>(new Set());
+  
+  // Helper para determinar si un campo específico está siendo subido
+  const isFieldUploading = (field: string) => {
+    return uploadingPhotos.has(field);
+  };
 
   // Obtener ID del URL en el cliente
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function NewAnalysisPage() {
     data: { ...formData, productType },
     onSave: handleAutoSave,
     delay: 500,
-    enabled: !!productType && !!formData.codigo && !!formData.lote
+    enabled: !!productType && !!formData.codigo && !!formData.lote && uploadingPhotos.size === 0
   });
 
   // Helper para obtener valores anidados (ej: "pesoBruto.fotoUrl")
@@ -203,30 +204,54 @@ export default function NewAnalysisPage() {
     console.log(`📸 Capturando foto para campo: ${field}`);
     console.log(`📁 Archivo: ${file.name} (${file.type}, ${file.size} bytes)`);
     
-    // Obtener URL anterior de la foto antes de reemplazarla
-    const oldPhotoUrl = getNestedValue(formData, field);
-    console.log(`🔗 URL anterior:`, oldPhotoUrl);
-
-    // Revocar URL blob anterior si existe para liberar memoria
-    if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
-      // Retrasar la revocación para evitar errores de carga en la UI antes de que se actualice el estado
-      setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
-    }
+    // Marcar que esta foto se está subiendo
+    setUploadingPhotos(prev => new Set(prev).add(field));
     
-    // Crear URL temporal para preview inmediato
-    const tempUrl = URL.createObjectURL(file);
-    console.log(`🖼️ URL temporal creada:`, tempUrl);
+    // Guardar la URL anterior para poder revertir en caso de error
+    const previousUrl = getNestedValue(formData, field);
     
-    handleInputChange(field, tempUrl);
-    setPhotos(prev => ({ ...prev, [field]: file }));
-
-    // Subir foto inmediatamente a Google Drive
     try {
+      // Obtener URL anterior de la foto antes de reemplazarla
+      const oldPhotoUrl = getNestedValue(formData, field);
+      console.log(`🔗 URL anterior:`, oldPhotoUrl);
+
+      // Revocar URL blob anterior si existe para liberar memoria
+      if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
+        // Retrasar la revocación para evitar errores de carga en la UI antes de que se actualice el estado
+        setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
+      }
+      
+      // Crear URL temporal para preview inmediato
+      const tempUrl = URL.createObjectURL(file);
+      console.log(`🖼️ URL temporal creada:`, tempUrl);
+      
+      handleInputChange(field, tempUrl);
+      setPhotos(prev => ({ ...prev, [field]: file }));
+
+      // Subir foto inmediatamente a Google Drive
       const { googleDriveService } = await import('@/lib/googleDriveService');
       const { googleAuthService } = await import('@/lib/googleAuthService');
       
+      // Inicializar servicios de Google si no están inicializados
+      if (typeof window !== 'undefined') {
+        await googleAuthService.initialize();
+      }
+      
       if (!googleAuthService.isAuthenticated()) {
-        console.warn('⚠️ Usuario no autenticado, foto no se subirá');
+        console.warn('⚠️ Usuario no autenticado, intentando login automático...');
+        alert('Necesitas iniciar sesión con Google para subir fotos. Redirigiendo al login...');
+        router.push('/');
+        return;
+      }
+
+      // Verificar que el token sea válido antes de subir
+      try {
+        await googleAuthService.ensureValidToken();
+        console.log('✅ Token válido, procediendo con la subida...');
+      } catch (tokenError) {
+        console.warn('⚠️ Token expirado, redirigiendo al login...');
+        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        router.push('/');
         return;
       }
 
@@ -261,39 +286,84 @@ export default function NewAnalysisPage() {
     } catch (error: any) {
       console.error('❌ Error subiendo foto:', error);
       
-      // Manejar error de sesión expirada
-      if (error.message?.includes('Sesión expirada') || error.message?.includes('Token inválido')) {
-        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
-        // Opcional: router.push('/');
-      } else {
-        alert('Error al subir la foto. Revisa tu conexión a internet.');
+      // Revertir a la URL anterior si la subida falló
+      console.warn('🔄 Revirtiendo a URL anterior debido a error de subida');
+      handleInputChange(field, previousUrl);
+      
+      // Revocar la URL temporal que se creó
+      if (getNestedValue(formData, field) && getNestedValue(formData, field).startsWith('blob:')) {
+        setTimeout(() => URL.revokeObjectURL(getNestedValue(formData, field)), 100);
       }
+      
+      // Mostrar mensaje de error específico
+      if (error.message?.includes('Error de conexión') || error.message?.includes('Google Drive')) {
+        alert('Error de conexión con Google Drive. Verifica tu conexión a internet o permisos de Google Drive. La foto se guardará localmente.');
+      } else if (error.message?.includes('Sesión expirada') || error.message?.includes('Token inválido') || error.message?.includes('401')) {
+        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        router.push('/');
+      } else {
+        alert(`Error al subir la foto ${field}. La foto se guardará localmente, pero no estará disponible después de recargar la página.`);
+      }
+    } finally {
+      // Marcar que terminó la subida
+      setUploadingPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
     }
   };
 
   const handlePesoBrutoPhotoCapture = async (registroId: string, file: File) => {
-    // Obtener URL anterior de la foto del registro
-    const oldPhotoUrl = pesosBrutos.find(r => r.id === registroId)?.fotoUrl;
+    const photoField = `pesoBruto_${registroId}`;
     
-    // Revocar URL blob anterior si existe
-    if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
-      setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
-    }
-
-    // Crear URL temporal para preview inmediato
-    const tempUrl = URL.createObjectURL(file);
-    setPesosBrutos(prev => prev.map(r => 
-      r.id === registroId ? { ...r, fotoUrl: tempUrl } : r
-    ));
-    setPhotos(prev => ({ ...prev, [`pesoBruto_${registroId}`]: file }));
-
-    // Subir foto inmediatamente a Google Drive
+    // Marcar que esta foto se está subiendo
+    setUploadingPhotos(prev => new Set(prev).add(photoField));
+    
+    // Guardar la URL anterior para poder revertir en caso de error
+    const registro = pesosBrutos.find(r => r.id === registroId);
+    const previousUrl = registro?.fotoUrl;
+    
     try {
+      // Obtener URL anterior de la foto del registro
+      const oldPhotoUrl = pesosBrutos.find(r => r.id === registroId)?.fotoUrl;
+      
+      // Revocar URL blob anterior si existe
+      if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
+        setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
+      }
+
+      // Crear URL temporal para preview inmediato
+      const tempUrl = URL.createObjectURL(file);
+      setPesosBrutos(prev => prev.map(r => 
+        r.id === registroId ? { ...r, fotoUrl: tempUrl } : r
+      ));
+      setPhotos(prev => ({ ...prev, [photoField]: file }));
+
+      // Subir foto inmediatamente a Google Drive
       const { googleDriveService } = await import('@/lib/googleDriveService');
       const { googleAuthService } = await import('@/lib/googleAuthService');
       
+      // Inicializar servicios de Google si no están inicializados
+      if (typeof window !== 'undefined') {
+        await googleAuthService.initialize();
+      }
+      
       if (!googleAuthService.isAuthenticated()) {
         console.warn('Usuario no autenticado, foto no se subirá');
+        alert('Necesitas iniciar sesión con Google para subir fotos. Redirigiendo al login...');
+        router.push('/');
+        return;
+      }
+
+      // Verificar que el token sea válido antes de subir
+      try {
+        await googleAuthService.ensureValidToken();
+        console.log('✅ Token válido, procediendo con la subida...');
+      } catch (tokenError) {
+        console.warn('⚠️ Token expirado, redirigiendo al login...');
+        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        router.push('/');
         return;
       }
 
@@ -301,7 +371,7 @@ export default function NewAnalysisPage() {
       
       const codigo = formData.codigo || 'temp';
       const lote = formData.lote || 'temp';
-      const photoType = `pesoBruto_${registroId}`;
+      const photoType = photoField;
       
       // Pasar la URL anterior para que se elimine
       const driveUrl = await googleDriveService.uploadAnalysisPhoto(
@@ -323,32 +393,46 @@ export default function NewAnalysisPage() {
       if (analysisId && productType && formData.codigo && formData.lote) {
         await handleFieldBlur();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error subiendo foto de peso bruto:', error);
+      
+      // Revertir a la URL anterior si la subida falló
+      console.warn('🔄 Revirtiendo foto de peso bruto a URL anterior debido a error de subida');
+      setPesosBrutos(prev => prev.map(r => 
+        r.id === registroId ? { ...r, fotoUrl: previousUrl } : r
+      ));
+      
+      // Revocar la URL temporal que se creó
+      const currentRegistro = pesosBrutos.find(r => r.id === registroId);
+      if (currentRegistro?.fotoUrl && currentRegistro.fotoUrl.startsWith('blob:')) {
+        setTimeout(() => URL.revokeObjectURL(currentRegistro.fotoUrl), 100);
+      }
+      
+      // Mostrar mensaje de error específico
+      if (error.message?.includes('Error de conexión') || error.message?.includes('Google Drive')) {
+        alert('Error de conexión con Google Drive. Verifica tu conexión a internet o permisos de Google Drive. La foto se guardará localmente.');
+      } else if (error.message?.includes('Sesión expirada') || error.message?.includes('Token inválido') || error.message?.includes('401')) {
+        alert('Tu sesión de Google ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        router.push('/');
+      } else {
+        alert(`Error al subir la foto de peso bruto. La foto se guardará localmente, pero no estará disponible después de recargar la página.`);
+      }
+    } finally {
+      // Marcar que terminó la subida
+      setUploadingPhotos(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(photoField);
+        return newSet;
+      });
     }
   };
 
-  const handleDefectoChange = (defecto: string, value: string) => {
-    const numValue = parseInt(value) || 0;
+  const handleDefectsChange = useCallback((defects: { [key: string]: number }) => {
     setFormData(prev => ({
       ...prev,
-      defectos: {
-        ...prev.defectos,
-        [defecto]: numValue
-      }
+      defectos: defects
     }));
-  };
-
-  const getDefectosForProductType = () => {
-    if (!productType) return [];
-    switch (productType) {
-      case 'ENTERO': return DEFECTOS_ENTERO;
-      case 'COLA': return DEFECTOS_COLA;
-      case 'VALOR_AGREGADO': return DEFECTOS_VALOR_AGREGADO;
-      case 'CONTROL_PESOS': return [];
-      default: return [];
-    }
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -423,9 +507,9 @@ export default function NewAnalysisPage() {
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header fijo superior */}
       <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700 shadow-md">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <button
                 onClick={() => router.push('/')}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -434,18 +518,18 @@ export default function NewAnalysisPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">
                   {editId ? '✏️ Editar Análisis' : '📋 Nuevo Análisis de Calidad'}
                 </h1>
                 {formData.codigo && formData.lote && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
                     {formData.codigo} - {formData.lote} {formData.talla && `| Talla: ${formData.talla}`}
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {productType && formData.codigo && formData.lote && (
                 <AutoSaveIndicatorNew 
                   isSaving={autoSaveState.isSaving}
@@ -474,25 +558,13 @@ export default function NewAnalysisPage() {
         </Card>
 
             {productType && (
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                {/* Columna izquierda - Información principal (8 columnas en XL) */}
-                <div className="xl:col-span-8 space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+                {/* Columna izquierda - Información principal (8 columnas en LG+) */}
+                <div className="lg:col-span-8 space-y-4 lg:space-y-6">
                   {/* Información básica */}
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">📝 Información Básica</CardTitle>
-                        {isLoaded && (
-                          <select
-                            value={viewMode}
-                            onChange={(e) => setViewMode(e.target.value as 'SUELTA' | 'COMPACTA')}
-                            className="px-3 py-1.5 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="SUELTA">📏 Vista Espaciosa</option>
-                            <option value="COMPACTA">📐 Vista Compacta</option>
-                          </select>
-                        )}
-                      </div>
+                      <CardTitle className="text-lg">📝 Información Básica</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -538,15 +610,15 @@ export default function NewAnalysisPage() {
                     registros={pesosBrutos}
                     onChange={setPesosBrutos}
                     onPhotoCapture={handlePesoBrutoPhotoCapture}
-                    viewMode={viewMode}
+                    isPhotoUploading={(registroId) => isFieldUploading(`pesoBruto_${registroId}`)}
                   />
                 )}
 
                 {/* Pesos (Solo para otros tipos) */}
-                {productType !== 'CONTROL_PESOS' && (<div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-blue-50 dark:bg-blue-900/20 rounded-lg`}>
-                  <h3 className={`font-semibold ${viewMode === 'COMPACTA' ? 'text-base' : 'text-lg'}`}>Pesos</h3>
+                {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <h3 className="font-semibold text-base">Pesos</h3>
                   
-                  <div className={`grid grid-cols-1 md:grid-cols-2 ${viewMode === 'COMPACTA' ? 'gap-3' : 'gap-4'}`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="pesoBruto">Peso Bruto (kg)</Label>
                       <Input 
@@ -564,6 +636,7 @@ export default function NewAnalysisPage() {
                         label="Peso Bruto"
                         photoUrl={formData.pesoBruto?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoBruto.fotoUrl', file)}
+                        isUploading={isFieldUploading('pesoBruto.fotoUrl')}
                       />
                     </div>
 
@@ -584,6 +657,7 @@ export default function NewAnalysisPage() {
                         label="Peso Congelado"
                         photoUrl={formData.pesoCongelado?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado.fotoUrl', file)}
+                        isUploading={isFieldUploading('pesoCongelado.fotoUrl')}
                       />
                     </div>
 
@@ -604,6 +678,7 @@ export default function NewAnalysisPage() {
                         label="Peso Neto"
                         photoUrl={formData.pesoNeto?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoNeto.fotoUrl', file)}
+                        isUploading={isFieldUploading('pesoNeto.fotoUrl')}
                       />
                     </div>
 
@@ -623,10 +698,10 @@ export default function NewAnalysisPage() {
 
                 {/* Uniformidad */}
                 {productType !== 'CONTROL_PESOS' && (
-                <div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-green-50 dark:bg-green-900/20 rounded-lg`}>
-                  <h3 className={`font-semibold ${viewMode === 'COMPACTA' ? 'text-base' : 'text-lg'}`}>Uniformidad</h3>
+                <div className="space-y-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <h3 className="font-semibold text-base">Uniformidad</h3>
                   
-                  <div className={`grid grid-cols-1 md:grid-cols-2 ${viewMode === 'COMPACTA' ? 'gap-3' : 'gap-4'}`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="grandes">Grandes</Label>
                       <Input 
@@ -643,6 +718,7 @@ export default function NewAnalysisPage() {
                         label="Grandes"
                         photoUrl={formData.uniformidad?.grandes?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('uniformidad.grandes.fotoUrl', file)}
+                        isUploading={isFieldUploading('uniformidad.grandes.fotoUrl')}
                       />
                     </div>
 
@@ -662,6 +738,7 @@ export default function NewAnalysisPage() {
                         label="Pequeños"
                         photoUrl={formData.uniformidad?.pequenos?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('uniformidad.pequenos.fotoUrl', file)}
+                        isUploading={isFieldUploading('uniformidad.pequenos.fotoUrl')}
                       />
                     </div>
                   </div>
@@ -670,31 +747,37 @@ export default function NewAnalysisPage() {
 
                 {/* Defectos */}
                 {productType !== 'CONTROL_PESOS' && (
-                <div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-yellow-50 dark:bg-yellow-900/20 rounded-lg`}>
-                  <h3 className={`font-semibold ${viewMode === 'COMPACTA' ? 'text-base' : 'text-lg'}`}>Defectos de Calidad</h3>
-                  
-                  <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${viewMode === 'COMPACTA' ? 'gap-2' : 'gap-4'}`}>
-                    {getDefectosForProductType().map((defecto) => (
-                      <div key={defecto} className="space-y-1">
-                        <Label htmlFor={defecto}>{DEFECTO_LABELS[defecto] || defecto}</Label>
-                        <Input 
-                          id={defecto}
-                          type="number" 
-                          min="0"
-                          value={formData.defectos?.[defecto] || ''}
-                          onChange={(e) => handleDefectoChange(defecto, e.target.value)}
-                          onBlur={handleFieldBlur}
-                        />
-                      </div>
-                    ))}
+                  <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">🐛 Defectos de Calidad</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DefectSelector
+                        productType={productType}
+                        selectedDefects={formData.defectos || {}}
+                        onDefectsChange={handleDefectsChange}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Foto de calidad general */}
+                {productType !== 'CONTROL_PESOS' && (
+                  <div className="space-y-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <h3 className="font-semibold text-base">📸 Foto General</h3>
+                    <PhotoCapture 
+                      label="Calidad General"
+                      photoUrl={formData.fotoCalidad}
+                      onPhotoCapture={(file) => handlePhotoCapture('fotoCalidad', file)}
+                      isUploading={isFieldUploading('fotoCalidad')}
+                    />
                   </div>
-                </div>
                 )}
 
                 </div>
 
-                {/* Columna derecha - Acciones y Observaciones (4 columnas en XL) */}
-                <div className="xl:col-span-4 space-y-6">
+                {/* Columna derecha - Acciones y Observaciones (4 columnas en LG+) */}
+                <div className="lg:col-span-4 space-y-4 lg:space-y-6">
                   
                   {/* Panel de Acciones - Sticky */}
                   <div className="sticky top-24 z-10">
@@ -733,21 +816,6 @@ export default function NewAnalysisPage() {
                     </CardContent>
                   </Card>
 
-                  {/* Foto de calidad general */}
-                  {productType !== 'CONTROL_PESOS' && (
-                    <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">📸 Foto General</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <PhotoCapture 
-                          label="Calidad General"
-                          photoUrl={formData.fotoCalidad}
-                          onPhotoCapture={(file) => handlePhotoCapture('fotoCalidad', file)}
-                        />
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </div>
             )}

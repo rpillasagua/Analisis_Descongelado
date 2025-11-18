@@ -9,6 +9,7 @@ interface ControlPesosBrutosProps {
   registros: PesoBrutoRegistro[];
   onChange: (registros: PesoBrutoRegistro[]) => void;
   onPhotoCapture: (registroId: string, file: File) => void;
+  isPhotoUploading?: (registroId: string) => boolean;
   viewMode?: 'SUELTA' | 'COMPACTA';
 }
 
@@ -22,7 +23,8 @@ export default function ControlPesosBrutos({
   registros, 
   onChange, 
   onPhotoCapture,
-  viewMode = 'SUELTA'
+  isPhotoUploading = () => false,
+  viewMode = 'COMPACTA'
 }: ControlPesosBrutosProps) {
   
   const agregarRegistro = () => {
@@ -110,6 +112,7 @@ export default function ControlPesosBrutos({
                     label={`Peso Bruto #${index + 1}`}
                     photoUrl={registro.fotoUrl}
                     onPhotoCapture={(file) => onPhotoCapture(registro.id, file)}
+                    isUploading={isPhotoUploading(registro.id)}
                   />
                 </div>
               </div>

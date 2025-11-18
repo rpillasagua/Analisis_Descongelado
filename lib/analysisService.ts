@@ -24,6 +24,12 @@ const cleanDataForFirestore = (data: any): any => {
     return null;
   }
   
+  // Prevenir guardar URLs de blob (locales) en Firestore
+  if (typeof data === 'string' && data.startsWith('blob:')) {
+    console.warn('⚠️ Detectada URL blob en guardado, ignorando para evitar enlaces rotos:', data);
+    return null;
+  }
+  
   if (Array.isArray(data)) {
     return data.map(cleanDataForFirestore);
   }
@@ -295,6 +301,67 @@ export const searchAnalyses = async (searchTerm: string): Promise<QualityAnalysi
   }
 };
 
+/**
+ * Renueva permisos de fotos en un análisis existente
+ * Útil para arreglar problemas de permisos expirados
+ */
+export const renewAnalysisPhotoPermissions = async (analysisId: string): Promise<void> => {
+  try {
+    console.log(`🔄 Renovando permisos de fotos para análisis: ${analysisId}`);
+    
+    // Obtener el análisis
+    const analysis = await getAnalysisById(analysisId);
+    if (!analysis) {
+      throw new Error(`Análisis ${analysisId} no encontrado`);
+    }
+    
+    // Extraer todas las URLs de fotos
+    const photoUrls: string[] = [];
+    
+    // Fotos principales
+    if (analysis.fotoCalidad) photoUrls.push(analysis.fotoCalidad);
+    if (analysis.pesoBruto?.fotoUrl) photoUrls.push(analysis.pesoBruto.fotoUrl);
+    if (analysis.pesoCongelado?.fotoUrl) photoUrls.push(analysis.pesoCongelado.fotoUrl);
+    if (analysis.pesoNeto?.fotoUrl) photoUrls.push(analysis.pesoNeto.fotoUrl);
+    
+    // Fotos de uniformidad
+    if (analysis.uniformidad?.grandes?.fotoUrl) photoUrls.push(analysis.uniformidad.grandes.fotoUrl);
+    if (analysis.uniformidad?.pequenos?.fotoUrl) photoUrls.push(analysis.uniformidad.pequenos.fotoUrl);
+    
+    // Fotos de pesos brutos
+    if (analysis.pesosBrutos) {
+      analysis.pesosBrutos.forEach(peso => {
+        if (peso.fotoUrl) photoUrls.push(peso.fotoUrl);
+      });
+    }
+    
+    // Filtrar solo URLs de Google Drive
+    const driveUrls = photoUrls.filter(url => url && url.includes('drive.google.com'));
+    
+    if (driveUrls.length === 0) {
+      console.log('ℹ️ No se encontraron URLs de Google Drive en este análisis');
+      return;
+    }
+    
+    console.log(`📸 Encontradas ${driveUrls.length} URLs de Google Drive`);
+    
+    // Importar servicio de Google Drive
+    const { googleDriveService } = await import('./googleDriveService');
+    
+    // Extraer IDs de archivos
+    const fileIds = googleDriveService.extractFileIdsFromUrls(driveUrls);
+    console.log(`🆔 Extraídos ${fileIds.length} IDs únicos de archivos`);
+    
+    // Renovar permisos
+    await googleDriveService.renewPublicPermissions(fileIds);
+    
+    console.log('✅ Permisos de fotos renovados exitosamente');
+  } catch (error) {
+    console.error('❌ Error renovando permisos de fotos:', error);
+    throw error;
+  }
+};
+
 export default {
   saveAnalysis,
   updateAnalysis,
@@ -303,5 +370,6 @@ export default {
   getAnalysesByDateRange,
   getAnalysesByShift,
   deleteAnalysis,
-  searchAnalyses
+  searchAnalyses,
+  renewAnalysisPhotoPermissions
 };

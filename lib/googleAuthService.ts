@@ -190,14 +190,39 @@ class GoogleAuthService {
       );
 
       if (!response.ok) {
-        // Token inválido, solicitar nuevo login
-        throw new Error('Token expirado');
+        // Token inválido, intentar renovar automáticamente
+        console.warn('Token expirado, intentando renovar...');
+        
+        // Limpiar token actual
+        this.accessToken = null;
+        sessionStorage.removeItem('google_access_token');
+        sessionStorage.removeItem('google_user');
+        this.user = null;
+        this.notifyListeners();
+        
+        throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      }
+
+      const tokenInfo = await response.json();
+      
+      // Verificar si el token expira pronto (menos de 5 minutos)
+      const expiresIn = tokenInfo.expires_in;
+      if (expiresIn && expiresIn < 300) {
+        console.warn('Token expira pronto, sería bueno renovarlo');
+        // Por ahora, continuar con el token actual
       }
 
       return this.accessToken;
     } catch (error) {
-      console.error('Token inválido, solicitando nuevo login...');
-      this.logout();
+      console.error('Error verificando token:', error);
+      
+      // Limpiar estado
+      this.accessToken = null;
+      this.user = null;
+      sessionStorage.removeItem('google_access_token');
+      sessionStorage.removeItem('google_user');
+      this.notifyListeners();
+      
       throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }
   }
