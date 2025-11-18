@@ -69,13 +69,8 @@ export default function AnalysisDashboard() {
   };
 
   const handleEdit = (id: string, status?: string) => {
-    // Si está EN_PROGRESO o no tiene estado, abrir en la página de creación para editar
-    if (!status || status === 'EN_PROGRESO') {
-      router.push(`/dashboard/tests/new?id=${id}`);
-    } else {
-      // Si está COMPLETADO, abrir en modo solo lectura
-      router.push(`/dashboard/tests/edit?id=${id}`);
-    }
+    // Siempre usar la página completa de edición que tiene todos los campos
+    router.push(`/dashboard/tests/new?id=${id}`);
   };
 
   const filteredAnalyses = analyses.filter(analysis => {
@@ -230,10 +225,8 @@ export default function AnalysisDashboard() {
                     {shiftAnalyses.map((analysis) => (
                       <div
                         key={analysis.id}
-                        onClick={() => analysis.status !== 'COMPLETADO' && handleEdit(analysis.id, analysis.status)}
-                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 transition-all ${
-                          analysis.status !== 'COMPLETADO' ? 'active:scale-[0.99]' : ''
-                        }`}
+                        onClick={() => handleEdit(analysis.id, analysis.status)}
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 transition-all cursor-pointer active:scale-[0.99] hover:shadow-lg"
                       >
                         {/* Card Header */}
                         <div className="px-4 py-3 flex justify-between items-center border-b border-gray-50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/50">
@@ -269,9 +262,10 @@ export default function AnalysisDashboard() {
                                     e.stopPropagation();
                                     handleEdit(analysis.id, analysis.status);
                                   }}
-                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                  className="p-2.5 sm:p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors active:scale-95"
+                                  aria-label="Editar análisis"
                                 >
-                                  <Edit2 size={18} />
+                                  <Edit2 size={20} className="sm:w-[18px] sm:h-[18px]" />
                                 </button>
                                 {deleteConfirm === analysis.id ? (
                                   <button
@@ -279,9 +273,10 @@ export default function AnalysisDashboard() {
                                       e.stopPropagation();
                                       handleDelete(analysis.id);
                                     }}
-                                    className="p-2 text-red-600 bg-red-50 rounded-full animate-pulse"
+                                    className="p-2.5 sm:p-2 text-red-600 bg-red-50 dark:bg-red-900/20 rounded-full animate-pulse active:scale-95"
+                                    aria-label="Confirmar eliminación"
                                   >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={20} className="sm:w-[18px] sm:h-[18px]" />
                                   </button>
                                 ) : (
                                   <button
@@ -290,9 +285,10 @@ export default function AnalysisDashboard() {
                                       setDeleteConfirm(analysis.id);
                                       setTimeout(() => setDeleteConfirm(null), 3000);
                                     }}
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                    className="p-2.5 sm:p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors active:scale-95"
+                                    aria-label="Eliminar análisis"
                                   >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={20} className="sm:w-[18px] sm:h-[18px]" />
                                   </button>
                                 )}
                               </div>
