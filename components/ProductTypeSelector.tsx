@@ -1,6 +1,8 @@
 'use client';
 
 import { ProductType, PRODUCT_TYPE_LABELS } from '@/lib/types';
+import { Edit2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface ProductTypeSelectorProps {
   selectedType?: ProductType;
@@ -8,19 +10,69 @@ interface ProductTypeSelectorProps {
 }
 
 export default function ProductTypeSelector({ selectedType, onSelect }: ProductTypeSelectorProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const productTypes: ProductType[] = ['ENTERO', 'COLA', 'VALOR_AGREGADO'];
 
+  // Si ya hay un tipo seleccionado y no estamos editando, mostrar solo el seleccionado
+  if (selectedType && !isEditing) {
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          Tipo de producto seleccionado
+        </label>
+        <div className="relative p-6 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="text-5xl">
+                {selectedType === 'ENTERO' && '🦐'}
+                {selectedType === 'COLA' && '🍤'}
+                {selectedType === 'VALOR_AGREGADO' && '📦'}
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  {PRODUCT_TYPE_LABELS[selectedType]}
+                </span>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Los campos del formulario se ajustan a este tipo de producto
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+            >
+              <Edit2 className="h-4 w-4" />
+              Cambiar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar selector completo si no hay selección o si está editando
   return (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-        ¿Qué tipo de producto vas a descongelar? *
+        {selectedType ? 'Selecciona un nuevo tipo de producto *' : '¿Qué tipo de producto vas a descongelar? *'}
       </label>
+      {selectedType && isEditing && (
+        <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            ⚠️ Al cambiar el tipo de producto, los defectos registrados se perderán si no son compatibles.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {productTypes.map((type) => (
           <button
             key={type}
             type="button"
-            onClick={() => onSelect(type)}
+            onClick={() => {
+              onSelect(type);
+              setIsEditing(false);
+            }}
             className={`
               relative p-6 rounded-lg border-2 transition-all duration-200
               ${selectedType === type
@@ -59,6 +111,17 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
           </button>
         ))}
       </div>
+      {selectedType && isEditing && (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsEditing(false)}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
     </div>
   );
 }
