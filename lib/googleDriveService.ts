@@ -561,8 +561,8 @@ class GoogleDriveService {
         console.log(`✅ Permisos renovados para: ${fileId}`);
         // Pequeño delay para no sobrecargar la API
         await new Promise(resolve => setTimeout(resolve, 200));
-      } catch (error) {
-        console.warn(`⚠️ Error renovando permisos para ${fileId}:`, error.message);
+      } catch (error: any) {
+        console.warn(`⚠️ Error renovando permisos para ${fileId}:`, error?.message || 'Error desconocido');
       }
     }
     
