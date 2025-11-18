@@ -372,8 +372,8 @@ class GoogleDriveService {
       try {
         await this.makeFilePublic(data.id);
         console.log('✅ Permisos públicos configurados');
-      } catch (error) {
-        console.warn('⚠️ No se pudieron configurar permisos públicos:', error.message);
+      } catch (error: any) {
+        console.warn('⚠️ No se pudieron configurar permisos públicos:', error?.message || 'Error desconocido');
         // Continuar de todos modos
       }
       
