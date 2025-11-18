@@ -330,7 +330,8 @@ export default function NewAnalysisPage() {
       
       // Revocar URL blob anterior si existe
       if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
-        setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
+        const urlToRevoke = oldPhotoUrl;
+        setTimeout(() => URL.revokeObjectURL(urlToRevoke), 1000);
       }
 
       // Crear URL temporal para preview inmediato
@@ -405,7 +406,8 @@ export default function NewAnalysisPage() {
       // Revocar la URL temporal que se creó
       const currentRegistro = pesosBrutos.find(r => r.id === registroId);
       if (currentRegistro?.fotoUrl && currentRegistro.fotoUrl.startsWith('blob:')) {
-        setTimeout(() => URL.revokeObjectURL(currentRegistro.fotoUrl), 100);
+        const urlToRevoke = currentRegistro.fotoUrl;
+        setTimeout(() => URL.revokeObjectURL(urlToRevoke), 100);
       }
       
       // Mostrar mensaje de error específico
