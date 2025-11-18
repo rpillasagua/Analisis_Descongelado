@@ -14,7 +14,6 @@
     "build:spa": "next build && npm run postbuild",
     "build:pwa": "npm run build:spa && echo '✓ SPA + PWA build completada en carpeta out/'",
     "build:vercel": "next build",
-    "postbuild": "node scripts/post-build.js",
     "start": "npx serve out -s -p ${PORT:-8080}",
     "start:spa": "npx serve out -p 8080",
     "start:production": "npx serve out -s -p 80",
