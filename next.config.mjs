@@ -1,9 +1,9 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración para SPA + PWA
-  output: 'export', // Exportar como SPA estática
-  distDir: 'out', // Directorio de salida
+  // Configuración para deployment en Vercel/Netlify
+  // Comentado output: 'export' para permitir rutas dinámicas
+  // output: 'export', // Descomentar solo para build SPA local
   images: {
     unoptimized: true, // Requerido para export estático
     formats: ['image/avif', 'image/webp'], // Formatos modernos

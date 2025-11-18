@@ -43,19 +43,38 @@ Aquagold_Resistencias/
 ### Paso 2: Crear Credenciales
 
 1. Ve a "APIs y servicios" > "Credenciales"
-2. Haz clic en "Crear credenciales" > "ID de cliente de OAuth"
-3. Tipo de aplicación: "Aplicación web"
-4. Orígenes autorizados de JavaScript:
+2. Haz clic en "Crear credenciales" > "ID de cliente de OAuth 2.0"
+3. **Tipo de aplicación**: "Aplicación web"
+4. **Nombre**: "Aquagold Analisis Descongelado"
+5. **Orígenes de JavaScript autorizados** (agrega TODOS):
    ```
    http://localhost:3000
-   https://tu-dominio.com
+   http://localhost:8080
+   http://127.0.0.1:3000
+   http://127.0.0.1:8080
    ```
-5. URIs de redireccionamiento autorizadas:
+   Para producción, agrega también:
+   ```
+   https://tu-dominio.com
+   https://www.tu-dominio.com
+   ```
+
+6. **URIs de redireccionamiento autorizadas** (mismas que arriba):
    ```
    http://localhost:3000
-   https://tu-dominio.com
+   http://localhost:8080
+   http://127.0.0.1:3000
+   http://127.0.0.1:8080
    ```
-6. Guarda el **Client ID** y **API Key**
+
+7. Haz clic en **CREAR**
+8. Copia el **Client ID** (formato: `XXXXXX.apps.googleusercontent.com`)
+9. Si necesitas API Key, créala desde "Crear credenciales" > "Clave de API"
+
+**⚠️ IMPORTANTE:**
+- NO agregues barras finales (/) a las URLs
+- NO agregues rutas adicionales como `/callback`
+- Espera 5-10 minutos después de guardar para que se propaguen los cambios
 
 ### Paso 3: Crear Carpeta Raíz en Google Drive
 
@@ -217,12 +236,21 @@ La aplicación estará disponible en http://localhost:3000
 
 ## Autenticación Google Drive
 
-El sistema usa OAuth2 de Google. La primera vez que se use:
+El sistema usa OAuth2 de Google (Google Identity Services). La primera vez que se use:
 
-1. Se abrirá ventana de autenticación de Google
+1. Se abrirá popup de autenticación de Google
 2. Seleccionar cuenta de Google
-3. Autorizar acceso a Google Drive
-4. El token se guardará en la sesión
+3. Autorizar permisos:
+   - Ver información básica del perfil
+   - Ver tu dirección de correo electrónico
+   - Acceso a Google Drive (solo archivos creados por la app)
+4. El token se guardará en la sesión del navegador
+
+**Solución de Problemas:**
+- Si aparece "Error 400: redirect_uri_mismatch", consulta `SOLUCION_ERROR_REDIRECT_URI.md`
+- Verifica que las URIs estén correctamente configuradas en Google Cloud Console
+- Limpia la caché del navegador e intenta en modo incógnito
+- Espera 5-10 minutos después de cambiar configuración en Google Cloud
 
 ## Migración de Datos Existentes
 
