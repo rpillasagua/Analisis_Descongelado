@@ -43,7 +43,8 @@ class GoogleAuthService {
         scope: this.config.scopes.join(' '),
         callback: (response: any) => {
           if (response.error) {
-            console.error('Error en autenticación:', response.error);
+            console.error('❌ Error en autenticación Google:', response.error);
+            alert(`Error de autenticación: ${response.error}\n\nPosibles causas:\n1. URL no autorizada en Google Cloud Console\n2. Client ID incorrecto\n3. Permisos denegados`);
             return;
           }
           

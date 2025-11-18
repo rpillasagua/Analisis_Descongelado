@@ -40,12 +40,15 @@ export default function GoogleLoginButton({ onLoginSuccess }: GoogleLoginButtonP
       setTimeout(() => {
         if (googleAuthService.isAuthenticated()) {
           onLoginSuccess?.();
+        } else {
+          console.error('Autenticación no completada después de 1 segundo');
         }
         setIsLoading(false);
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al iniciar sesión:', error);
-      alert('Error al iniciar sesión con Google');
+      const errorMessage = error?.message || 'Error desconocido';
+      alert(`Error al iniciar sesión con Google:\n\n${errorMessage}\n\nVerifica que la URL de Vercel esté autorizada en Google Cloud Console.`);
       setIsLoading(false);
     }
   };
