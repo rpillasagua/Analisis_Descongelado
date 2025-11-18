@@ -1,8 +1,0 @@
-# Render.com Configuration for SPA + PWA
-# https://render.com
-
-# Build Command
-npm install --legacy-peer-deps && npm run build:pwa
-
-# Start Command (Static Site)
-npx serve out -s -p $PORT

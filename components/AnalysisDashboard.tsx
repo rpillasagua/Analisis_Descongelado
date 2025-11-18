@@ -45,7 +45,7 @@ export default function AnalysisDashboard() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/dashboard/analysis/edit/${id}`);
+    router.push(`/dashboard/tests/edit?id=${id}`);
   };
 
   const filteredAnalyses = analyses.filter(analysis => 
