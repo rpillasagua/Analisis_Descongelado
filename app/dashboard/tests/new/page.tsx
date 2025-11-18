@@ -108,7 +108,7 @@ export default function NewAnalysisPage() {
   const autoSaveState = useAutoSaveAnalysis({
     data: { ...formData, productType },
     onSave: handleAutoSave,
-    delay: 2000,
+    delay: 500,
     enabled: !!productType && !!formData.codigo && !!formData.lote
   });
 
@@ -422,7 +422,8 @@ export default function NewAnalysisPage() {
                 )}
 
                 {/* Uniformidad */}
-                {productType !== 'CONTROL_PESOS' && (<div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-green-50 dark:bg-green-900/20 rounded-lg`}>
+                {productType !== 'CONTROL_PESOS' && (
+                <div className={`${viewMode === 'COMPACTA' ? 'space-y-2' : 'space-y-4'} ${viewMode === 'COMPACTA' ? 'p-3' : 'p-4'} bg-green-50 dark:bg-green-900/20 rounded-lg`}>
                   <h3 className={`font-semibold ${viewMode === 'COMPACTA' ? 'text-base' : 'text-lg'}`}>Uniformidad</h3>
                   
                   <div className={`grid grid-cols-1 md:grid-cols-2 ${viewMode === 'COMPACTA' ? 'gap-3' : 'gap-4'}`}>
