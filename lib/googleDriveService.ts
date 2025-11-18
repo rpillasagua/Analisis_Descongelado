@@ -71,7 +71,7 @@ class GoogleDriveService {
         this.rootFolderId = await this.createRootFolder();
         console.log('✅ Carpeta "descongelado" creada:', this.rootFolderId);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error inicializando Google Drive:', error);
       throw error;
     }
@@ -95,7 +95,7 @@ class GoogleDriveService {
 
       const data = await response.json();
       return data.files && data.files.length > 0 ? data.files[0].id : null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error buscando carpeta en raíz:', error);
       return null;
     }
@@ -122,7 +122,7 @@ class GoogleDriveService {
 
       const data = await response.json();
       return data.id;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creando carpeta raíz:', error);
       throw error;
     }
