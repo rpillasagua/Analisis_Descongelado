@@ -12,7 +12,6 @@ interface PhotoCaptureProps {
 }
 
 export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoRemove, isUploading = false }: PhotoCaptureProps) {
-  const [isCapturing, setIsCapturing] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [errorType, setErrorType] = useState<'blob' | 'drive_auth' | 'drive_permissions' | 'unknown'>('unknown');

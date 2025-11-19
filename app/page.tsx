@@ -141,6 +141,7 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
             <h1 className="text-lg sm:text-xl font-bold text-white hidden sm:block">
               Resistencias App
             </h1>
+            <p className="text-[10px] sm:text-xs text-[#9ca3af] hidden xs:block">Control de Calidad</p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -207,11 +208,3 @@ export default function Home() {
     </div>
   );
 }
-
-
-
-
-
-
-
-

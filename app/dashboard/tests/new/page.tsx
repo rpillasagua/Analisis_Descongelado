@@ -20,13 +20,13 @@ export const dynamic = 'force-dynamic';
 
 // Componentes UI
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
-  <div className={`bg-white dark:bg-slate-800 border-2 rounded-lg shadow-sm hover:shadow-md transition-all ${className}`}>{children}</div>;
+  <div className={`glass-card border border-[rgba(6,182,212,0.2)] rounded-lg transition-all ${className}`}>{children}</div>;
 const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
-  <div className={`p-4 sm:p-6 ${className}`}>{children}</div>;
+  <div className={`p-4 sm:p-6 border-b border-[rgba(6,182,212,0.1)] ${className}`}>{children}</div>;
 const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
-  <h2 className={`text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white ${className}`}>{children}</h2>;
+  <h2 className={`text-xl sm:text-2xl font-semibold text-[#f3f4f6] ${className}`}>{children}</h2>;
 const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
-  <p className={`text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 ${className}`}>{children}</p>;
+  <p className={`text-xs sm:text-sm text-[#9ca3af] mt-1 ${className}`}>{children}</p>;
 const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
   <div className={`p-4 sm:p-6 ${className}`}>{children}</div>;
 
@@ -42,19 +42,19 @@ interface ButtonProps {
 const Button = ({ children, onClick, className = '', variant = 'default', type = 'button', disabled = false }: ButtonProps) => {
   const baseClasses = "inline-flex items-center justify-center rounded-lg text-xs sm:text-sm font-medium transition-all h-9 sm:h-10 px-4 py-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed";
   const variantClasses = {
-    default: 'bg-blue-500 text-white hover:bg-blue-600 border-0',
-    outline: 'border-2 border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
-    ghost: 'hover:bg-gray-100 dark:hover:bg-gray-800',
+    default: 'bg-gradient-to-br from-[#06b6d4] to-[#0891b2] text-white hover:from-[#0891b2] hover:to-[#067e8f]',
+    outline: 'border-2 border-[rgba(6,182,212,0.3)] bg-[rgba(6,182,212,0.05)] text-[#06b6d4] hover:bg-[rgba(6,182,212,0.1)]',
+    ghost: 'hover:bg-[rgba(6,182,212,0.1)] text-[#06b6d4]',
   };
   return <button disabled={disabled} type={type} onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>{children}</button>;
 };
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => 
-  <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 dark:border-gray-600 dark:bg-slate-700 dark:text-white shadow-sm transition-all placeholder:text-gray-400" />;
+  <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) => 
-  <label {...props} className="text-xs sm:text-sm font-medium leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700 dark:text-gray-300" />;
+  <label {...props} className="text-xs sm:text-sm font-medium leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#f3f4f6]" />;
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => 
-  <textarea {...props} className="flex min-h-20 w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 dark:border-gray-600 dark:bg-slate-700 dark:text-white shadow-sm transition-all placeholder:text-gray-400" />;
+  <textarea {...props} className="flex min-h-20 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
 
 export default function NewAnalysisPage() {
   const router = useRouter();
@@ -496,36 +496,36 @@ export default function NewAnalysisPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f1535] to-[#1a2847]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Cargando análisis...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#06b6d4] mx-auto mb-4"></div>
+          <p className="text-[#9ca3af]">Cargando análisis...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <main className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f1535] to-[#1a2847] overflow-x-hidden">
       {/* Header fijo superior */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700 shadow-md">
+      <div className="sticky top-0 z-10 glass-card m-0 rounded-none border-b border-[rgba(6,182,212,0.2)]">
         <div className="max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <button
                 onClick={() => router.push('/')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-[rgba(6,182,212,0.1)] rounded-lg transition-colors text-[#9ca3af] hover:text-[#06b6d4]"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white truncate">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#f3f4f6] truncate">
                   {editId ? '✏️ Editar Análisis' : '📋 Nuevo Análisis de Calidad'}
                 </h1>
                 {formData.codigo && formData.lote && (
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
+                  <p className="text-xs sm:text-sm text-[#9ca3af] truncate">
                     {formData.codigo} - {formData.lote} {formData.talla && `| Talla: ${formData.talla}`}
                   </p>
                 )}
@@ -545,8 +545,8 @@ export default function NewAnalysisPage() {
       </div>
 
       {/* Contenido principal con layout de 2 columnas en pantallas grandes */}
-      <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
+      <div className="max-w-[1920px] mx-auto p-2 xs:p-3 sm:p-4 lg:p-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
             <Card className="bg-white dark:bg-gray-800">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Tipo de Producto</CardTitle>
@@ -560,16 +560,16 @@ export default function NewAnalysisPage() {
         </Card>
 
             {productType && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 xs:gap-3 lg:gap-6">
                 {/* Columna izquierda - Información principal (8 columnas en LG+) */}
-                <div className="lg:col-span-8 space-y-4 lg:space-y-6">
+                <div className="lg:col-span-8 space-y-3 sm:space-y-4 lg:space-y-6">
                   {/* Información básica */}
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-4">
                       <CardTitle className="text-lg">📝 Información Básica</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 xs:gap-3">
                         <div className="space-y-2">
                     <Label htmlFor="lote">Lote *</Label>
                     <Input 
@@ -617,10 +617,10 @@ export default function NewAnalysisPage() {
                 )}
 
                 {/* Pesos (Solo para otros tipos) */}
-                {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <h3 className="font-semibold text-base">Pesos</h3>
+                {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-2 xs:p-3 bg-[rgba(6,182,212,0.05)] border border-[rgba(6,182,212,0.2)] rounded-lg">
+                  <h3 className="font-semibold text-base text-[#f3f4f6]">Pesos</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="pesoBruto">Peso Bruto (kg)</Label>
                       <Input 
@@ -700,10 +700,10 @@ export default function NewAnalysisPage() {
 
                 {/* Uniformidad */}
                 {productType !== 'CONTROL_PESOS' && (
-                <div className="space-y-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="space-y-2 p-2 xs:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <h3 className="font-semibold text-base">Uniformidad</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="grandes">Grandes</Label>
                       <Input 
@@ -765,7 +765,7 @@ export default function NewAnalysisPage() {
 
                 {/* Foto de calidad general */}
                 {productType !== 'CONTROL_PESOS' && (
-                  <div className="space-y-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="space-y-2 p-2 xs:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <h3 className="font-semibold text-base">📸 Foto General</h3>
                     <PhotoCapture 
                       label="Calidad General"
@@ -779,7 +779,7 @@ export default function NewAnalysisPage() {
                 </div>
 
                 {/* Columna derecha - Acciones y Observaciones (4 columnas en LG+) */}
-                <div className="lg:col-span-4 space-y-4 lg:space-y-6">
+                <div className="lg:col-span-4 space-y-3 sm:space-y-4 lg:space-y-6">
                   
                   {/* Panel de Acciones - Sticky */}
                   <div className="sticky top-24 z-10">

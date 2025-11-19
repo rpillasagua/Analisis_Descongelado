@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, FileText, Search, Edit2, Trash2, Check, Hourglass, Clock, Filter } from 'lucide-react';
+import { Plus, FileText, Edit2, Trash2, Check, Hourglass, Clock, Filter, Search } from 'lucide-react';
 import { getAnalysesByDate, deleteAnalysis, updateAnalysis } from '@/lib/analysisService';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS } from '@/lib/types';
 import DailyReportModal from '@/components/DailyReportModalNew';
@@ -74,7 +74,7 @@ export default function AnalysisDashboard() {
   };
 
   const filteredAnalyses = analyses.filter(analysis => {
-    // Filtro por búsqueda
+    // Filtro solo por búsqueda
     const matchesSearch = analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.lote.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -115,8 +115,8 @@ export default function AnalysisDashboard() {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`p-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 flex-1 md:flex-none ${showFilters
-                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                : 'glass-panel text-gray-300 hover:bg-white/5'
+              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+              : 'glass-panel text-gray-300 hover:bg-white/5'
               }`}
           >
             <Filter size={20} />
@@ -180,8 +180,8 @@ export default function AnalysisDashboard() {
                   key={status}
                   onClick={() => setFilterStatus(status)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterStatus === status
-                      ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
                     }`}
                 >
                   {status === 'TODOS' ? 'Todos' : status === 'EN_PROGRESO' ? 'En Progreso' : 'Completados'}
@@ -257,8 +257,8 @@ export default function AnalysisDashboard() {
                     >
                       {/* Status Badge */}
                       <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide border ${analysis.status === 'COMPLETADO'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         }`}>
                         {analysis.status === 'COMPLETADO' ? 'COMPLETADO' : 'EN PROGRESO'}
                       </div>
@@ -275,6 +275,7 @@ export default function AnalysisDashboard() {
                           <p className="text-sm font-medium text-blue-400/80 mt-0.5">
                             {PRODUCT_TYPE_LABELS[analysis.productType]}
                           </p>
+
                         </div>
                       </div>
 
@@ -326,8 +327,8 @@ export default function AnalysisDashboard() {
                                 }
                               }}
                               className={`p-2 rounded-lg transition-colors ${deleteConfirm === analysis.id
-                                  ? 'bg-red-500 text-white'
-                                  : 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'
+                                ? 'bg-red-500 text-white'
+                                : 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'
                                 }`}
                             >
                               <Trash2 size={18} />

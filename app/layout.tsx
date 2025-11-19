@@ -1,4 +1,4 @@
-import './globals.css';
+import './globals-darkglass.css';
 import type { Metadata, Viewport } from 'next';
 
 // PWA Ready - Vercel Production Build
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
+  themeColor: '#06b6d4',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
