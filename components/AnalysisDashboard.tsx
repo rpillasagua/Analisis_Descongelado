@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, FileText, Search, Edit2, Trash2, Check, Hourglass, Clock, Filter } from 'lucide-react';
+import { Plus, FileText, Search, Edit2, Trash2, Check, Hourglass, Clock, User, LogOut } from 'lucide-react';
 import { getAnalysesByDate, deleteAnalysis, updateAnalysis } from '@/lib/analysisService';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS } from '@/lib/types';
 import DailyReportModal from '@/components/DailyReportModalNew';
+import { googleAuthService } from '@/lib/googleAuthService';
 
 export default function AnalysisDashboard() {
   const router = useRouter();
@@ -15,11 +16,22 @@ export default function AnalysisDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'TODOS' | 'EN_PROGRESO' | 'COMPLETADO'>('TODOS');
-  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<'TODOS' | 'EN_PROGRESO'>('TODOS');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; picture?: string } | null>(null);
 
   useEffect(() => {
+    // Obtener usuario actual
+    const user = googleAuthService.getCurrentUser();
+    setCurrentUser(user);
+    
+    // Suscribirse a cambios de usuario
+    const unsubscribe = googleAuthService.subscribe((user) => {
+      setCurrentUser(user);
+    });
+    
     loadAnalyses();
+    return unsubscribe;
   }, [selectedDate]);
 
   const loadAnalyses = async () => {
@@ -78,18 +90,12 @@ export default function AnalysisDashboard() {
     const matchesSearch = analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          analysis.lote.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filtro por estado
+    // Filtro por estado: solo mostrar "En Progreso" o "Todos"
     const matchesStatus = filterStatus === 'TODOS' || 
-                         (filterStatus === 'EN_PROGRESO' && (!analysis.status || analysis.status === 'EN_PROGRESO')) ||
-                         (filterStatus === 'COMPLETADO' && analysis.status === 'COMPLETADO');
+                         (filterStatus === 'EN_PROGRESO' && (!analysis.status || analysis.status === 'EN_PROGRESO'));
     
     return matchesSearch && matchesStatus;
   });
-
-  const groupedByStatus = {
-    EN_PROGRESO: filteredAnalyses.filter(a => !a.status || a.status === 'EN_PROGRESO'),
-    COMPLETADO: filteredAnalyses.filter(a => a.status === 'COMPLETADO')
-  };
 
   const groupedByShift = {
     DIA: filteredAnalyses.filter(a => a.shift === 'DIA'),
@@ -100,7 +106,7 @@ export default function AnalysisDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#0f1535] to-[#1a2847] pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
         
-        {/* Header Compacto */}
+        {/* Header con botones */}
         <div className="flex justify-between items-center mb-6 sticky top-16 z-20 glass-card py-4 px-4 rounded-xl">
           <div>
             <h1 className="text-2xl font-bold text-[#f3f4f6]">
@@ -110,85 +116,96 @@ export default function AnalysisDashboard() {
               {new Date(selectedDate).toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {/* Botón Generar Reporte */}
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-full transition-all ${showFilters ? 'bg-[rgba(6,182,212,0.2)] text-[#06b6d4]' : 'glass-card text-[#9ca3af] hover:text-[#06b6d4]'}`}
+              onClick={() => setShowReportModal(true)}
+              className="p-2 bg-gradient-to-br from-[#10b981] to-[#059669] text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 hover:from-[#059669] hover:to-[#047857]"
+              title="Generar Reporte"
             >
-              <Filter size={20} />
+              <FileText size={20} />
             </button>
+            
+            {/* Botón Nuevo Análisis */}
             <button
               onClick={() => router.push('/dashboard/tests/new')}
               className="p-2 bg-gradient-to-br from-[#06b6d4] to-[#0891b2] text-white rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 hover:from-[#0891b2] hover:to-[#067e8f]"
+              title="Nuevo Análisis"
             >
               <Plus size={24} />
             </button>
+            
+            {/* Botón Perfil con menú */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="p-2 rounded-full transition-all hover:bg-[rgba(6,182,212,0.2)] text-[#06b6d4]"
+                title="Perfil"
+              >
+                {currentUser?.picture ? (
+                  <img 
+                    src={currentUser.picture} 
+                    alt={currentUser.name}
+                    className="w-6 h-6 rounded-full border-2 border-[#06b6d4]"
+                  />
+                ) : (
+                  <User size={20} />
+                )}
+              </button>
+              
+              {/* Menú desplegable de Perfil */}
+              {showProfileMenu && currentUser && (
+                <div className="absolute right-0 mt-2 w-48 glass-card rounded-lg shadow-xl border border-[rgba(6,182,212,0.2)] z-30 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-[rgba(6,182,212,0.1)]">
+                    <p className="text-sm font-medium text-[#f3f4f6]">{currentUser.name}</p>
+                    <p className="text-xs text-[#9ca3af]">{currentUser.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      googleAuthService.logout();
+                    }}
+                    className="w-full px-4 py-2.5 flex items-center gap-2 text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)] transition-colors text-sm font-medium"
+                  >
+                    <LogOut size={16} />
+                    Salir
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Filtros Expandibles */}
-        {showFilters && (
-          <div className="glass-card rounded-xl p-4 mb-6 animate-in slide-in-from-top-2">
-            <div className="space-y-4">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-4 py-2 border border-[rgba(6,182,212,0.2)] rounded-lg bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] placeholder-[#6b7280]"
-              />
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6b7280]" />
-                <input
-                  type="text"
-                  placeholder="Buscar código o lote..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-[rgba(6,182,212,0.2)] rounded-lg bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] placeholder-[#6b7280]"
-                />
-              </div>
-              <div className="flex gap-2 p-1 bg-[rgba(6,182,212,0.1)] rounded-lg">
-                {(['TODOS', 'EN_PROGRESO', 'COMPLETADO'] as const).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setFilterStatus(status)}
-                    className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      filterStatus === status
-                        ? 'glass-card text-[#06b6d4] shadow-sm'
-                        : 'text-[#9ca3af] hover:text-[#06b6d4]'
-                    }`}
-                  >
-                    {status === 'TODOS' ? 'Todos' : status === 'EN_PROGRESO' ? 'En Progreso' : 'Completados'}
-                  </button>
-                ))}
-              </div>
+        {/* Barra de búsqueda siempre visible */}
+        <div className="glass-card rounded-xl p-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#6b7280]" />
+            <input
+              type="text"
+              placeholder="Buscar código o lote..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-[rgba(6,182,212,0.2)] rounded-lg bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] placeholder-[#6b7280] focus:outline-none focus:border-[rgba(6,182,212,0.4)]"
+            />
+          </div>
+          
+          {/* Botones de filtro */}
+          <div className="flex gap-2 p-1 bg-[rgba(6,182,212,0.1)] rounded-lg mt-3">
+            {(['EN_PROGRESO', 'TODOS'] as const).map((status) => (
               <button
-                onClick={() => setShowReportModal(true)}
-                className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#10b981] bg-[rgba(16,185,129,0.1)] rounded-lg hover:bg-[rgba(16,185,129,0.2)] transition-colors border border-[rgba(16,185,129,0.2)]"
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  filterStatus === status
+                    ? 'glass-card text-[#06b6d4] shadow-sm'
+                    : 'text-[#9ca3af] hover:text-[#06b6d4]'
+                }`}
               >
-                <FileText size={16} />
-                Generar Reporte Diario
+                {status === 'EN_PROGRESO' ? 'En Progreso' : 'Todos'}
               </button>
-            </div>
+            ))}
           </div>
-        )}
-
-        {/* Resumen Rápido */}
-        {!showFilters && (
-          <div className="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex-shrink-0 px-4 py-2 glass-card rounded-lg border-l-4 border-[#06b6d4]">
-              <div className="text-xs text-[#9ca3af]">Total</div>
-              <div className="text-lg font-bold text-[#f3f4f6]">{filteredAnalyses.length}</div>
-            </div>
-            <div className="flex-shrink-0 px-4 py-2 glass-card rounded-lg border-l-4 border-[#f97316]">
-              <div className="text-xs text-[#9ca3af]">En Progreso</div>
-              <div className="text-lg font-bold text-[#f3f4f6]">{groupedByStatus.EN_PROGRESO.length}</div>
-            </div>
-            <div className="flex-shrink-0 px-4 py-2 glass-card rounded-lg border-l-4 border-[#10b981]">
-              <div className="text-xs text-[#9ca3af]">Completados</div>
-              <div className="text-lg font-bold text-[#f3f4f6]">{groupedByStatus.COMPLETADO.length}</div>
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* Lista de Análisis */}
         {isLoading ? (
@@ -202,13 +219,7 @@ export default function AnalysisDashboard() {
               <Search className="h-8 w-8 text-[#06b6d4]" />
             </div>
             <h3 className="text-lg font-medium text-[#f3f4f6] mb-1">No hay análisis</h3>
-            <p className="text-[#9ca3af] text-sm mb-4">No se encontraron registros para esta fecha</p>
-            <button
-              onClick={() => router.push('/dashboard/tests/new')}
-              className="text-[#06b6d4] font-medium text-sm hover:text-[#0891b2] transition-colors"
-            >
-              Crear nuevo análisis
-            </button>
+            <p className="text-[#9ca3af] text-sm">No se encontraron registros para esta búsqueda</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -314,22 +325,6 @@ export default function AnalysisDashboard() {
                             )}
                           </div>
                         </div>
-
-                        {/* Card Footer */}
-                        {analysis.status !== 'COMPLETADO' && (
-                          <div className="px-4 pb-4 pt-0">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleComplete(analysis.id);
-                              }}
-                              className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all active:scale-[0.98]"
-                            >
-                              <Check size={18} />
-                              COMPLETAR
-                            </button>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
