@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Fondo circular azul (color Aquagold) -->
+  <circle cx="256" cy="256" r="256" fill="#0EA5E9"/>
+  
+  <!-- Camarón estilizado (blanco) - versión alta resolución -->
+  <g transform="translate(128, 160)">
+    <!-- Cuerpo del camarón -->
+    <ellipse cx="128" cy="80" rx="93" ry="48" fill="white" opacity="0.95"/>
+    
+    <!-- Segmentos del camarón -->
+    <path d="M 53 67 Q 67 59 80 67" stroke="white" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 80 67 Q 93 59 107 67" stroke="white" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 107 67 Q 120 59 133 67" stroke="white" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 133 67 Q 147 59 160 67" stroke="white" stroke-width="5" fill="none" opacity="0.7"/>
+    <path d="M 160 67 Q 173 59 187 67" stroke="white" stroke-width="5" fill="none" opacity="0.7"/>
+    
+    <!-- Cola del camarón -->
+    <path d="M 200 80 L 227 67 L 240 80 L 227 93 Z" fill="white" opacity="0.9"/>
+    <path d="M 227 67 L 248 59 L 253 80 L 248 101 Z" fill="white" opacity="0.85"/>
+    
+    <!-- Cabeza -->
+    <circle cx="53" cy="80" r="27" fill="white" opacity="0.95"/>
+    
+    <!-- Antenas -->
+    <path d="M 48 67 Q 40 48 32 32" stroke="white" stroke-width="5" fill="none" opacity="0.8"/>
+    <path d="M 59 67 Q 67 48 75 32" stroke="white" stroke-width="5" fill="none" opacity="0.8"/>
+    
+    <!-- Ojo -->
+    <circle cx="53" cy="75" r="5" fill="#0EA5E9"/>
+    
+    <!-- Patas (parte inferior) -->
+    <path d="M 67 101 L 61 120" stroke="white" stroke-width="4" opacity="0.7"/>
+    <path d="M 93 107 L 88 125" stroke="white" stroke-width="4" opacity="0.7"/>
+    <path d="M 120 107 L 115 125" stroke="white" stroke-width="4" opacity="0.7"/>
+    <path d="M 147 107 L 141 125" stroke="white" stroke-width="4" opacity="0.7"/>
+    <path d="M 173 101 L 168 120" stroke="white" stroke-width="4" opacity="0.7"/>
+  </g>
+  
+  <!-- Símbolo de resistencia/durabilidad (escudo) -->
+  <g transform="translate(320, 293)">
+    <path d="M 53 0 L 80 13 L 80 53 Q 80 80 53 93 Q 27 80 27 53 L 27 13 Z" 
+          fill="white" opacity="0.9" stroke="#0EA5E9" stroke-width="4"/>
+    
+    <!-- Check mark dentro del escudo -->
+    <path d="M 40 48 L 51 59 L 69 35" 
+          stroke="#0EA5E9" stroke-width="7" fill="none" 
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Burbujas de agua (ambiente acuícola) -->
+  <circle cx="107" cy="107" r="11" fill="white" opacity="0.3"/>
+  <circle cx="400" cy="120" r="13" fill="white" opacity="0.25"/>
+  <circle cx="427" cy="400" r="8" fill="white" opacity="0.3"/>
+  <circle cx="80" cy="413" r="11" fill="white" opacity="0.25"/>
+  <circle cx="427" cy="200" r="9" fill="white" opacity="0.28"/>
+  <circle cx="75" cy="240" r="7" fill="white" opacity="0.32"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0077b6"/>
+  <g>
+    <path d="M160 320c0-64 64-120 140-120 56 0 100 32 100 76 0 32-28 52-60 52-24 0-38-12-38-26 0-16 14-26 38-26 16 0 28 6 28 16" stroke="#fff" stroke-width="18" fill="none"/>
+    <ellipse cx="360" cy="272" rx="18" ry="18" fill="#fff"/>
+    <path d="M192 384c24 24 68 36 108 36 56 0 100-32 100-76" stroke="#fff" stroke-width="18" fill="none"/>
+    <text x="50%" y="470" text-anchor="middle" font-size="80" font-family="Arial, sans-serif" fill="#fff" font-weight="bold">AQUAGOLD</text>
+  </g>
+</svg>

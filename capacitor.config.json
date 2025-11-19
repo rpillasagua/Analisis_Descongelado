@@ -1,0 +1,15 @@
+{
+  "appId": "com.aquagold.resistencias",
+  "appName": "Aquagold Resistencias",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https",
+    "url": "https://aquagold-resistencias-app.vercel.app",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
