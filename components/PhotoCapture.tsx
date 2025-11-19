@@ -109,12 +109,12 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
         />
         
         {photoUrl && !imageError ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full min-w-0">
-            <div className="relative group self-center sm:self-auto flex-shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 w-full min-w-0">
+            <div className="relative group flex-shrink-0 w-20 h-20">
               {(isLoading || isRetrying || isUploading) && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-lg z-10">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-1"></div>
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mb-1"></div>
+                  <span className="text-xs text-gray-600 dark:text-gray-300 text-center px-1">
                     {isUploading ? 'Subiendo...' : isRetrying ? 'Reconectando...' : 'Cargando...'}
                   </span>
                 </div>
@@ -122,7 +122,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
               <img
                 src={photoUrl}
                 alt={label}
-                className="w-24 h-24 sm:w-20 sm:h-20 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer hover:border-blue-500 transition-all"
+                className="w-20 h-20 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer hover:border-blue-500 transition-all"
                 onClick={handleImageClick}
                 onError={async (e) => {
                   console.warn(`⚠️ No se pudo cargar la imagen ${label}:`, photoUrl);
