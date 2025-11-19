@@ -149,52 +149,62 @@ export default function AnalysisDashboard() {
                       <div
                         key={analysis.id}
                         onClick={() => handleEdit(analysis.id, analysis.status)}
-                        className="glass-card rounded-md overflow-hidden border border-[rgba(6,182,212,0.2)] transition-all cursor-pointer active:scale-[0.99] hover:shadow-lg hover:border-[rgba(6,182,212,0.4)]"
+                        className={`glass-card rounded-md overflow-hidden border transition-all cursor-pointer active:scale-[0.99] hover:shadow-lg ${
+                          analysis.status === 'COMPLETADO'
+                            ? 'border-[rgba(6,182,212,0.2)] hover:border-[rgba(6,182,212,0.4)]'
+                            : 'border-[rgba(249,115,22,0.15)] hover:border-[rgba(249,115,22,0.3)]'
+                        }`}
                       >
                         {/* Card Header compacto - MÓVIL ULTRA COMPACTO */}
-                        <div className="px-2 py-1 sm:py-1.5 flex justify-between items-center border-b border-[rgba(6,182,212,0.1)] bg-[rgba(6,182,212,0.05)]">
-                          <div className="flex items-center gap-0.5 text-[10px] sm:text-xs font-medium text-[#9ca3af]">
+                        <div className={`px-2 py-0.5 sm:py-1 flex justify-between items-center border-b transition-colors ${
+                          analysis.status === 'COMPLETADO'
+                            ? 'border-[rgba(6,182,212,0.1)] bg-[rgba(6,182,212,0.05)]'
+                            : 'border-[rgba(249,115,22,0.1)] bg-[rgba(249,115,22,0.03)]'
+                        }`}>
+                          <div className="flex items-center gap-0.5 text-[9px] sm:text-xs font-medium text-[#9ca3af]">
                             <Clock size={10} />
                             {new Date(analysis.createdAt).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })}
                           </div>
-                          <div className={`flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] sm:text-[8px] font-bold tracking-wide ${
+                          <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[7px] sm:text-[8px] font-bold tracking-wide ${
                             analysis.status === 'COMPLETADO' 
                               ? 'bg-[rgba(16,185,129,0.2)] text-[#10b981]'
-                              : 'bg-[rgba(249,115,22,0.2)] text-[#f97316]'
+                              : 'bg-[rgba(249,115,22,0.25)] text-[#fbbf24]'
                           }`}>
                             {analysis.status === 'COMPLETADO' ? <Check size={8} /> : <Hourglass size={8} />}
-                            {analysis.status === 'COMPLETADO' ? 'LISTO' : 'PROG'}
+                            {analysis.status === 'COMPLETADO' ? 'LISTO' : 'EN PROG'}
                           </div>
                         </div>
 
-                        {/* Card Body compacto MÓVIL */}
-                        <div className="p-1.5 sm:p-2.5">
-                          <div className="grid grid-cols-3 gap-1 sm:gap-2 text-[9px] sm:text-xs">
+                        {/* Card Body compacto MÓVIL - Más compacto para EN PROGRESO */}
+                        <div className={`${analysis.status === 'COMPLETADO' ? 'p-1.5 sm:p-2.5' : 'p-1 sm:p-1.5'}`}>
+                          <div className="grid grid-cols-3 gap-0.5 sm:gap-1.5 text-[9px] sm:text-xs">
                             <div className="overflow-hidden">
-                              <span className="text-[#9ca3af] text-[8px] sm:text-[10px] block">Lote:</span>
-                              <p className="font-mono font-semibold text-[#f3f4f6] text-[10px] sm:text-[11px] truncate">{analysis.lote}</p>
+                              <span className="text-[#9ca3af] text-[7px] sm:text-[9px] block font-medium">Lote:</span>
+                              <p className="font-mono font-semibold text-[#f3f4f6] text-[9px] sm:text-[10px] truncate">{analysis.lote}</p>
                             </div>
                             <div className="overflow-hidden">
-                              <span className="text-[#9ca3af] text-[8px] sm:text-[10px] block">Código:</span>
-                              <p className="font-bold text-[#f3f4f6] text-[10px] sm:text-[11px]">{analysis.codigo}</p>
+                              <span className="text-[#9ca3af] text-[7px] sm:text-[9px] block font-medium">Código:</span>
+                              <p className="font-bold text-[#f3f4f6] text-[9px] sm:text-[10px]">{analysis.codigo}</p>
                             </div>
                             <div className="overflow-hidden">
-                              <span className="text-[#9ca3af] text-[8px] sm:text-[10px] block">Talla:</span>
-                              <p className="font-semibold text-[#f3f4f6] text-[10px] sm:text-[11px]">{analysis.talla || '-'}</p>
+                              <span className="text-[#9ca3af] text-[7px] sm:text-[9px] block font-medium">Talla:</span>
+                              <p className="font-semibold text-[#f3f4f6] text-[9px] sm:text-[10px]">{analysis.talla || '-'}</p>
                             </div>
                           </div>
 
                           {/* Tipo de producto - más compacto */}
-                          <div className="mt-1 pt-1 border-t border-[rgba(6,182,212,0.1)]">
-                            <p className="text-[8px] sm:text-[10px] font-medium text-[#06b6d4] truncate">
-                              {PRODUCT_TYPE_LABELS[analysis.productType]}
-                            </p>
-                          </div>
+                          {analysis.status === 'COMPLETADO' && (
+                            <div className="mt-1 pt-0.5 border-t border-[rgba(6,182,212,0.1)]">
+                              <p className="text-[8px] sm:text-[9px] font-medium text-[#06b6d4] truncate">
+                                {PRODUCT_TYPE_LABELS[analysis.productType]}
+                              </p>
+                            </div>
+                          )}
                         </div>
 
                         {/* Botones de edición solo si está completado */}
                         {analysis.status === 'COMPLETADO' && (
-                          <div className="px-1.5 py-1 flex gap-0.5 border-t border-[rgba(6,182,212,0.1)] bg-[rgba(6,182,212,0.02)]">
+                          <div className="px-1 py-0.5 sm:px-1.5 sm:py-0.75 flex gap-0.5 border-t border-[rgba(6,182,212,0.1)] bg-[rgba(6,182,212,0.02)]">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
