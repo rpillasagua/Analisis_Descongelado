@@ -98,7 +98,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 overflow-x-hidden max-h-32">
         <input
           ref={fileInputRef}
           type="file"
@@ -109,8 +109,8 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
         />
         
         {photoUrl && !imageError ? (
-          <div className="flex flex-col sm:flex-row sm:items-start gap-3 w-full min-w-0">
-            <div className="relative group flex-shrink-0 w-20 h-20">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 w-full min-w-0 max-h-28">
+            <div className="relative group flex-shrink-0 w-20 h-20 overflow-hidden">
               {(isLoading || isRetrying || isUploading) && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-lg z-10">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mb-1"></div>
@@ -237,11 +237,11 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                 <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-1 w-full sm:w-auto flex-shrink">
             <button
               type="button"
               onClick={handleCameraClick}
-              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex-1 sm:flex-none"
+              className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex-1 sm:flex-none whitespace-nowrap flex-shrink-0"
             >
               Cambiar
             </button>
@@ -249,7 +249,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
               <button
                 type="button"
                 onClick={onPhotoRemove}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex-1 sm:flex-none"
+                className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex-1 sm:flex-none whitespace-nowrap flex-shrink-0"
               >
                 Eliminar
               </button>
