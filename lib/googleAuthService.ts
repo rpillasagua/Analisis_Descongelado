@@ -144,7 +144,9 @@ class GoogleAuthService {
       this.accessToken = response.access_token;
       
       // MEJORÍA: Guardar en localStorage en lugar de sessionStorage
-      localStorage.setItem(this.TOKEN_STORAGE_KEY, this.accessToken);
+      if (this.accessToken) {
+        localStorage.setItem(this.TOKEN_STORAGE_KEY, this.accessToken);
+      }
       
       // Cargar información del usuario
       await this.loadUserInfo();
