@@ -9,7 +9,7 @@ import { useState } from 'react';
  */
 
 export const DarkGlassShowcase = () => {
-  const [activeTab, setActiveTab] = React.useState('colors');
+  const [activeTab, setActiveTab] = useState('colors');
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#0a0e27] to-[#1a2847] p-4 md:p-8">
