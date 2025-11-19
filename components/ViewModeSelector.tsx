@@ -16,25 +16,25 @@ export default function ViewModeSelector({ value, onChange }: ViewModeSelectorPr
       <button
         type="button"
         onClick={() => onChange('SUELTA')}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
           value === 'SUELTA'
             ? 'bg-blue-500 text-white shadow-sm'
             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
       >
-        <Maximize2 className="w-4 h-4" />
+        <Maximize2 className="w-5 h-5 sm:w-4 sm:h-4" />
         <span>Suelta</span>
       </button>
       <button
         type="button"
         onClick={() => onChange('COMPACTA')}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
           value === 'COMPACTA'
             ? 'bg-blue-500 text-white shadow-sm'
             : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
       >
-        <Minimize2 className="w-4 h-4" />
+        <Minimize2 className="w-5 h-5 sm:w-4 sm:h-4" />
         <span>Compacta</span>
       </button>
     </div>

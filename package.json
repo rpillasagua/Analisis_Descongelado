@@ -44,11 +44,15 @@
     "@capacitor/android": "^7.4.3",
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
+    "@tailwindcss/postcss": "^4.1.17",
+    "autoprefixer": "^10.4.22",
     "concurrently": "^9.2.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
     "local-ssl-proxy": "^2.0.5",
+    "postcss": "^8.5.6",
     "sharp": "^0.34.4",
+    "tailwindcss": "^4.1.17",
     "tsx": "^4.20.6"
   },
   "overrides": {

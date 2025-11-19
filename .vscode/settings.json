@@ -1,4 +1,6 @@
 {
   "json.schemas": [],
-  "json.validate.enable": false
+  "json.validate.enable": false,
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore"
 }

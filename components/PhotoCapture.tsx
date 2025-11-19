@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, ZoomIn, ImageOff } from 'lucide-react';
+import { X, ZoomIn, ImageOff, Camera } from 'lucide-react';
 
 interface PhotoCaptureProps {
   label: string;
@@ -25,19 +25,19 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
   const getAlternativeDriveUrl = (currentUrl: string): string | null => {
     const fileIdMatch = currentUrl.match(/[?&]id=([^&]+)/);
     if (!fileIdMatch) return null;
-    
+
     const fileId = fileIdMatch[1];
-    
+
     // Si es thumbnail, probar con uc export
     if (currentUrl.includes('/thumbnail?')) {
       return `https://drive.google.com/uc?export=view&id=${fileId}`;
     }
-    
+
     // Si es uc export, probar con thumbnail
     if (currentUrl.includes('uc?export=view')) {
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
     }
-    
+
     // URL por defecto
     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
   };
@@ -72,11 +72,11 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
     const file = e.target.files?.[0];
     if (file) {
       console.log(`📸 PhotoCapture: Archivo seleccionado para ${label}:`, file.name);
-      
+
       if (file.type === 'image/heic' || file.type === 'image/heif') {
         alert('⚠️ Las fotos en formato HEIC (iPhone) pueden no visualizarse correctamente en Windows. Por favor intenta cambiar la configuración de tu cámara a "Más compatible" (JPEG) o usa otra foto.');
       }
-      
+
       setImageError(false);
       onPhotoCapture(file);
     }
@@ -98,7 +98,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <input
           ref={fileInputRef}
           type="file"
@@ -107,14 +107,14 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
           onChange={handleFileSelect}
           className="hidden"
         />
-        
+
         {photoUrl && !imageError ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
-            <div className="relative group self-center sm:self-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full p-3 bg-black/20 rounded-xl border border-white/5">
+            <div className="relative group self-center sm:self-auto w-24 h-24 sm:w-20 sm:h-20 flex-shrink-0">
               {(isLoading || isRetrying || isUploading) && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-lg z-10">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-1"></div>
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/80 rounded-lg z-10 backdrop-blur-sm">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mb-1"></div>
+                  <span className="text-[10px] font-medium text-blue-400">
                     {isUploading ? 'Subiendo...' : isRetrying ? 'Reconectando...' : 'Cargando...'}
                   </span>
                 </div>
@@ -122,12 +122,12 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
               <img
                 src={photoUrl}
                 alt={label}
-                className="w-24 h-24 sm:w-20 sm:h-20 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer hover:border-blue-500 transition-all"
+                className="w-full h-full object-cover rounded-lg border border-white/10 cursor-pointer hover:border-blue-500 transition-all shadow-lg"
                 onClick={handleImageClick}
                 onError={async (e) => {
                   console.warn(`⚠️ No se pudo cargar la imagen ${label}:`, photoUrl);
                   console.warn('Error details:', e);
-                  
+
                   // Determinar el tipo de URL y manejar el error apropiadamente
                   if (photoUrl.startsWith('blob:')) {
                     // URLs blob son temporales y expiran, no se pueden recuperar
@@ -138,12 +138,12 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                     setIsRetrying(false);
                     return;
                   }
-                  
+
                   // Si es una URL de Google Drive, intentar diferentes estrategias de recuperación
                   if (photoUrl.includes('drive.google.com') && retryCount < 2) {
                     setRetryCount(prev => prev + 1);
                     console.log(`🔄 Intento ${retryCount + 1} de recuperación para Google Drive`);
-                    
+
                     // Primero intentar con URL alternativa sin autenticación
                     const altUrl = getAlternativeDriveUrl(photoUrl);
                     if (altUrl) {
@@ -154,13 +154,13 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                       }, 500);
                       // NO HACEMOS RETURN AQUÍ - dejamos que continue la lógica
                     }
-                    
+
                     // Si no hay URL alternativa, intentar refrescar permisos
                     try {
                       setIsRetrying(true);
                       const { googleDriveService } = await import('@/lib/googleDriveService');
                       const { googleAuthService } = await import('@/lib/googleAuthService');
-                      
+
                       // Verificar si el usuario está autenticado
                       if (!googleAuthService.isAuthenticated()) {
                         console.warn('Usuario no autenticado, no se pueden refrescar permisos');
@@ -170,7 +170,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                         setIsRetrying(false);
                         return;
                       }
-                      
+
                       // Intentar refrescar permisos
                       const fileIdMatch = photoUrl.match(/[?&]id=([^&]+)/);
                       if (fileIdMatch) {
@@ -178,7 +178,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                         try {
                           await googleDriveService.makeFilePublic(fileIdMatch[1]);
                           console.log('✅ Permisos refrescados exitosamente');
-                          
+
                           // Reintentar con la URL original después de refrescar permisos
                           setTimeout(() => {
                             const img = e.target as HTMLImageElement;
@@ -188,7 +188,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                           // NO HACEMOS RETURN AQUÍ - dejamos que continue la lógica
                         } catch (permissionError: any) {
                           console.warn('⚠️ No se pudieron refrescar los permisos:', permissionError.message);
-                          
+
                           // Mostrar error de permisos
                           setErrorType('drive_permissions');
                           setImageError(true);
@@ -197,7 +197,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                           return;
                         }
                       }
-                      
+
                       setIsRetrying(false);
                     } catch (error) {
                       console.error('Error en recuperación de Google Drive:', error);
@@ -214,7 +214,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                     setIsLoading(false);
                     setIsRetrying(false);
                   }
-                  
+
                   // Para otros tipos de URLs o errores no manejados
                   setErrorType('unknown');
                   setImageError(true);
@@ -230,159 +230,155 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                   setRetryCount(0); // Reset retry count
                 }}
               />
-              <div 
-                className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all flex items-center justify-center cursor-pointer"
+              <div
+                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg transition-all flex items-center justify-center cursor-pointer backdrop-blur-[2px]"
                 onClick={handleImageClick}
               >
-                <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ZoomIn className="w-6 h-6 text-white" />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={handleCameraClick}
-              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex-1 sm:flex-none"
-            >
-              Cambiar
-            </button>
-            {onPhotoRemove && (
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto flex-1">
               <button
                 type="button"
-                onClick={onPhotoRemove}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex-1 sm:flex-none"
+                onClick={handleCameraClick}
+                className="px-4 py-2.5 text-sm font-medium bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex-1 sm:flex-none shadow-lg shadow-blue-500/20"
               >
-                Eliminar
+                Cambiar
+              </button>
+              {onPhotoRemove && (
+                <button
+                  type="button"
+                  onClick={onPhotoRemove}
+                  className="px-4 py-2.5 text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors flex-1 sm:flex-none"
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 w-full">
+            {imageError ? (
+              <div className="flex flex-col items-center gap-3 w-full p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div className="flex items-center gap-2 text-red-400">
+                  <ImageOff className="w-5 h-5" />
+                  <span className="text-sm font-bold">
+                    {errorType === 'blob'
+                      ? 'Imagen temporal expirada'
+                      : errorType === 'drive_auth'
+                        ? 'Error de autenticación'
+                        : errorType === 'drive_permissions'
+                          ? 'Error de permisos'
+                          : 'Error al cargar imagen'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-400 text-center max-w-xs">
+                  {errorType === 'blob'
+                    ? 'Esta imagen temporal ha expirado. Necesitas volver a tomar la foto.'
+                    : errorType === 'drive_auth'
+                      ? 'Tu sesión de Google ha expirado. Inicia sesión nuevamente para ver las fotos.'
+                      : errorType === 'drive_permissions'
+                        ? 'La imagen no se puede cargar. Puede que haya un problema con los permisos o la imagen haya sido eliminada.'
+                        : 'La imagen puede estar dañada o no disponible'}
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 w-full">
+                  {errorType === 'blob' ? (
+                    <button
+                      type="button"
+                      onClick={handleCameraClick}
+                      className="text-xs font-bold bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg text-white flex-1 transition-colors shadow-lg"
+                    >
+                      Tomar nueva foto
+                    </button>
+                  ) : errorType === 'drive_auth' ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(`🔄 Reintentando cargar imagen: ${label}`);
+                        setImageError(false); // Reset error state
+                        setErrorType('unknown'); // Reset error type
+                        setIsLoading(true); // Show loading
+                        // Force reload by updating the src
+                        setTimeout(() => {
+                          const img = document.querySelector(`img[alt="${label}"]`) as HTMLImageElement;
+                          if (img && photoUrl) {
+                            img.src = photoUrl + '?t=' + Date.now();
+                          }
+                        }, 100);
+                      }}
+                      className="text-xs font-bold bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg text-white flex-1 transition-colors shadow-lg"
+                    >
+                      Reintentar carga
+                    </button>
+                  ) : (
+                    <div className="text-xs text-center py-2 text-gray-500 italic">
+                      No se puede recuperar automáticamente
+                    </div>
+                  )}
+                  {photoUrl && photoUrl.startsWith('http') && errorType !== 'blob' && (
+                    <a
+                      href={photoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-lg text-gray-300 inline-block text-center flex-1 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Ver en navegador
+                    </a>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCameraClick}
+                className="flex items-center justify-center gap-3 px-4 py-4 bg-white/5 text-gray-300 border border-white/10 rounded-xl hover:bg-white/10 transition-all hover:scale-[1.01] active:scale-[0.99] w-full group"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                  <Camera className="w-4 h-4 text-blue-400" />
+                </div>
+                <span className="text-sm font-medium">Tomar foto de {label}</span>
               </button>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 w-full">
-          {imageError ? (
-            <div className="flex flex-col items-center gap-2 w-full">
-              <div className="flex items-center gap-2 text-red-600">
-                <ImageOff className="w-5 h-5" />
-                <span className="text-sm font-medium">
-                  {errorType === 'blob' 
-                    ? 'Imagen temporal expirada'
-                    : errorType === 'drive_auth'
-                    ? 'Error de autenticación'
-                    : errorType === 'drive_permissions'
-                    ? 'Error de permisos'
-                    : 'Error al cargar imagen'}
-                </span>
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 text-center mb-2">
-                {errorType === 'blob'
-                  ? 'Esta imagen temporal ha expirado. Necesitas volver a tomar la foto.'
-                  : errorType === 'drive_auth'
-                  ? 'Tu sesión de Google ha expirado. Inicia sesión nuevamente para ver las fotos.'
-                  : errorType === 'drive_permissions'
-                  ? 'La imagen no se puede cargar. Puede que haya un problema con los permisos o la imagen haya sido eliminada.'
-                  : 'La imagen puede estar dañada o no disponible'}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full">
-                {errorType === 'blob' ? (
-                  <button
-                    type="button"
-                    onClick={handleCameraClick}
-                    className="text-xs bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-white flex-1 transition-colors"
-                  >
-                    Tomar nueva foto
-                  </button>
-                ) : errorType === 'drive_auth' ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log(`🔄 Reintentando cargar imagen: ${label}`);
-                      setImageError(false); // Reset error state
-                      setErrorType('unknown'); // Reset error type
-                      setIsLoading(true); // Show loading
-                      // Force reload by updating the src
-                      setTimeout(() => {
-                        const img = document.querySelector(`img[alt="${label}"]`) as HTMLImageElement;
-                        if (img && photoUrl) {
-                          img.src = photoUrl + '?t=' + Date.now();
-                        }
-                      }, 100);
-                    }}
-                    className="text-xs bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded text-white flex-1 transition-colors"
-                  >
-                    Reintentar carga
-                  </button>
-                ) : (
-                  <div className="text-xs text-center py-2 text-gray-500">
-                    No se puede recuperar automáticamente
-                  </div>
-                )}
-                {photoUrl && photoUrl.startsWith('http') && errorType !== 'blob' && (
-                  <a 
-                    href={photoUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded text-gray-700 inline-block text-center flex-1 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Ver en navegador
-                  </a>
-                )}
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleCameraClick}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border w-full"
-            >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span className="text-sm whitespace-nowrap">Tomar foto de {label}</span>
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
 
-    {/* Modal para ver imagen en grande */}
-    {showModal && photoUrl && (
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-        onClick={handleCloseModal}
-      >
-        <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
-          <button
-            onClick={handleCloseModal}
-            className="absolute -top-12 right-0 p-2 text-white hover:text-gray-300 transition-colors z-10 bg-black bg-opacity-50 rounded-full"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl">
-            <img
-              src={photoUrl}
-              alt={label}
-              className="w-full h-auto max-h-[60vh] sm:max-h-[70vh] object-contain"
-              onClick={(e) => e.stopPropagation()}
-              onError={(e) => {
-                console.warn(`⚠️ Error cargando imagen en modal ${label}:`, photoUrl);
-                console.warn('Modal error details:', e);
-                // No seteamos imageError aquí para no cerrar el modal abruptamente,
-                // pero podríamos mostrar un mensaje dentro del modal.
-                // Por ahora, solo loggeamos el error
-              }}
-              onLoad={() => {
-                console.log(`✅ Imagen del modal cargada correctamente: ${label}`);
-              }}
-            />
-            <div className="bg-gray-900 text-white p-3">
-              <p className="text-center font-medium text-sm">{label}</p>
+      {/* Modal para ver imagen en grande */}
+      {showModal && photoUrl && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 animate-fade-in"
+          onClick={handleCloseModal}
+        >
+          <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl">
+            <button
+              onClick={handleCloseModal}
+              className="absolute -top-12 right-0 p-2 text-white/70 hover:text-white transition-colors z-10 bg-white/10 rounded-full hover:bg-white/20 backdrop-blur-md"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+              <img
+                src={photoUrl}
+                alt={label}
+                className="w-full h-auto max-h-[60vh] sm:max-h-[70vh] object-contain bg-black/50"
+                onClick={(e) => e.stopPropagation()}
+                onError={(e) => {
+                  console.warn(`⚠️ Error cargando imagen en modal ${label}:`, photoUrl);
+                  console.warn('Modal error details:', e);
+                }}
+                onLoad={() => {
+                  console.log(`✅ Imagen del modal cargada correctamente: ${label}`);
+                }}
+              />
+              <div className="bg-black/80 text-white p-4 backdrop-blur-md border-t border-white/10">
+                <p className="text-center font-bold text-sm tracking-wide">{label}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </>
+      )}
+    </>
   );
 }
