@@ -545,8 +545,8 @@ export default function NewAnalysisPage() {
       </div>
 
       {/* Contenido principal con layout de 2 columnas en pantallas grandes */}
-      <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
+      <div className="max-w-[1920px] mx-auto p-2 xs:p-3 sm:p-4 lg:p-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
             <Card className="bg-white dark:bg-gray-800">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Tipo de Producto</CardTitle>
@@ -560,16 +560,16 @@ export default function NewAnalysisPage() {
         </Card>
 
             {productType && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 xs:gap-3 lg:gap-6">
                 {/* Columna izquierda - Información principal (8 columnas en LG+) */}
-                <div className="lg:col-span-8 space-y-4 lg:space-y-6">
+                <div className="lg:col-span-8 space-y-3 sm:space-y-4 lg:space-y-6">
                   {/* Información básica */}
                   <Card className="bg-white dark:bg-gray-800">
                     <CardHeader className="pb-4">
                       <CardTitle className="text-lg">📝 Información Básica</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 xs:gap-3">
                         <div className="space-y-2">
                     <Label htmlFor="lote">Lote *</Label>
                     <Input 
@@ -617,10 +617,10 @@ export default function NewAnalysisPage() {
                 )}
 
                 {/* Pesos (Solo para otros tipos) */}
-                {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-3 bg-[rgba(6,182,212,0.05)] border border-[rgba(6,182,212,0.2)] rounded-lg">
+                {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-2 xs:p-3 bg-[rgba(6,182,212,0.05)] border border-[rgba(6,182,212,0.2)] rounded-lg">
                   <h3 className="font-semibold text-base text-[#f3f4f6]">Pesos</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="pesoBruto">Peso Bruto (kg)</Label>
                       <Input 
@@ -700,10 +700,10 @@ export default function NewAnalysisPage() {
 
                 {/* Uniformidad */}
                 {productType !== 'CONTROL_PESOS' && (
-                <div className="space-y-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="space-y-2 p-2 xs:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <h3 className="font-semibold text-base">Uniformidad</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="grandes">Grandes</Label>
                       <Input 
@@ -765,7 +765,7 @@ export default function NewAnalysisPage() {
 
                 {/* Foto de calidad general */}
                 {productType !== 'CONTROL_PESOS' && (
-                  <div className="space-y-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="space-y-2 p-2 xs:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <h3 className="font-semibold text-base">📸 Foto General</h3>
                     <PhotoCapture 
                       label="Calidad General"
@@ -779,7 +779,7 @@ export default function NewAnalysisPage() {
                 </div>
 
                 {/* Columna derecha - Acciones y Observaciones (4 columnas en LG+) */}
-                <div className="lg:col-span-4 space-y-4 lg:space-y-6">
+                <div className="lg:col-span-4 space-y-3 sm:space-y-4 lg:space-y-6">
                   
                   {/* Panel de Acciones - Sticky */}
                   <div className="sticky top-24 z-10">

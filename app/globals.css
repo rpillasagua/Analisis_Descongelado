@@ -395,9 +395,21 @@ input::placeholder, textarea::placeholder {
   font-weight: 500;
 }
 
-input:focus, textarea:focus, select:focus {
+/* Focus-visible mejorado para móvil y desktop */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 2px;
+  border-color: #06b6d4;
+  background: rgba(6, 182, 212, 0.08);
+  box-shadow: 0 6px 18px rgba(6, 182, 212, 0.4), 
+              inset 0 1px 3px rgba(255, 255, 255, 0.1),
+              0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+/* Focus sin outline visible */
+input:focus:not(:focus-visible), textarea:focus:not(:focus-visible), select:focus:not(:focus-visible) {
   outline: none;
-  border-color: var(--blue);
+  border-color: #06b6d4;
   background: rgba(30, 41, 59, 0.8);
   box-shadow: 0 6px 18px rgba(59, 130, 246, 0.3), 
               inset 0 1px 3px rgba(255, 255, 255, 0.1),
@@ -974,6 +986,18 @@ input {
     width: 100%;
   }
   
+  /* Mejora de focus-visible en móvil */
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
+    border-color: #06b6d4;
+  }
+  
+  /* Active state para inputs - visual feedback en móvil */
+  input:active, textarea:active, select:active {
+    transform: scale(0.98);
+  }
+  
   label {
     font-size: 0.95rem;
     margin-bottom: 6px;
@@ -1006,11 +1030,25 @@ input {
     box-shadow: none !important;
     font-size: inherit !important;
   }
+  
+  /* Focus-visible para botones del header */
+  .sticky button:focus-visible,
+  header button:focus-visible {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
 
   /* Botones de navegación (Dashboard, Nueva) - compactos pero no tan pequeños */
   button[class*="flex-1"] {
     min-height: 32px !important;
     padding: 6px 8px !important;
+  }
+  
+  /* Focus-visible para botones principales */
+  button:focus-visible {
+    outline: 2px solid #06b6d4;
+    outline-offset: 2px;
   }
   
   button:active {
@@ -1068,6 +1106,17 @@ input {
   .mb-4 { margin-bottom: 8px; }
   .mt-6 { margin-top: 12px; }
   .mb-6 { margin-bottom: 12px; }
+  
+  /* Padding utilities - OPTIMIZADAS */
+  .p-1 { padding: 0.25rem; }
+  .p-2 { padding: 0.5rem; }
+  .p-3 { padding: 0.75rem; }
+  .p-4 { padding: 1rem; }
+  
+  /* Altura mínima para touch targets en móvil */
+  input, textarea, select, button {
+    min-height: 44px;
+  }
 }
 
 /* Tablet and up */
