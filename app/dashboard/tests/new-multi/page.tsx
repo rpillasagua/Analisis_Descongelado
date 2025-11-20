@@ -214,9 +214,10 @@ export default function NewMultiAnalysisPage() {
                 });
             } else {
                 // pesoBruto, pesoCongelado, pesoNeto
+                const currentFieldValue = currentAnalysis[field as keyof Analysis] as any;
                 updateCurrentAnalysis({
                     [field]: {
-                        ...currentAnalysis[field as keyof Analysis],
+                        ...(currentFieldValue || {}),
                         fotoUrl: url
                     } as any
                 });
