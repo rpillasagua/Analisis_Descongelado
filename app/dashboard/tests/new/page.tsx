@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ProductTypeSelector from '@/components/ProductTypeSelector';
 import InitialForm from '@/components/InitialForm';
 import AnalysisTabs from '@/components/AnalysisTabs';
@@ -68,6 +68,7 @@ const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
 
 export default function NewMultiAnalysisPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     // Basic document info
     const [analysisId, setAnalysisId] = useState<string | null>(null);
@@ -94,12 +95,54 @@ export default function NewMultiAnalysisPage() {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Generate ID on mount
+    // Load existing analysis if id parameter is present
     useEffect(() => {
-        if (!analysisId) {
-            setAnalysisId(generateId());
-        }
-    }, []);
+        const loadExistingAnalysis = async () => {
+            const idParam = searchParams.get('id');
+
+            if (idParam) {
+                setIsLoading(true);
+                try {
+                    const { getAnalysisById } = await import('@/lib/analysisService');
+                    const existingAnalysis = await getAnalysisById(idParam);
+
+                    if (existingAnalysis) {
+                        // Populate all fields with existing data
+                        setAnalysisId(existingAnalysis.id);
+                        setProductType(existingAnalysis.productType);
+                        setLote(existingAnalysis.lote);
+                        setCodigo(existingAnalysis.codigo);
+                        setTalla(existingAnalysis.talla || '');
+                        setAnalystColor(existingAnalysis.analystColor);
+
+                        // Load analyses array if it exists, otherwise create empty one
+                        if (existingAnalysis.analyses && existingAnalysis.analyses.length > 0) {
+                            setAnalyses(existingAnalysis.analyses);
+                        }
+
+                        // Mark basics as completed since we loaded existing data
+                        setBasicsCompleted(true);
+
+                        console.log('✅ Loaded existing analysis:', existingAnalysis.id);
+                    } else {
+                        console.warn('⚠️ Analysis not found:', idParam);
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading analysis:', error);
+                    setSaveError('Error al cargar el análisis');
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                // New analysis - generate ID
+                if (!analysisId) {
+                    setAnalysisId(generateId());
+                }
+            }
+        };
+
+        loadExistingAnalysis();
+    }, [searchParams]);
 
     // Handle initial form completion
     const handleInitialFormComplete = async (data: {

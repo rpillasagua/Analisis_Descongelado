@@ -1,4 +1,4 @@
-import './globals-darkglass.css';
+import './globals.css';
 import type { Metadata, Viewport } from 'next';
 
 // PWA Ready - Vercel Production Build
