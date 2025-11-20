@@ -185,7 +185,7 @@ export default function NewMultiAnalysisPage() {
     const handlePhotoCapture = async (field: string, file: File) => {
         const key = `${activeAnalysisIndex}-${field}`;
         setPhotos(prev => ({ ...prev, [key]: file }));
-        setUploadingPhotos(prev = new Set(prev).add(key));
+        setUploadingPhotos(prev => new Set(prev).add(key));
 
         try {
             const { googleDriveService } = await import('@/lib/googleDriveService');
