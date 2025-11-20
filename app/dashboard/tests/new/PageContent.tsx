@@ -370,7 +370,18 @@ export default function NewMultiAnalysisPageContent() {
     if (!basicsCompleted) {
         return (
             <div className="min-h-screen p-4">
-                <InitialForm onComplete={handleInitialFormComplete} />
+                <div className="max-w-4xl mx-auto">
+                    {/* Botón Volver al Dashboard */}
+                    <button
+                        onClick={() => router.push('/dashboard')}
+                        className="flex items-center gap-2 px-4 py-2.5 mb-6 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-all border border-slate-800 hover:border-slate-700"
+                    >
+                        <ArrowLeft size={20} />
+                        <span className="font-medium">Volver al Dashboard</span>
+                    </button>
+
+                    <InitialForm onComplete={handleInitialFormComplete} />
+                </div>
             </div>
         );
     }

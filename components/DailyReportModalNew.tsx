@@ -309,8 +309,13 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
             disabled={isLoading}
             className="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            {isLoading ? 'Cargando...' : 'Generar Reporte'}
+            {isLoading ? '⏳ Buscando...' : '🔍 Paso 1: Buscar Análisis'}
           </button>
+          {!isLoading && analyses.length === 0 && (
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+              👆 Haz clic para buscar los análisis de la fecha seleccionada
+            </p>
+          )}
 
           {/* Resumen */}
           {analyses.length > 0 && (
@@ -345,14 +350,19 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
           {/* Botón descargar */}
           {analyses.length > 0 && (
-            <button
-              onClick={handleDownloadReport}
-              disabled={isLoading}
-              className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
-            >
-              <Download className="h-5 w-5" />
-              {isLoading ? 'Generando...' : 'Descargar Reporte Excel'}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={handleDownloadReport}
+                disabled={isLoading}
+                className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 shadow-md"
+              >
+                <Download className="h-5 w-5" />
+                {isLoading ? '📊 Generando Excel...' : '⬇️ Paso 2: Descargar Reporte Excel'}
+              </button>
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+                ✅ {analyses.length} análisis encontrados. El Excel se descargará automáticamente.
+              </p>
+            </div>
           )}
         </div>
       </div>

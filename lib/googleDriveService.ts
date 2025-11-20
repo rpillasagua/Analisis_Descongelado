@@ -346,7 +346,7 @@ class GoogleDriveService {
       form.append('file', file);
 
       const response = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink,thumbnailLink',
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink',
         {
           method: 'POST',
           headers: {
@@ -379,11 +379,10 @@ class GoogleDriveService {
         // Continuar de todos modos
       }
 
-      // Usar URL de thumbnail que es más confiable para acceso público
-      // Si no hay thumbnail, usar una URL directa que debería funcionar con permisos públicos
-      const publicUrl = data.thumbnailLink ||
-        `https://drive.google.com/thumbnail?id=${data.id}&sz=w800` ||
-        `https://drive.google.com/uc?export=view&id=${data.id}`;
+      // Usar webContentLink primero (menos rate limiting) o construir URL de descarga directa
+      // webContentLink es más estable y tiene menos límites de rate limiting que thumbnailLink
+      const publicUrl = data.webContentLink ||
+        `https://drive.google.com/uc?id=${data.id}&export=download`;
 
       console.log(`🔗 URL pública generada: ${publicUrl}`);
 

@@ -18,6 +18,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
   const [isLoading, setIsLoading] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [cacheBuster, setCacheBuster] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Función para generar URLs alternativas de Google Drive
@@ -27,18 +28,8 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
 
     const fileId = fileIdMatch[1];
 
-    // Si es thumbnail, probar con uc export
-    if (currentUrl.includes('/thumbnail?')) {
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
-    }
-
-    // Si es uc export, probar con thumbnail
-    if (currentUrl.includes('uc?export=view')) {
-      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
-    }
-
-    // URL por defecto
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+    // Siempre usar URL de descarga directa (más estable y menos rate limiting)
+    return `https://drive.google.com/uc?id=${fileId}&export=download`;
   };
 
   useEffect(() => {
@@ -47,6 +38,10 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
     setIsLoading(!!photoUrl); // Mostrar loading si hay URL
     setIsRetrying(false);
     setRetryCount(0); // Reset retry count
+    // Actualizar cache buster solo en el cliente para evitar hydration error
+    if (photoUrl) {
+      setCacheBuster(`?t=${Date.now()}`);
+    }
   }, [photoUrl]);
 
   // Timeout de seguridad para prevenir loading infinito
@@ -149,8 +144,9 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                       console.log('🔄 Intentando con URL alternativa:', altUrl);
                       setTimeout(() => {
                         const img = e.target as HTMLImageElement;
-                        img.src = altUrl + '?t=' + Date.now();
-                      }, 500);
+                        setCacheBuster(`?t=${Date.now()}`);
+                        img.src = altUrl + cacheBuster;
+                      }, 2000 + Math.random() * 1000); // 2-3s con jitter para evitar rate limiting
                       // NO HACEMOS RETURN AQUÍ - dejamos que continue la lógica
                     }
 
@@ -181,9 +177,11 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                           // Reintentar con la URL original después de refrescar permisos
                           setTimeout(() => {
                             const img = e.target as HTMLImageElement;
-                            img.src = photoUrl + '?t=' + Date.now();
+                            const newCacheBuster = `?t=${Date.now()}`;
+                            setCacheBuster(newCacheBuster);
+                            img.src = photoUrl + newCacheBuster;
                             setIsRetrying(false);
-                          }, 1000);
+                          }, 3000 + Math.random() * 1000); // 3-4s con jitter para evitar rate limiting
                           // NO HACEMOS RETURN AQUÍ - dejamos que continue la lógica
                         } catch (permissionError: any) {
                           console.warn('⚠️ No se pudieron refrescar los permisos:', permissionError.message);
@@ -302,7 +300,9 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                         setTimeout(() => {
                           const img = document.querySelector(`img[alt="${label}"]`) as HTMLImageElement;
                           if (img && photoUrl) {
-                            img.src = photoUrl + '?t=' + Date.now();
+                            const newCacheBuster = `?t=${Date.now()}`;
+                            setCacheBuster(newCacheBuster);
+                            img.src = photoUrl + newCacheBuster;
                           }
                         }, 100);
                       }}

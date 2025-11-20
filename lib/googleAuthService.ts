@@ -50,20 +50,53 @@ class GoogleAuthService {
       // Cargar Google Identity Services
       await this.loadGoogleScript();
 
-      // Inicializar token client
+      // MEJORÍA: Usar redirect en lugar de popup (evita bloqueo del navegador)
       this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: this.config.clientId,
         scope: this.config.scopes.join(' '),
         callback: this.onTokenResponse,
+        ux_mode: 'redirect',
+        redirect_uri: typeof window !== 'undefined' ? window.location.origin : ''
       });
+
+      // Verificar si venimos de un redirect de Google Auth
+      await this.handleRedirectCallback();
 
       // MEJORÍA: Restaurar sesión desde localStorage (persiste entre navegador restarts)
       await this.syncFromPersistentStorage();
 
-      console.log('✅ Google Auth inicializado');
+      console.log('✅ Google Auth inicializado (modo redirect)');
     } catch (error) {
       console.error('❌ Error inicializando Google Auth:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Maneja el callback después de redirect de Google Auth
+   */
+  private async handleRedirectCallback() {
+    if (typeof window === 'undefined') return;
+
+    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = urlParams.get('access_token');
+    const error = urlParams.get('error');
+
+    if (error) {
+      console.error('❌ Error en autenticación Google (redirect):', error);
+      // Limpiar URL sin recargar
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    if (accessToken) {
+      console.log('✅ Token recibido desde redirect');
+
+      // Simular respuesta del callback
+      await this.onTokenResponse({ access_token: accessToken });
+
+      // Limpiar URL sin recargar
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }
 
