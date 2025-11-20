@@ -295,6 +295,9 @@ export interface QualityAnalysis {
   // Estado del análisis
   status?: 'EN_PROGRESO' | 'COMPLETADO';
   completedAt?: string;
+
+  // Observaciones generales (Legacy support)
+  observations?: string;
 }
 
 // ============================================
