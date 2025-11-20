@@ -464,12 +464,13 @@ export default function NewAnalysisPage() {
 
       // Las fotos ya están subidas, solo usar formData y pesosBrutos actuales
 
-      const analysis: QualityAnalysis = {
+      const analysisData: any = {
         id: analysisId || generateId(),
         productType: productType!,
         lote: lote,
         codigo: codigo,
         talla: formData.talla,
+        // Legacy fields (kept for backward compatibility)
         pesoBruto: formData.pesoBruto,
         pesoCongelado: formData.pesoCongelado,
         pesoNeto: formData.pesoNeto,
@@ -479,6 +480,24 @@ export default function NewAnalysisPage() {
         defectos: formData.defectos,
         fotoCalidad: formData.fotoCalidad,
         observations: formData.observations,
+
+        // New fields (for forward compatibility)
+        analystColor: 'red', // Default for legacy creations
+        analyses: [
+          {
+            numero: 1,
+            pesoBruto: formData.pesoBruto,
+            pesoCongelado: formData.pesoCongelado,
+            pesoNeto: formData.pesoNeto,
+            pesosBrutos: productType === 'CONTROL_PESOS' ? pesosBrutos : undefined,
+            conteo: formData.conteo,
+            uniformidad: formData.uniformidad,
+            defectos: formData.defectos,
+            fotoCalidad: formData.fotoCalidad,
+            observations: formData.observations,
+          }
+        ],
+
         createdAt: now.toISOString(),
         createdBy: user.email || 'unknown',
         shift: getWorkShift(now),
@@ -489,7 +508,7 @@ export default function NewAnalysisPage() {
 
       // Guardar en Firestore
       const { saveAnalysis } = await import('@/lib/analysisService');
-      await saveAnalysis(analysis);
+      await saveAnalysis(analysisData);
 
       alert('Análisis guardado exitosamente');
       router.push('/');
