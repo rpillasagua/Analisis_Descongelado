@@ -131,7 +131,7 @@ export default function NewAnalysisPage() {
       const user = googleAuthService.getUser();
       const now = new Date();
 
-      const analysis: QualityAnalysis = {
+      const analysis: any = {
         id: analysisId,
         productType: productType!,
         lote: data.lote || '',
