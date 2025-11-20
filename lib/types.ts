@@ -203,44 +203,146 @@ export interface PesoBrutoRegistro {
   timestamp: string;
 }
 
-export interface QualityAnalysis {
-  id: string;
-  productType: ProductType;
-  lote: string;
-  codigo: string;
-  talla?: string;
-  
+// ============================================
+// COLORES DEL ANALISTA
+// ============================================
+
+/**
+ * Colores disponibles para identificar análisis por analista
+ * Máximo 4 analistas por turno
+ */
+export type AnalystColor = 'red' | 'blue' | 'green' | 'yellow';
+
+export const ANALYST_COLOR_LABELS: Record<AnalystColor, string> = {
+  red: 'Rojo',
+  blue: 'Azul',
+  green: 'Verde',
+  yellow: 'Amarillo'
+};
+
+export const ANALYST_COLOR_HEX: Record<AnalystColor, string> = {
+  red: '#ef4444',
+  blue: '#3b82f6',
+  green: '#22c55e',
+  yellow: '#eab308'
+};
+
+// ============================================
+// ANÁLISIS INDIVIDUAL (SUB-ANÁLISIS)
+// ============================================
+
+/**
+ * Un análisis individual dentro de un documento de análisis de calidad
+ * Permite múltiples análisis para el mismo lote/código/talla
+ */
+export interface Analysis {
+  numero: number; // 1, 2, 3, etc.
+
   // Pesos con fotos opcionales
   pesoBruto?: PesoConFoto;
   pesoCongelado?: PesoConFoto;
   pesoNeto?: PesoConFoto;
-  
+
   // Control de pesos brutos (múltiples registros)
   pesosBrutos?: PesoBrutoRegistro[];
-  
+
   // Conteo
   conteo?: number;
-  
+
   // Uniformidad con fotos
   uniformidad?: Uniformidad;
-  
+
   // Defectos según tipo de producto
   defectos?: Defectos;
-  
+
   // Foto de calidad general
   fotoCalidad?: string;
-  
+
+  // Observaciones específicas de este análisis
+  observations?: string;
+}
+
+// ============================================
+// DOCUMENTO DE ANÁLISIS DE CALIDAD
+// ============================================
+
+/**
+ * Documento principal que contiene múltiples análisis
+ * para el mismo lote/código/talla
+ */
+export interface QualityAnalysis {
+  id: string;
+  productType: ProductType;
+
+  // CAMPOS OBLIGATORIOS (se llenan primero)
+  lote: string;         // REQUIRED
+  codigo: string;       // REQUIRED
+  talla?: string;       // Optional but recommended
+
+  // Color del analista que creó este análisis
+  analystColor: AnalystColor;  // REQUIRED
+
+  // Array de análisis individuales (tabs)
+  analyses: Analysis[];  // Mínimo 1 análisis
+
   // Metadata
   createdAt: string;
   updatedAt?: string;
   createdBy: string;
   shift: WorkShift;
   date: string; // YYYY-MM-DD
-  
+
   // Estado del análisis
   status?: 'EN_PROGRESO' | 'COMPLETADO';
   completedAt?: string;
-  
+}
+
+// ============================================
+// LEGACY: Old QualityAnalysis structure
+// ============================================
+
+/**
+ * @deprecated Use QualityAnalysis with analyses array instead
+ * This interface is kept for backward compatibility with existing data
+ */
+export interface LegacyQualityAnalysis {
+  id: string;
+  productType: ProductType;
+  lote: string;
+  codigo: string;
+  talla?: string;
+
+  // Pesos con fotos opcionales
+  pesoBruto?: PesoConFoto;
+  pesoCongelado?: PesoConFoto;
+  pesoNeto?: PesoConFoto;
+
+  // Control de pesos brutos (múltiples registros)
+  pesosBrutos?: PesoBrutoRegistro[];
+
+  // Conteo
+  conteo?: number;
+
+  // Uniformidad con fotos
+  uniformidad?: Uniformidad;
+
+  // Defectos según tipo de producto
+  defectos?: Defectos;
+
+  // Foto de calidad general
+  fotoCalidad?: string;
+
+  // Metadata
+  createdAt: string;
+  updatedAt?: string;
+  createdBy: string;
+  shift: WorkShift;
+  date: string; // YYYY-MM-DD
+
+  // Estado del análisis
+  status?: 'EN_PROGRESO' | 'COMPLETADO';
+  completedAt?: string;
+
   // Observaciones
   observations?: string;
 }
