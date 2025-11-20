@@ -122,7 +122,7 @@ export default function NewAnalysisPage() {
   };
 
   // Auto-guardado
-  const handleAutoSave = async (data: Partial<QualityAnalysis>) => {
+  const handleAutoSave = async (data: any) => {
     if (!analysisId) return;
 
     try {
