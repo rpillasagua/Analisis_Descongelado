@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, Plus } from 'lucide-react';
+import { X, Search, Plus, Edit2, Check } from 'lucide-react';
 import {
   DEFECTOS_ENTERO,
   DEFECTOS_COLA,
@@ -30,6 +30,7 @@ export default function DefectSelector({
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedItems, setSelectedItems] = useState<DefectItem[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Obtener la lista de defectos según el tipo de producto
@@ -168,7 +169,31 @@ export default function DefectSelector({
       {/* Lista de defectos seleccionados */}
       {selectedItems.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-gray-300">Defectos Agregados:</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-300">Defectos Agregados:</h4>
+            <button
+              type="button"
+              onClick={() => setIsEditMode(!isEditMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                isEditMode 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+              title={isEditMode ? 'Finalizar edición' : 'Editar defectos'}
+            >
+              {isEditMode ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Finalizar</span>
+                </>
+              ) : (
+                <>
+                  <Edit2 className="w-4 h-4" />
+                  <span>Editar</span>
+                </>
+              )}
+            </button>
+          </div>
           <div className="space-y-3">
             {selectedItems.map((item) => (
               <div
@@ -190,14 +215,16 @@ export default function DefectSelector({
                   />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleRemoveDefect(item.key)}
-                  className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
-                  title="Eliminar defecto"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                {isEditMode && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDefect(item.key)}
+                    className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
+                    title="Eliminar defecto"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
