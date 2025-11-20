@@ -129,8 +129,8 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
           shiftAnalyses.forEach((analysis) => {
             // Helper to get property from new structure (analyses[0]) or legacy structure
-            const getProp = (prop: keyof any) => {
-              return analysis.analyses?.[0]?.[prop] || (analysis as any)[prop];
+            const getProp = (prop: string): any => {
+              return analysis.analyses?.[0]?.[prop as keyof typeof analysis.analyses[0]] || (analysis as any)[prop];
             };
 
             const defectos = getProp('defectos');
