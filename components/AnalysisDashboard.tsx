@@ -284,10 +284,13 @@ export default function AnalysisDashboard() {
                           <span className="text-xs text-gray-500 block mb-0.5">Lote</span>
                           <span className="text-sm font-mono font-semibold text-gray-200">{analysis.lote}</span>
                         </div>
-                        {analysis.pesoNeto?.valor && (
+                        {/* Support for both new (analyses[0]) and legacy (direct property) structures */}
+                        {(analysis.analyses?.[0]?.pesoNeto?.valor || (analysis as any).pesoNeto?.valor) && (
                           <div className="bg-black/20 rounded-lg p-2.5 border border-white/5">
                             <span className="text-xs text-gray-500 block mb-0.5">Peso Neto</span>
-                            <span className="text-sm font-semibold text-gray-200">{analysis.pesoNeto.valor} kg</span>
+                            <span className="text-sm font-semibold text-gray-200">
+                              {analysis.analyses?.[0]?.pesoNeto?.valor || (analysis as any).pesoNeto?.valor} kg
+                            </span>
                           </div>
                         )}
                       </div>
