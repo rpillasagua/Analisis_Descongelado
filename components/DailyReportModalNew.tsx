@@ -23,15 +23,15 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
     setIsLoading(true);
     try {
       let data: QualityAnalysis[];
-      
+
       if (selectedShift === 'ALL') {
         data = await getAnalysesByDate(selectedDate);
       } else {
         data = await getAnalysesByShift(selectedDate, selectedShift);
       }
-      
+
       setAnalyses(data);
-      
+
       if (data.length === 0) {
         alert('No se encontraron análisis para esta fecha/turno.');
       }
@@ -70,10 +70,10 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
       // Subtítulo con turno
       worksheet.mergeCells('A2:M2');
       const subtitleCell = worksheet.getCell('A2');
-      subtitleCell.value = selectedShift === 'ALL' 
-        ? 'Todos los turnos' 
-        : selectedShift === 'DIA' 
-          ? 'Turno Día (7:10 AM - 7:10 PM)' 
+      subtitleCell.value = selectedShift === 'ALL'
+        ? 'Todos los turnos'
+        : selectedShift === 'DIA'
+          ? 'Turno Día (7:10 AM - 7:10 PM)'
           : 'Turno Noche (7:10 PM - 7:10 AM)';
       subtitleCell.font = { size: 12, bold: true };
       subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -115,7 +115,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
       // Agregar datos por turno
       ['DIA', 'NOCHE'].forEach((shift) => {
         const shiftAnalyses = analysesByShift[shift as WorkShift];
-        
+
         if (shiftAnalyses.length > 0) {
           // Separador de turno
           const separatorRow = worksheet.addRow([shift === 'DIA' ? 'TURNO DÍA' : 'TURNO NOCHE']);
@@ -128,8 +128,14 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
           };
 
           shiftAnalyses.forEach((analysis) => {
-            const totalDefectos = analysis.defectos 
-              ? Object.values(analysis.defectos).reduce((sum, val) => sum + val, 0)
+            // Helper to get property from new structure (analyses[0]) or legacy structure
+            const getProp = (prop: keyof any) => {
+              return analysis.analyses?.[0]?.[prop] || (analysis as any)[prop];
+            };
+
+            const defectos = getProp('defectos');
+            const totalDefectos = defectos
+              ? Object.values(defectos).reduce((sum: any, val: any) => sum + val, 0)
               : 0;
 
             const row = worksheet.addRow([
@@ -139,12 +145,12 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
               analysis.lote,
               analysis.codigo,
               analysis.talla || '-',
-              analysis.pesoBruto?.valor || '-',
-              analysis.pesoCongelado?.valor || '-',
-              analysis.pesoNeto?.valor || '-',
-              analysis.conteo || '-',
-              analysis.uniformidad?.grandes?.valor || '-',
-              analysis.uniformidad?.pequenos?.valor || '-',
+              getProp('pesoBruto')?.valor || '-',
+              getProp('pesoCongelado')?.valor || '-',
+              getProp('pesoNeto')?.valor || '-',
+              getProp('conteo') || '-',
+              getProp('uniformidad')?.grandes?.valor || '-',
+              getProp('uniformidad')?.pequenos?.valor || '-',
               totalDefectos,
               analysis.observations || '-'
             ]);
@@ -238,10 +244,10 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
       // Generar archivo
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
-      
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -267,7 +273,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
             <X className="h-6 w-6" />
           </button>
         </div>
-        
+
         <div className="p-6 space-y-6">
           {/* Selector de fecha */}
           <div className="space-y-2">
