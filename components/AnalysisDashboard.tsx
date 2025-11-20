@@ -186,12 +186,17 @@ export default function AnalysisDashboard() {
                       <div
                         key={analysis.id}
                         onClick={() => handleEdit(analysis.id, analysis.status)}
-                        className="card p-4 cursor-pointer group hover:border-slate-600"
+                        className="card p-4 cursor-pointer group transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4"
+                        style={{
+                          borderColor: analystColorHex,
+                          boxShadow: `0 4px 20px -10px ${analystColorHex}40`,
+                          background: `linear-gradient(145deg, ${analystColorHex}08 0%, rgba(15, 23, 42, 1) 100%)`
+                        }}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             {/* Main Title: Lote (Swapped from Code) */}
-                            <h3 className="text-base font-semibold text-white truncate mb-1">
+                            <h3 className="text-base font-semibold text-white truncate mb-1 group-hover:text-sky-400 transition-colors">
                               {analysis.lote}
                             </h3>
 
@@ -215,24 +220,27 @@ export default function AnalysisDashboard() {
 
                           {/* Right Side: Product Type & Analyst Color */}
                           <div className="flex flex-col items-end gap-2">
-                            <span className="text-xs font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 whitespace-nowrap">
+                            <span className="text-sm font-bold text-slate-300 whitespace-nowrap">
                               {PRODUCT_TYPE_LABELS[analysis.productType]}
                             </span>
                             {analysis.analystColor && (
                               <div
-                                className="w-4 h-4 rounded-full ring-2 ring-slate-800"
-                                style={{ backgroundColor: analystColorHex, boxShadow: `0 0 8px ${analystColorHex}66` }}
+                                className="w-4 h-4 rounded-full ring-2 ring-slate-800 transition-transform group-hover:scale-110"
+                                style={{ backgroundColor: analystColorHex, boxShadow: `0 0 10px ${analystColorHex}80` }}
                                 title={`Analista: ${analysis.analystColor}`}
                               />
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-800/50">
                           {analysis.status !== 'COMPLETADO' ? (
                             <>
                               <span className="text-xs font-medium text-amber-500 flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                </span>
                                 En Progreso
                               </span>
                               <button

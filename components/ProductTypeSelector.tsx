@@ -20,7 +20,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Tipo de producto seleccionado
         </label>
-        <div className="relative p-6 rounded-lg border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg">
+        <div className="relative p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="text-5xl">
@@ -30,10 +30,10 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {selectedType === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <div>
-                <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                <span className="text-2xl font-bold text-slate-200">
                   {PRODUCT_TYPE_LABELS[selectedType]}
                 </span>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Los campos del formulario se ajustan a este tipo de producto
                 </p>
               </div>
@@ -41,7 +41,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/50 rounded-lg transition-colors"
             >
               <Edit2 className="h-4 w-4" />
               Cambiar

@@ -76,7 +76,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="lote">
-                                Lote <span className="text-red-400">*</span>
+                                📦 Lote <span className="text-red-400">*</span>
                             </Label>
                             <Input
                                 id="lote"
@@ -90,7 +90,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
 
                         <div className="space-y-2">
                             <Label htmlFor="codigo">
-                                Código <span className="text-red-400">*</span>
+                                🔢 Código <span className="text-red-400">*</span>
                             </Label>
                             <Input
                                 id="codigo"
@@ -105,7 +105,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                     {/* Talla */}
                     <div className="space-y-2">
                         <Label htmlFor="talla">
-                            Talla <span className="text-gray-500">(opcional)</span>
+                            📏 Talla <span className="text-gray-500">(opcional)</span>
                         </Label>
                         <Input
                             id="talla"

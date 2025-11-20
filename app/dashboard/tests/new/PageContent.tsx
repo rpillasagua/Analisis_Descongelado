@@ -387,10 +387,10 @@ export default function NewMultiAnalysisPageContent() {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => router.back()}
-                                className="flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors"
+                                className="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-all"
+                                title="Volver"
                             >
                                 <ArrowLeft size={20} />
-                                <span className="text-sm font-medium">Volver</span>
                             </button>
                             <div className="h-5 w-px bg-slate-800"></div>
                             <div className="flex items-center gap-3">
