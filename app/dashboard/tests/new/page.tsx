@@ -60,7 +60,7 @@ export default function NewAnalysisPage() {
   const router = useRouter();
   const [editId, setEditId] = useState<string | null>(null);
   const [productType, setProductType] = useState<ProductType>();
-  const [formData, setFormData] = useState<Partial<QualityAnalysis>>({});
+  const [formData, setFormData] = useState<any>({});
   const [photos, setPhotos] = useState<{ [key: string]: File }>({});
   const [pesosBrutos, setPesosBrutos] = useState<PesoBrutoRegistro[]>([]);
   const [isSaving, setIsSaving] = useState(false);
