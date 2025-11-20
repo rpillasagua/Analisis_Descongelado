@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import ProductTypeSelector from '@/components/ProductTypeSelector';
 import InitialForm from '@/components/InitialForm';
 import AnalysisTabs from '@/components/AnalysisTabs';
@@ -26,17 +27,21 @@ const createEmptyAnalysis = (numero: number): Analysis => ({
     defectos: {}
 });
 
-// Componentes UI
+// Componentes UI Modernizados (Clean & Professional)
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`glass-card border border-[rgba(6,182,212,0.2)] rounded-lg transition-all ${className}`}>{children}</div>;
+    <div className={`card overflow-hidden ${className}`}>{children}</div>;
+
 const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`p-4 sm:p-6 border-b border-[rgba(6,182,212,0.1)] ${className}`}>{children}</div>;
+    <div className={`px-6 py-4 border-b border-slate-800 bg-slate-900/50 ${className}`}>{children}</div>;
+
 const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <h2 className={`text-xl sm:text-2xl font-semibold text-[#f3f4f6] ${className}`}>{children}</h2>;
+    <h2 className={`text-lg font-semibold text-slate-100 flex items-center gap-2 ${className}`}>{children}</h2>;
+
 const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <p className={`text-xs sm:text-sm text-[#9ca3af] mt-1 ${className}`}>{children}</p>;
+    <p className={`text-sm text-slate-400 mt-0.5 ${className}`}>{children}</p>;
+
 const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`p-4 sm:p-6 ${className}`}>{children}</div>;
+    <div className={`p-6 ${className}`}>{children}</div>;
 
 interface ButtonProps {
     children: React.ReactNode;
@@ -48,21 +53,23 @@ interface ButtonProps {
 }
 
 const Button = ({ children, onClick, className = '', variant = 'default', type = 'button', disabled = false }: ButtonProps) => {
-    const baseClasses = "inline-flex items-center justify-center rounded-lg text-xs sm:text-sm font-medium transition-all h-9 sm:h-10 px-4 py-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed";
+    const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all h-10 px-4 disabled:opacity-50 disabled:cursor-not-allowed";
     const variantClasses = {
-        default: 'bg-gradient-to-br from-[#06b6d4] to-[#0891b2] text-white hover:from-[#0891b2] hover:to-[#067e8f]',
-        outline: 'border-2 border-[rgba(6,182,212,0.3)] bg-[rgba(6,182,212,0.05)] text-[#06b6d4] hover:bg-[rgba(6,182,212,0.1)]',
-        ghost: 'hover:bg-[rgba(6,182,212,0.1)] text-[#06b6d4]',
+        default: 'btn-primary shadow-sm',
+        outline: 'btn-secondary',
+        ghost: 'text-slate-400 hover:text-slate-100 hover:bg-slate-800',
     };
     return <button disabled={disabled} type={type} onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>{children}</button>;
 };
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
+    <input {...props} className="modern-input w-full px-3 py-2 text-sm" />;
+
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-    <label {...props} className="text-xs sm:text-sm font-medium leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#f3f4f6]" />;
+    <label {...props} className="text-sm font-medium text-slate-300 mb-1.5 block" />;
+
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
-    <textarea {...props} className="flex min-h-20 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
+    <textarea {...props} className="modern-input w-full px-3 py-2 text-sm min-h-[100px]" />;
 
 export default function NewMultiAnalysisPageContent() {
     const router = useRouter();
@@ -337,7 +344,10 @@ export default function NewMultiAnalysisPageContent() {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-white text-xl">Cargando...</div>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-slate-700 border-t-sky-500 rounded-full animate-spin"></div>
+                    <div className="text-slate-400 font-medium">Cargando análisis...</div>
+                </div>
             </div>
         );
     }
@@ -366,36 +376,69 @@ export default function NewMultiAnalysisPageContent() {
     }
 
     // Step 3: Multi-Analysis Form with Tabs
-    const colorHex = analystColor ? ANALYST_COLOR_HEX[analystColor] : '#06b6d4';
+    const colorHex = analystColor ? ANALYST_COLOR_HEX[analystColor] : '#0ea5e9';
 
     return (
-        <div className="min-h-screen p-4">
-            <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header with color indicator */}
-                <div className="glass-card rounded-2xl p-6" style={{ borderLeft: `4px solid ${colorHex}` }}>
+        <div className="min-h-screen p-4 pb-20">
+            <div className="max-w-5xl mx-auto space-y-6">
+                {/* Minimalist Header */}
+                <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-white mb-2">
-                                📋 Análisis de Calidad - {productType}
-                            </h1>
-                            <div className="flex items-center gap-4 text-sm text-gray-300">
-                                <span>🏷️ Lote: <strong>{lote}</strong></span>
-                                <span>📦 Código: <strong>{codigo}</strong></span>
-                                {talla && <span>📏 Talla: <strong>{talla}</strong></span>}
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => router.back()}
+                                className="flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors"
+                            >
+                                <ArrowLeft size={20} />
+                                <span className="text-sm font-medium">Volver</span>
+                            </button>
+                            <div className="h-5 w-px bg-slate-800"></div>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-lg font-bold text-slate-100">
+                                    Análisis de Calidad
+                                </h1>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">
+                                    {productType}
+                                </span>
                             </div>
                         </div>
+
                         <div className="flex items-center gap-3">
                             <AutoSaveIndicatorNew
                                 isSaving={isSaving}
                                 lastSaved={lastSaved}
                                 error={saveError}
                             />
-                            <div
-                                className="w-12 h-12 rounded-full border-4 border-white"
-                                style={{ backgroundColor: colorHex }}
-                                title={`Color del analista: ${analystColor}`}
-                            />
+                            <div className="flex items-center gap-2 pl-3 border-l border-slate-800">
+                                <div
+                                    className="w-5 h-5 rounded-full border border-slate-700 shadow-sm"
+                                    style={{ backgroundColor: colorHex }}
+                                    title={`Color del analista: ${analystColor}`}
+                                />
+                            </div>
                         </div>
+                    </div>
+
+                    {/* Compact Info Bar */}
+                    <div className="flex items-center gap-6 text-sm px-4 py-3 bg-slate-900/50 rounded-lg border border-slate-800">
+                        <div className="flex items-center gap-2">
+                            <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Lote</span>
+                            <span className="text-slate-200 font-mono">{lote}</span>
+                        </div>
+                        <div className="w-px h-3 bg-slate-800"></div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Código</span>
+                            <span className="text-slate-200 font-mono">{codigo}</span>
+                        </div>
+                        {talla && (
+                            <>
+                                <div className="w-px h-3 bg-slate-800"></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Talla</span>
+                                    <span className="text-slate-200 font-mono">{talla}</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -418,90 +461,94 @@ export default function NewMultiAnalysisPageContent() {
                                 <CardDescription>Registra los pesos con fotos</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                {/* Peso Bruto */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="peso-bruto">Peso Bruto (kg)</Label>
-                                    <Input
-                                        id="peso-bruto"
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        value={currentAnalysis.pesoBruto?.valor || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            pesoBruto: {
-                                                ...currentAnalysis.pesoBruto,
-                                                valor: parseFloat(e.target.value) || undefined
-                                            }
-                                        })}
-                                    />
-                                    <PhotoCapture
-                                        label="Foto Peso Bruto"
-                                        photoUrl={currentAnalysis.pesoBruto?.fotoUrl}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoBruto', file)}
-                                        isUploading={isFieldUploading('pesoBruto')}
-                                    />
-                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {/* Peso Bruto */}
+                                    <div className="space-y-3">
+                                        <Label htmlFor="peso-bruto">Peso Bruto (kg)</Label>
+                                        <Input
+                                            id="peso-bruto"
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoBruto?.valor || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                pesoBruto: {
+                                                    ...currentAnalysis.pesoBruto,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Bruto"
+                                            photoUrl={currentAnalysis.pesoBruto?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoBruto', file)}
+                                            isUploading={isFieldUploading('pesoBruto')}
+                                        />
+                                    </div>
 
-                                {/* Peso Congelado */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="peso-congelado">Peso Congelado (kg)</Label>
-                                    <Input
-                                        id="peso-congelado"
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        value={currentAnalysis.pesoCongelado?.valor || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            pesoCongelado: {
-                                                ...currentAnalysis.pesoCongelado,
-                                                valor: parseFloat(e.target.value) || undefined
-                                            }
-                                        })}
-                                    />
-                                    <PhotoCapture
-                                        label="Foto Peso Congelado"
-                                        photoUrl={currentAnalysis.pesoCongelado?.fotoUrl}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado', file)}
-                                        isUploading={isFieldUploading('pesoCongelado')}
-                                    />
-                                </div>
+                                    {/* Peso Congelado */}
+                                    <div className="space-y-3">
+                                        <Label htmlFor="peso-congelado">Peso Congelado (kg)</Label>
+                                        <Input
+                                            id="peso-congelado"
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoCongelado?.valor || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                pesoCongelado: {
+                                                    ...currentAnalysis.pesoCongelado,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Congelado"
+                                            photoUrl={currentAnalysis.pesoCongelado?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado', file)}
+                                            isUploading={isFieldUploading('pesoCongelado')}
+                                        />
+                                    </div>
 
-                                {/* Peso Neto */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="peso-neto">Peso Neto (kg)</Label>
-                                    <Input
-                                        id="peso-neto"
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        value={currentAnalysis.pesoNeto?.valor || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            pesoNeto: {
-                                                ...currentAnalysis.pesoNeto,
-                                                valor: parseFloat(e.target.value) || undefined
-                                            }
-                                        })}
-                                    />
-                                    <PhotoCapture
-                                        label="Foto Peso Neto"
-                                        photoUrl={currentAnalysis.pesoNeto?.fotoUrl}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoNeto', file)}
-                                        isUploading={isFieldUploading('pesoNeto')}
-                                    />
+                                    {/* Peso Neto */}
+                                    <div className="space-y-3">
+                                        <Label htmlFor="peso-neto">Peso Neto (kg)</Label>
+                                        <Input
+                                            id="peso-neto"
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoNeto?.valor || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                pesoNeto: {
+                                                    ...currentAnalysis.pesoNeto,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Neto"
+                                            photoUrl={currentAnalysis.pesoNeto?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoNeto', file)}
+                                            isUploading={isFieldUploading('pesoNeto')}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Conteo */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="conteo">Conteo</Label>
-                                    <Input
-                                        id="conteo"
-                                        type="number"
-                                        placeholder="0"
-                                        value={currentAnalysis.conteo || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            conteo: parseInt(e.target.value) || undefined
-                                        })}
-                                    />
+                                <div className="pt-4 border-t border-slate-800">
+                                    <div className="max-w-xs">
+                                        <Label htmlFor="conteo">Conteo</Label>
+                                        <Input
+                                            id="conteo"
+                                            type="number"
+                                            placeholder="0"
+                                            value={currentAnalysis.conteo || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                conteo: parseInt(e.target.value) || undefined
+                                            })}
+                                        />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -524,56 +571,58 @@ export default function NewMultiAnalysisPageContent() {
                                 <CardTitle>📏 Uniformidad</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                {/* Grandes */}
-                                <div className="space-y-2">
-                                    <Label>Grandes (kg)</Label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        value={currentAnalysis.uniformidad?.grandes?.valor || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            uniformidad: {
-                                                ...currentAnalysis.uniformidad,
-                                                grandes: {
-                                                    ...currentAnalysis.uniformidad?.grandes,
-                                                    valor: parseFloat(e.target.value) || undefined
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Grandes */}
+                                    <div className="space-y-3">
+                                        <Label>Grandes (kg)</Label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.uniformidad?.grandes?.valor || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                uniformidad: {
+                                                    ...currentAnalysis.uniformidad,
+                                                    grandes: {
+                                                        ...currentAnalysis.uniformidad?.grandes,
+                                                        valor: parseFloat(e.target.value) || undefined
+                                                    }
                                                 }
-                                            }
-                                        })}
-                                    />
-                                    <PhotoCapture
-                                        label="Foto Grandes"
-                                        photoUrl={currentAnalysis.uniformidad?.grandes?.fotoUrl}
-                                        onPhotoCapture={(file) => handlePhotoCapture('uniformidad_grandes', file)}
-                                        isUploading={isFieldUploading('uniformidad_grandes')}
-                                    />
-                                </div>
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Grandes"
+                                            photoUrl={currentAnalysis.uniformidad?.grandes?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('uniformidad_grandes', file)}
+                                            isUploading={isFieldUploading('uniformidad_grandes')}
+                                        />
+                                    </div>
 
-                                {/* Pequeños */}
-                                <div className="space-y-2">
-                                    <Label>Pequeños (kg)</Label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        value={currentAnalysis.uniformidad?.pequenos?.valor || ''}
-                                        onChange={(e) => updateCurrentAnalysis({
-                                            uniformidad: {
-                                                ...currentAnalysis.uniformidad,
-                                                pequenos: {
-                                                    ...currentAnalysis.uniformidad?.pequenos,
-                                                    valor: parseFloat(e.target.value) || undefined
+                                    {/* Pequeños */}
+                                    <div className="space-y-3">
+                                        <Label>Pequeños (kg)</Label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.uniformidad?.pequenos?.valor || ''}
+                                            onChange={(e) => updateCurrentAnalysis({
+                                                uniformidad: {
+                                                    ...currentAnalysis.uniformidad,
+                                                    pequenos: {
+                                                        ...currentAnalysis.uniformidad?.pequenos,
+                                                        valor: parseFloat(e.target.value) || undefined
+                                                    }
                                                 }
-                                            }
-                                        })}
-                                    />
-                                    <PhotoCapture
-                                        label="Foto Pequeños"
-                                        photoUrl={currentAnalysis.uniformidad?.pequenos?.fotoUrl}
-                                        onPhotoCapture={(file) => handlePhotoCapture('uniformidad_pequenos', file)}
-                                        isUploading={isFieldUploading('uniformidad_pequenos')}
-                                    />
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Pequeños"
+                                            photoUrl={currentAnalysis.uniformidad?.pequenos?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('uniformidad_pequenos', file)}
+                                            isUploading={isFieldUploading('uniformidad_pequenos')}
+                                        />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -617,33 +666,12 @@ export default function NewMultiAnalysisPageContent() {
                         </CardHeader>
                         <CardContent>
                             <Textarea
-                                placeholder="Observaciones adicionales..."
+                                placeholder="Escribe cualquier observación adicional aquí..."
                                 value={currentAnalysis.observations || ''}
                                 onChange={(e) => updateCurrentAnalysis({ observations: e.target.value })}
-                                rows={4}
                             />
                         </CardContent>
                     </Card>
-
-                    {/* Actions */}
-                    <div className="flex gap-4">
-                        <Button
-                            variant="outline"
-                            onClick={() => router.push('/')}
-                            className="flex-1"
-                        >
-                            ← Volver al Dashboard
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                saveDocument();
-                                alert('Análisis guardado exitosamente');
-                            }}
-                            className="flex-1"
-                        >
-                            💾 Guardar Análisis
-                        </Button>
-                    </div>
                 </div>
             </div>
         </div>

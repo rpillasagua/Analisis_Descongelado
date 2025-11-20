@@ -231,17 +231,17 @@ class GoogleDriveService {
         console.log(`✅ Permisos PÚBLICOS configurados para archivo ${fileId}`);
         return;
       } catch (publicError: any) {
-        console.warn('⚠️ No se pudo configurar permiso público ("anyone"). Intentando con dominio...', publicError.message);
+        console.warn('⚠️ No se pudo configurar permiso público ("anyone").', publicError.message);
 
-        // Si falla, intentar permiso de dominio (toda la organización)
-        try {
-          await this.addPermission(fileId, 'domain', 'reader');
-          console.log(`✅ Permisos de DOMINIO configurados para archivo ${fileId}`);
-          return;
-        } catch (domainError: any) {
-          console.error('❌ Falló también el permiso de dominio:', domainError.message);
-          throw new Error(`No se pudieron configurar permisos: ${publicError.message} / ${domainError.message}`);
-        }
+        // Si falla "anyone", es probable que la organización restrinja compartir fuera del dominio.
+        // Intentamos configurar permiso de dominio, pero necesitamos saber el dominio.
+        // Como no tenemos el dominio fácilmente accesible, intentaremos un fallback genérico
+        // o simplemente dejaremos que el usuario lo maneje manualmente si es estricto.
+
+        // NOTA: Para usar type='domain', se requiere el campo 'domain'. 
+        // Si no lo tenemos, no podemos usarlo.
+        // Por ahora, solo logueamos el error y no bloqueamos el flujo.
+        console.log('ℹ️ El archivo se subió pero puede requerir permisos manuales si la organización es estricta.');
       }
     } catch (error) {
       console.error('❌ Error en makeFilePublic:', error);
