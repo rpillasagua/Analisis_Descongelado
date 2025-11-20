@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, Camera } from 'lucide-react';
+import { Plus, Trash2, Camera, Edit2, Check } from 'lucide-react';
 import PhotoCapture from './PhotoCapture';
 import { PesoBrutoRegistro } from '@/lib/types';
 
@@ -26,6 +26,7 @@ export default function ControlPesosBrutos({
   isPhotoUploading = () => false,
   viewMode = 'COMPACTA'
 }: ControlPesosBrutosProps) {
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const agregarRegistro = () => {
     const nuevoRegistro: PesoBrutoRegistro = {
@@ -36,8 +37,45 @@ export default function ControlPesosBrutos({
     onChange([...registros, nuevoRegistro]);
   };
 
-  const eliminarRegistro = (id: string) => {
+  const eliminarRegistro = async (id: string) => {
+    const registro = registros.find(r => r.id === id);
+
+    // Si el registro tiene foto, intentar eliminarla de Google Drive
+    if (registro?.fotoUrl && !registro.fotoUrl.startsWith('blob:')) {
+      try {
+        const { googleDriveService } = await import('@/lib/googleDriveService');
+
+        // Extraer el ID del archivo desde la URL
+        const fileId = extractFileIdFromUrl(registro.fotoUrl);
+
+        if (fileId) {
+          await googleDriveService.deleteFile(fileId);
+          console.log('✅ Foto de peso bruto eliminada de Google Drive');
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudo eliminar la foto de Google Drive:', error);
+        // Continuar con la eliminación del registro aunque falle la eliminación de la foto
+      }
+    }
+
+    // Eliminar el registro del array
     onChange(registros.filter(r => r.id !== id));
+  };
+
+  // Helper para extraer ID de archivo de URL de Google Drive
+  const extractFileIdFromUrl = (url: string): string | null => {
+    if (!url) return null;
+
+    // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
+    // o https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+    const match = url.match(/[?&]id=([^&]+)/);
+    if (match) return match[1];
+
+    // Formato: https://drive.google.com/file/d/FILE_ID/view
+    const match2 = url.match(/\/file\/d\/([^/]+)/);
+    if (match2) return match2[1];
+
+    return null;
   };
 
   const actualizarRegistro = (id: string, campo: keyof PesoBrutoRegistro, valor: any) => {
@@ -54,14 +92,39 @@ export default function ControlPesosBrutos({
         <h3 className={`font-bold ${isCompact ? 'text-base' : 'text-xl'} text-white tracking-tight`}>
           Control de Pesos Brutos
         </h3>
-        <button
-          type="button"
-          onClick={agregarRegistro}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 text-sm font-semibold hover:scale-105 active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Agregar Peso
-        </button>
+        <div className="flex items-center gap-2">
+          {registros.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(!isEditMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              title={isEditMode ? 'Finalizar edición' : 'Editar registros'}
+            >
+              {isEditMode ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Finalizar</span>
+                </>
+              ) : (
+                <>
+                  <Edit2 className="w-4 h-4" />
+                  <span>Editar</span>
+                </>
+              )}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={agregarRegistro}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 text-sm font-semibold hover:scale-105 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Agregar Peso
+          </button>
+        </div>
       </div>
 
       {registros.length === 0 ? (
@@ -83,14 +146,16 @@ export default function ControlPesosBrutos({
                 <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">
                   Registro #{index + 1}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => eliminarRegistro(registro.id)}
-                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                  title="Eliminar registro"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {isEditMode && (
+                  <button
+                    type="button"
+                    onClick={() => eliminarRegistro(registro.id)}
+                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Eliminar registro"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
 
               <div className={isCompact ? 'space-y-3' : 'space-y-4'}>
