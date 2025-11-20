@@ -8,8 +8,8 @@ import ControlPesosBrutos from '@/components/ControlPesosBrutos';
 import AutoSaveIndicatorNew from '@/components/AutoSaveIndicatorNew';
 import DefectSelector from '@/components/DefectSelector';
 import { useAutoSaveAnalysis } from '@/lib/useAutoSaveAnalysis';
-import { 
-  ProductType, 
+import {
+  ProductType,
   QualityAnalysis,
   PesoBrutoRegistro
 } from '@/lib/types';
@@ -19,15 +19,15 @@ import { getAnalysisById } from '@/lib/analysisService';
 export const dynamic = 'force-dynamic';
 
 // Componentes UI
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
+const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
   <div className={`glass-card border border-[rgba(6,182,212,0.2)] rounded-lg transition-all ${className}`}>{children}</div>;
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
+const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
   <div className={`p-4 sm:p-6 border-b border-[rgba(6,182,212,0.1)] ${className}`}>{children}</div>;
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
+const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
   <h2 className={`text-xl sm:text-2xl font-semibold text-[#f3f4f6] ${className}`}>{children}</h2>;
-const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
+const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
   <p className={`text-xs sm:text-sm text-[#9ca3af] mt-1 ${className}`}>{children}</p>;
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => 
+const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
   <div className={`p-4 sm:p-6 ${className}`}>{children}</div>;
 
 interface ButtonProps {
@@ -49,11 +49,11 @@ const Button = ({ children, onClick, className = '', variant = 'default', type =
   return <button disabled={disabled} type={type} onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>{children}</button>;
 };
 
-const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => 
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
   <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
-const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) => 
+const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
   <label {...props} className="text-xs sm:text-sm font-medium leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#f3f4f6]" />;
-const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => 
+const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
   <textarea {...props} className="flex min-h-20 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
 
 export default function NewAnalysisPage() {
@@ -61,14 +61,14 @@ export default function NewAnalysisPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [productType, setProductType] = useState<ProductType>();
   const [formData, setFormData] = useState<Partial<QualityAnalysis>>({});
-  const [photos, setPhotos] = useState<{[key: string]: File}>({});
+  const [photos, setPhotos] = useState<{ [key: string]: File }>({});
   const [pesosBrutos, setPesosBrutos] = useState<PesoBrutoRegistro[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [isDocumentCreated, setIsDocumentCreated] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState<Set<string>>(new Set());
-  
+
   // Helper para determinar si un campo específico está siendo subido
   const isFieldUploading = (field: string) => {
     return uploadingPhotos.has(field);
@@ -98,8 +98,15 @@ export default function NewAnalysisPage() {
         setAnalysisId(analysis.id);
         setProductType(analysis.productType);
         setFormData(analysis);
-        if (analysis.pesosBrutos) {
-          setPesosBrutos(analysis.pesosBrutos);
+        // Cast to any to support both legacy and new structure during migration
+        const analysisData = analysis as any;
+        if (analysisData.pesosBrutos) {
+          setPesosBrutos(analysisData.pesosBrutos);
+        } else if (analysis.analyses && analysis.analyses.length > 0) {
+          // Fallback for new structure if needed in legacy page
+          if (analysis.analyses[0].pesosBrutos) {
+            setPesosBrutos(analysis.analyses[0].pesosBrutos);
+          }
         }
         setIsDocumentCreated(true); // Ya existe en Firestore
       } else {
@@ -117,7 +124,7 @@ export default function NewAnalysisPage() {
   // Auto-guardado
   const handleAutoSave = async (data: Partial<QualityAnalysis>) => {
     if (!analysisId) return;
-    
+
     try {
       const { saveAnalysis, updateAnalysis } = await import('@/lib/analysisService');
       const { googleAuthService } = await import('@/lib/googleAuthService');
@@ -203,13 +210,13 @@ export default function NewAnalysisPage() {
   const handlePhotoCapture = async (field: string, file: File) => {
     console.log(`📸 Capturando foto para campo: ${field}`);
     console.log(`📁 Archivo: ${file.name} (${file.type}, ${file.size} bytes)`);
-    
+
     // Marcar que esta foto se está subiendo
     setUploadingPhotos(prev => new Set(prev).add(field));
-    
+
     // Guardar la URL anterior para poder revertir en caso de error
     const previousUrl = getNestedValue(formData, field);
-    
+
     try {
       // Obtener URL anterior de la foto antes de reemplazarla
       const oldPhotoUrl = getNestedValue(formData, field);
@@ -220,23 +227,23 @@ export default function NewAnalysisPage() {
         // Retrasar la revocación para evitar errores de carga en la UI antes de que se actualice el estado
         setTimeout(() => URL.revokeObjectURL(oldPhotoUrl), 1000);
       }
-      
+
       // Crear URL temporal para preview inmediato
       const tempUrl = URL.createObjectURL(file);
       console.log(`🖼️ URL temporal creada:`, tempUrl);
-      
+
       handleInputChange(field, tempUrl);
       setPhotos(prev => ({ ...prev, [field]: file }));
 
       // Subir foto inmediatamente a Google Drive
       const { googleDriveService } = await import('@/lib/googleDriveService');
       const { googleAuthService } = await import('@/lib/googleAuthService');
-      
+
       // Inicializar servicios de Google si no están inicializados
       if (typeof window !== 'undefined') {
         await googleAuthService.initialize();
       }
-      
+
       if (!googleAuthService.isAuthenticated()) {
         console.warn('⚠️ Usuario no autenticado, intentando login automático...');
         alert('Necesitas iniciar sesión con Google para subir fotos. Redirigiendo al login...');
@@ -257,11 +264,11 @@ export default function NewAnalysisPage() {
 
       console.log(`⬆️ Subiendo foto a Google Drive...`);
       await googleDriveService.initialize();
-      
+
       const codigo = formData.codigo || 'temp';
       const lote = formData.lote || 'temp';
       const photoType = field.replace(/\./g, '_');
-      
+
       // Pasar la URL anterior para que se elimine
       const driveUrl = await googleDriveService.uploadAnalysisPhoto(
         file,
@@ -270,13 +277,13 @@ export default function NewAnalysisPage() {
         photoType,
         oldPhotoUrl
       );
-      
+
       console.log(`✅ Foto ${photoType} subida a Drive:`, driveUrl);
-      
+
       // Actualizar con URL de Drive
       handleInputChange(field, driveUrl);
       console.log(`📝 Estado actualizado con URL de Drive`);
-      
+
       // Guardar automáticamente con la nueva URL
       if (analysisId && productType && formData.codigo && formData.lote) {
         console.log(`💾 Auto-guardando análisis...`);
@@ -285,16 +292,16 @@ export default function NewAnalysisPage() {
       }
     } catch (error: any) {
       console.error('❌ Error subiendo foto:', error);
-      
+
       // Revertir a la URL anterior si la subida falló
       console.warn('🔄 Revirtiendo a URL anterior debido a error de subida');
       handleInputChange(field, previousUrl);
-      
+
       // Revocar la URL temporal que se creó
       if (getNestedValue(formData, field) && getNestedValue(formData, field).startsWith('blob:')) {
         setTimeout(() => URL.revokeObjectURL(getNestedValue(formData, field)), 100);
       }
-      
+
       // Mostrar mensaje de error específico
       if (error.message?.includes('Error de conexión') || error.message?.includes('Google Drive')) {
         alert('Error de conexión con Google Drive. Verifica tu conexión a internet o permisos de Google Drive. La foto se guardará localmente.');
@@ -316,18 +323,18 @@ export default function NewAnalysisPage() {
 
   const handlePesoBrutoPhotoCapture = async (registroId: string, file: File) => {
     const photoField = `pesoBruto_${registroId}`;
-    
+
     // Marcar que esta foto se está subiendo
     setUploadingPhotos(prev => new Set(prev).add(photoField));
-    
+
     // Guardar la URL anterior para poder revertir en caso de error
     const registro = pesosBrutos.find(r => r.id === registroId);
     const previousUrl = registro?.fotoUrl;
-    
+
     try {
       // Obtener URL anterior de la foto del registro
       const oldPhotoUrl = pesosBrutos.find(r => r.id === registroId)?.fotoUrl;
-      
+
       // Revocar URL blob anterior si existe
       if (oldPhotoUrl && oldPhotoUrl.startsWith('blob:')) {
         const urlToRevoke = oldPhotoUrl;
@@ -336,7 +343,7 @@ export default function NewAnalysisPage() {
 
       // Crear URL temporal para preview inmediato
       const tempUrl = URL.createObjectURL(file);
-      setPesosBrutos(prev => prev.map(r => 
+      setPesosBrutos(prev => prev.map(r =>
         r.id === registroId ? { ...r, fotoUrl: tempUrl } : r
       ));
       setPhotos(prev => ({ ...prev, [photoField]: file }));
@@ -344,12 +351,12 @@ export default function NewAnalysisPage() {
       // Subir foto inmediatamente a Google Drive
       const { googleDriveService } = await import('@/lib/googleDriveService');
       const { googleAuthService } = await import('@/lib/googleAuthService');
-      
+
       // Inicializar servicios de Google si no están inicializados
       if (typeof window !== 'undefined') {
         await googleAuthService.initialize();
       }
-      
+
       if (!googleAuthService.isAuthenticated()) {
         console.warn('Usuario no autenticado, foto no se subirá');
         alert('Necesitas iniciar sesión con Google para subir fotos. Redirigiendo al login...');
@@ -369,11 +376,11 @@ export default function NewAnalysisPage() {
       }
 
       await googleDriveService.initialize();
-      
+
       const codigo = formData.codigo || 'temp';
       const lote = formData.lote || 'temp';
       const photoType = photoField;
-      
+
       // Pasar la URL anterior para que se elimine
       const driveUrl = await googleDriveService.uploadAnalysisPhoto(
         file,
@@ -382,34 +389,34 @@ export default function NewAnalysisPage() {
         photoType,
         oldPhotoUrl
       );
-      
+
       console.log(`✅ Foto peso bruto subida a Drive:`, driveUrl);
-      
+
       // Actualizar con URL de Drive
-      setPesosBrutos(prev => prev.map(r => 
+      setPesosBrutos(prev => prev.map(r =>
         r.id === registroId ? { ...r, fotoUrl: driveUrl } : r
       ));
-      
+
       // Guardar automáticamente con la nueva URL
       if (analysisId && productType && formData.codigo && formData.lote) {
         await handleFieldBlur();
       }
     } catch (error: any) {
       console.error('Error subiendo foto de peso bruto:', error);
-      
+
       // Revertir a la URL anterior si la subida falló
       console.warn('🔄 Revirtiendo foto de peso bruto a URL anterior debido a error de subida');
-      setPesosBrutos(prev => prev.map(r => 
+      setPesosBrutos(prev => prev.map(r =>
         r.id === registroId ? { ...r, fotoUrl: previousUrl } : r
       ));
-      
+
       // Revocar la URL temporal que se creó
       const currentRegistro = pesosBrutos.find(r => r.id === registroId);
       if (currentRegistro?.fotoUrl && currentRegistro.fotoUrl.startsWith('blob:')) {
         const urlToRevoke = currentRegistro.fotoUrl;
         setTimeout(() => URL.revokeObjectURL(urlToRevoke), 100);
       }
-      
+
       // Mostrar mensaje de error específico
       if (error.message?.includes('Error de conexión') || error.message?.includes('Google Drive')) {
         alert('Error de conexión con Google Drive. Verifica tu conexión a internet o permisos de Google Drive. La foto se guardará localmente.');
@@ -448,7 +455,7 @@ export default function NewAnalysisPage() {
       // Verificar autenticación
       const { googleAuthService } = await import('@/lib/googleAuthService');
       const user = googleAuthService.getUser();
-      
+
       if (!user) {
         alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
         router.push('/');
@@ -533,7 +540,7 @@ export default function NewAnalysisPage() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {productType && formData.codigo && formData.lote && (
-                <AutoSaveIndicatorNew 
+                <AutoSaveIndicatorNew
                   isSaving={autoSaveState.isSaving}
                   lastSaved={autoSaveState.lastSaved}
                   error={autoSaveState.error}
@@ -547,64 +554,64 @@ export default function NewAnalysisPage() {
       {/* Contenido principal con layout de 2 columnas en pantallas grandes */}
       <div className="max-w-[1920px] mx-auto p-2 xs:p-3 sm:p-4 lg:p-8">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">{/* Selector de tipo de producto - Tarjetas horizontales en desktop */}
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Tipo de Producto</CardTitle>
-              </CardHeader>
-              <CardContent>
-            <ProductTypeSelector 
-              selectedType={productType} 
-              onSelect={setProductType} 
-            />
-          </CardContent>
-        </Card>
+          <Card className="bg-white dark:bg-gray-800">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Tipo de Producto</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProductTypeSelector
+                selectedType={productType}
+                onSelect={setProductType}
+              />
+            </CardContent>
+          </Card>
 
-            {productType && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 xs:gap-3 lg:gap-6">
-                {/* Columna izquierda - Información principal (8 columnas en LG+) */}
-                <div className="lg:col-span-8 space-y-3 sm:space-y-4 lg:space-y-6">
-                  {/* Información básica */}
-                  <Card className="bg-white dark:bg-gray-800">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-lg">📝 Información Básica</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 xs:gap-3">
-                        <div className="space-y-2">
-                    <Label htmlFor="lote">Lote *</Label>
-                    <Input 
-                      id="lote" 
-                      placeholder="Ej: L-12345" 
-                      required 
-                      value={formData.lote || ''}
-                      onChange={(e) => handleInputChange('lote', e.target.value)}
-                      onBlur={handleFieldBlur}
-                    />
-                  </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="codigo">Código *</Label>
-                          <Input 
-                            id="codigo" 
-                            placeholder="Ej: C-789" 
-                            required 
-                            value={formData.codigo || ''}
-                            onChange={(e) => handleInputChange('codigo', e.target.value)}
-                            onBlur={handleFieldBlur}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="talla">Talla</Label>
-                          <Input 
-                            id="talla" 
-                            placeholder="Ej: 16/20" 
-                            value={formData.talla || ''}
-                            onChange={(e) => handleInputChange('talla', e.target.value)}
-                            onBlur={handleFieldBlur}
-                          />
-                        </div>
+          {productType && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 xs:gap-3 lg:gap-6">
+              {/* Columna izquierda - Información principal (8 columnas en LG+) */}
+              <div className="lg:col-span-8 space-y-3 sm:space-y-4 lg:space-y-6">
+                {/* Información básica */}
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg">📝 Información Básica</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 xs:gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="lote">Lote *</Label>
+                        <Input
+                          id="lote"
+                          placeholder="Ej: L-12345"
+                          required
+                          value={formData.lote || ''}
+                          onChange={(e) => handleInputChange('lote', e.target.value)}
+                          onBlur={handleFieldBlur}
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="space-y-2">
+                        <Label htmlFor="codigo">Código *</Label>
+                        <Input
+                          id="codigo"
+                          placeholder="Ej: C-789"
+                          required
+                          value={formData.codigo || ''}
+                          onChange={(e) => handleInputChange('codigo', e.target.value)}
+                          onBlur={handleFieldBlur}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="talla">Talla</Label>
+                        <Input
+                          id="talla"
+                          placeholder="Ej: 16/20"
+                          value={formData.talla || ''}
+                          onChange={(e) => handleInputChange('talla', e.target.value)}
+                          onBlur={handleFieldBlur}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Control de Pesos Brutos (Solo para tipo CONTROL_PESOS) */}
                 {productType === 'CONTROL_PESOS' && (
@@ -619,22 +626,22 @@ export default function NewAnalysisPage() {
                 {/* Pesos (Solo para otros tipos) */}
                 {productType !== 'CONTROL_PESOS' && (<div className="space-y-2 p-2 xs:p-3 bg-[rgba(6,182,212,0.05)] border border-[rgba(6,182,212,0.2)] rounded-lg">
                   <h3 className="font-semibold text-base text-[#f3f4f6]">Pesos</h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="pesoBruto">Peso Bruto (kg)</Label>
-                      <Input 
-                        id="pesoBruto" 
-                        type="number" 
-                        step="0.01" 
+                      <Input
+                        id="pesoBruto"
+                        type="number"
+                        step="0.01"
                         value={formData.pesoBruto?.valor || ''}
-                        onChange={(e) => handleInputChange('pesoBruto', { 
-                          ...formData.pesoBruto, 
-                          valor: parseFloat(e.target.value) 
+                        onChange={(e) => handleInputChange('pesoBruto', {
+                          ...formData.pesoBruto,
+                          valor: parseFloat(e.target.value)
                         })}
                         onBlur={handleFieldBlur}
                       />
-                      <PhotoCapture 
+                      <PhotoCapture
                         label="Peso Bruto"
                         photoUrl={formData.pesoBruto?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoBruto.fotoUrl', file)}
@@ -644,18 +651,18 @@ export default function NewAnalysisPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="pesoCongelado">Peso Congelado (kg)</Label>
-                      <Input 
-                        id="pesoCongelado" 
-                        type="number" 
-                        step="0.01" 
+                      <Input
+                        id="pesoCongelado"
+                        type="number"
+                        step="0.01"
                         value={formData.pesoCongelado?.valor || ''}
-                        onChange={(e) => handleInputChange('pesoCongelado', { 
-                          ...formData.pesoCongelado, 
-                          valor: parseFloat(e.target.value) 
+                        onChange={(e) => handleInputChange('pesoCongelado', {
+                          ...formData.pesoCongelado,
+                          valor: parseFloat(e.target.value)
                         })}
                         onBlur={handleFieldBlur}
                       />
-                      <PhotoCapture 
+                      <PhotoCapture
                         label="Peso Congelado"
                         photoUrl={formData.pesoCongelado?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado.fotoUrl', file)}
@@ -665,18 +672,18 @@ export default function NewAnalysisPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="pesoNeto">Peso Neto (kg)</Label>
-                      <Input 
-                        id="pesoNeto" 
-                        type="number" 
-                        step="0.01" 
+                      <Input
+                        id="pesoNeto"
+                        type="number"
+                        step="0.01"
                         value={formData.pesoNeto?.valor || ''}
-                        onChange={(e) => handleInputChange('pesoNeto', { 
-                          ...formData.pesoNeto, 
-                          valor: parseFloat(e.target.value) 
+                        onChange={(e) => handleInputChange('pesoNeto', {
+                          ...formData.pesoNeto,
+                          valor: parseFloat(e.target.value)
                         })}
                         onBlur={handleFieldBlur}
                       />
-                      <PhotoCapture 
+                      <PhotoCapture
                         label="Peso Neto"
                         photoUrl={formData.pesoNeto?.fotoUrl}
                         onPhotoCapture={(file) => handlePhotoCapture('pesoNeto.fotoUrl', file)}
@@ -686,9 +693,9 @@ export default function NewAnalysisPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="conteo">Conteo</Label>
-                      <Input 
-                        id="conteo" 
-                        type="number" 
+                      <Input
+                        id="conteo"
+                        type="number"
                         value={formData.conteo || ''}
                         onChange={(e) => handleInputChange('conteo', parseInt(e.target.value))}
                         onBlur={handleFieldBlur}
@@ -700,51 +707,51 @@ export default function NewAnalysisPage() {
 
                 {/* Uniformidad */}
                 {productType !== 'CONTROL_PESOS' && (
-                <div className="space-y-2 p-2 xs:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <h3 className="font-semibold text-base">Uniformidad</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="grandes">Grandes</Label>
-                      <Input 
-                        id="grandes" 
-                        type="number" 
-                        value={formData.uniformidad?.grandes?.valor || ''}
-                        onChange={(e) => handleInputChange('uniformidad', {
-                          ...formData.uniformidad,
-                          grandes: { ...formData.uniformidad?.grandes, valor: parseFloat(e.target.value) }
-                        })}
-                        onBlur={handleFieldBlur}
-                      />
-                      <PhotoCapture 
-                        label="Grandes"
-                        photoUrl={formData.uniformidad?.grandes?.fotoUrl}
-                        onPhotoCapture={(file) => handlePhotoCapture('uniformidad.grandes.fotoUrl', file)}
-                        isUploading={isFieldUploading('uniformidad.grandes.fotoUrl')}
-                      />
-                    </div>
+                  <div className="space-y-2 p-2 xs:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h3 className="font-semibold text-base">Uniformidad</h3>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="pequenos">Pequeños</Label>
-                      <Input 
-                        id="pequenos" 
-                        type="number" 
-                        value={formData.uniformidad?.pequenos?.valor || ''}
-                        onChange={(e) => handleInputChange('uniformidad', {
-                          ...formData.uniformidad,
-                          pequenos: { ...formData.uniformidad?.pequenos, valor: parseFloat(e.target.value) }
-                        })}
-                        onBlur={handleFieldBlur}
-                      />
-                      <PhotoCapture 
-                        label="Pequeños"
-                        photoUrl={formData.uniformidad?.pequenos?.fotoUrl}
-                        onPhotoCapture={(file) => handlePhotoCapture('uniformidad.pequenos.fotoUrl', file)}
-                        isUploading={isFieldUploading('uniformidad.pequenos.fotoUrl')}
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 xs:gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="grandes">Grandes</Label>
+                        <Input
+                          id="grandes"
+                          type="number"
+                          value={formData.uniformidad?.grandes?.valor || ''}
+                          onChange={(e) => handleInputChange('uniformidad', {
+                            ...formData.uniformidad,
+                            grandes: { ...formData.uniformidad?.grandes, valor: parseFloat(e.target.value) }
+                          })}
+                          onBlur={handleFieldBlur}
+                        />
+                        <PhotoCapture
+                          label="Grandes"
+                          photoUrl={formData.uniformidad?.grandes?.fotoUrl}
+                          onPhotoCapture={(file) => handlePhotoCapture('uniformidad.grandes.fotoUrl', file)}
+                          isUploading={isFieldUploading('uniformidad.grandes.fotoUrl')}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="pequenos">Pequeños</Label>
+                        <Input
+                          id="pequenos"
+                          type="number"
+                          value={formData.uniformidad?.pequenos?.valor || ''}
+                          onChange={(e) => handleInputChange('uniformidad', {
+                            ...formData.uniformidad,
+                            pequenos: { ...formData.uniformidad?.pequenos, valor: parseFloat(e.target.value) }
+                          })}
+                          onBlur={handleFieldBlur}
+                        />
+                        <PhotoCapture
+                          label="Pequeños"
+                          photoUrl={formData.uniformidad?.pequenos?.fotoUrl}
+                          onPhotoCapture={(file) => handlePhotoCapture('uniformidad.pequenos.fotoUrl', file)}
+                          isUploading={isFieldUploading('uniformidad.pequenos.fotoUrl')}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {/* Defectos */}
@@ -767,7 +774,7 @@ export default function NewAnalysisPage() {
                 {productType !== 'CONTROL_PESOS' && (
                   <div className="space-y-2 p-2 xs:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <h3 className="font-semibold text-base">📸 Foto General</h3>
-                    <PhotoCapture 
+                    <PhotoCapture
                       label="Calidad General"
                       photoUrl={formData.fotoCalidad}
                       onPhotoCapture={(file) => handlePhotoCapture('fotoCalidad', file)}
@@ -776,52 +783,52 @@ export default function NewAnalysisPage() {
                   </div>
                 )}
 
-                </div>
+              </div>
 
-                {/* Columna derecha - Acciones y Observaciones (4 columnas en LG+) */}
-                <div className="lg:col-span-4 space-y-3 sm:space-y-4 lg:space-y-6">
-                  
-                  {/* Panel de Acciones - Sticky */}
-                  <div className="sticky top-24 z-10">
-                    <Card className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800 shadow-lg">
-                      <CardHeader className="pb-2 border-b border-gray-100 dark:border-gray-700">
-                        <CardTitle className="text-lg">Acciones</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-4 space-y-4">
-                        <Button type="submit" disabled={isSaving} className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 shadow-md transition-all hover:scale-[1.02]">
-                          {isSaving ? 'Guardando...' : '💾 Guardar Análisis'}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={() => router.back()} className="w-full">
-                          Cancelar
-                        </Button>
-                        <div className="text-xs text-center text-gray-500 dark:text-gray-400">
-                          {autoSaveState.lastSaved ? `Guardado: ${autoSaveState.lastSaved.toLocaleTimeString()}` : 'Cambios sin guardar'}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+              {/* Columna derecha - Acciones y Observaciones (4 columnas en LG+) */}
+              <div className="lg:col-span-4 space-y-3 sm:space-y-4 lg:space-y-6">
 
-                  {/* Observaciones */}
-                  <Card className="bg-white dark:bg-gray-800">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">📝 Observaciones</CardTitle>
+                {/* Panel de Acciones - Sticky */}
+                <div className="sticky top-24 z-10">
+                  <Card className="bg-white dark:bg-gray-800 border-blue-200 dark:border-blue-800 shadow-lg">
+                    <CardHeader className="pb-2 border-b border-gray-100 dark:border-gray-700">
+                      <CardTitle className="text-lg">Acciones</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <Textarea 
-                        id="observations" 
-                        placeholder="Escribe aquí cualquier observación relevante..."
-                        value={formData.observations || ''}
-                        onChange={(e) => handleInputChange('observations', e.target.value)}
-                        onBlur={handleFieldBlur}
-                        className="min-h-[150px]"
-                      />
+                    <CardContent className="pt-4 space-y-4">
+                      <Button type="submit" disabled={isSaving} className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 shadow-md transition-all hover:scale-[1.02]">
+                        {isSaving ? 'Guardando...' : '💾 Guardar Análisis'}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => router.back()} className="w-full">
+                        Cancelar
+                      </Button>
+                      <div className="text-xs text-center text-gray-500 dark:text-gray-400">
+                        {autoSaveState.lastSaved ? `Guardado: ${autoSaveState.lastSaved.toLocaleTimeString()}` : 'Cambios sin guardar'}
+                      </div>
                     </CardContent>
                   </Card>
-
                 </div>
+
+                {/* Observaciones */}
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">📝 Observaciones</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      id="observations"
+                      placeholder="Escribe aquí cualquier observación relevante..."
+                      value={formData.observations || ''}
+                      onChange={(e) => handleInputChange('observations', e.target.value)}
+                      onBlur={handleFieldBlur}
+                      className="min-h-[150px]"
+                    />
+                  </CardContent>
+                </Card>
+
               </div>
-            )}
-          </form>
+            </div>
+          )}
+        </form>
       </div>
     </main>
   );
