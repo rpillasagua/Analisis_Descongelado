@@ -90,6 +90,8 @@ export default function NewMultiAnalysisPage() {
 
     // UI state
     const [isSaving, setIsSaving] = useState(false);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // Generate ID on mount
@@ -163,9 +165,12 @@ export default function NewMultiAnalysisPage() {
             };
 
             await saveAnalysis(document);
+            setLastSaved(now);
+            setSaveError(null);
             console.log('✅ Document saved');
         } catch (error) {
             console.error('Error saving:', error);
+            setSaveError('Error al guardar');
         } finally {
             setIsSaving(false);
         }
@@ -303,7 +308,7 @@ export default function NewMultiAnalysisPage() {
                 <div className="max-w-4xl mx-auto">
                     <ProductTypeSelector
                         selectedType={productType}
-                        onTypeSelect={(type) => setProductType(type)}
+                        onSelect={(type) => setProductType(type)}
                     />
                 </div>
             </div>
@@ -339,7 +344,11 @@ export default function NewMultiAnalysisPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <AutoSaveIndicatorNew isSaving={isSaving} />
+                            <AutoSaveIndicatorNew
+                                isSaving={isSaving}
+                                lastSaved={lastSaved}
+                                error={saveError}
+                            />
                             <div
                                 className="w-12 h-12 rounded-full border-4 border-white"
                                 style={{ backgroundColor: colorHex }}
