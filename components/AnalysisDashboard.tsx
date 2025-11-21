@@ -71,13 +71,12 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
           {/* Search Bar - Centered & Enhanced */}
           <div className="max-w-md mx-auto relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8e8e8e] group-focus-within:text-[#262626] transition-colors" />
             <input
               type="text"
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#efefef] focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] shadow-sm"
+              className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-2xl px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-[#efefef] focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] shadow-sm text-center"
             />
           </div>
         </div>
@@ -85,20 +84,20 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
       <div className="max-w-5xl mx-auto p-4 pb-20 space-y-6">
         {/* Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex justify-center gap-3 pb-2">
           <button
             onClick={() => setFilterStatus('ALL')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${filterStatus === 'ALL'
-              ? 'bg-[#262626] text-white'
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all transform hover:scale-105 ${filterStatus === 'ALL'
+              ? 'bg-[#262626] text-white shadow-md'
               : 'bg-white border border-[#dbdbdb] text-[#262626] hover:bg-[#fafafa]'
               }`}
           >
             Todos
           </button>
           <button
-            onClick={() => setFilterStatus('EN_PROGRESO')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${filterStatus === 'EN_PROGRESO'
-              ? 'bg-[#262626] text-white'
+            onClick={() => setFilterStatus('COMPLETADO')}
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all transform hover:scale-105 ${filterStatus === 'COMPLETADO'
+              ? 'bg-[#262626] text-white shadow-md'
               : 'bg-white border border-[#dbdbdb] text-[#262626] hover:bg-[#fafafa]'
               }`}
           >

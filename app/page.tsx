@@ -139,7 +139,7 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
           {/* Logo / Brand */}
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent font-instagram">
-              QualityControl
+              Análisis en Descongelado
             </h1>
           </div>
 
@@ -155,11 +155,11 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
                     src={user.picture}
                     alt={user.name}
                     referrerPolicy="no-referrer"
-                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    className="w-6 h-6 rounded-full border-2 border-white object-cover"
                   />
                 </div>
               ) : (
-                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-600">
+                <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-600">
                   <span className="text-xs font-bold">{user.name.charAt(0)}</span>
                 </div>
               )}
