@@ -49,36 +49,36 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
   return (
     <div className="min-h-screen bg-[#fafafa]">
       {/* Header Sticky */}
-      <div className="sticky top-0 z-30 bg-white border-b border-[#dbdbdb] px-4 py-3 shadow-sm">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8e8e8e]" />
-              <input
-                type="text"
-                placeholder="Buscar por lote o código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#efefef] rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#dbdbdb] transition-all placeholder-[#8e8e8e] text-[#262626]"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowReportModal(true)}
-              className="p-2 text-[#262626] hover:bg-[#efefef] rounded-lg transition-colors"
-              title="Generar Reporte"
-            >
-              <FileText className="h-6 w-6" />
-            </button>
+      <div className="sticky top-0 z-30 bg-white border-b border-[#dbdbdb] px-4 py-4 shadow-sm">
+        <div className="max-w-5xl mx-auto space-y-4">
+          {/* Actions Row - Centered */}
+          <div className="flex justify-center items-center gap-3 sm:gap-4">
             <button
               onClick={() => router.push('/dashboard/tests/new')}
-              className="bg-[#0095f6] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1877f2] transition-colors flex items-center gap-2 shadow-sm"
+              className="bg-[#0095f6] text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1877f2] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-2 shadow-md"
             >
               <Plus className="h-5 w-5" />
-              <span className="hidden sm:inline">Nuevo Análisis</span>
+              <span>Nuevo Análisis</span>
             </button>
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="bg-white text-[#262626] border border-[#dbdbdb] px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#fafafa] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-2 shadow-sm"
+            >
+              <FileText className="h-5 w-5" />
+              <span>Reporte</span>
+            </button>
+          </div>
+
+          {/* Search Bar - Centered & Enhanced */}
+          <div className="max-w-md mx-auto relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#8e8e8e] group-focus-within:text-[#262626] transition-colors" />
+            <input
+              type="text"
+              placeholder="Buscar por lote o código..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#efefef] focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] shadow-sm"
+            />
           </div>
         </div>
       </div>
