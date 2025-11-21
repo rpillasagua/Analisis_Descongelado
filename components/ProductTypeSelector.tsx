@@ -17,10 +17,10 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
   if (selectedType && !isEditing) {
     return (
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-300 mb-3">
+        <label className="block text-base font-bold text-gray-900 mb-3">
           Tipo de producto seleccionado
         </label>
-        <div className="relative p-6">
+        <div className="relative p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="text-5xl">
@@ -30,10 +30,10 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {selectedType === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <div>
-                <span className="text-2xl font-bold text-slate-200">
+                <span className="text-2xl font-bold text-gray-900">
                   {PRODUCT_TYPE_LABELS[selectedType]}
                 </span>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                   Los campos del formulario se ajustan a este tipo de producto
                 </p>
               </div>
@@ -41,7 +41,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-300"
             >
               <Edit2 className="h-4 w-4" />
               Cambiar
@@ -55,12 +55,12 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
   // Mostrar selector completo si no hay selección o si está editando
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-slate-200 mb-3">
+      <label className="block text-base font-bold text-gray-900 mb-3">
         {selectedType ? 'Selecciona un nuevo tipo de producto *' : '¿Qué tipo de producto vas a descongelar? *'}
       </label>
       {selectedType && isEditing && (
-        <div className="mb-3 p-3 bg-yellow-900/20 border border-yellow-700 rounded-lg">
-          <p className="text-sm text-yellow-200">
+        <div className="mb-3 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
+          <p className="text-sm text-yellow-800 font-medium">
             ⚠️ Al cambiar el tipo de producto, los defectos registrados se perderán si no son compatibles.
           </p>
         </div>
@@ -75,10 +75,10 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
               setIsEditing(false);
             }}
             className={`
-              relative p-4 sm:p-6 rounded-lg border-2 transition-all duration-200
+              relative p-4 sm:p-6 rounded-2xl border-3 transition-all duration-200 hover:scale-105 active:scale-95
               ${selectedType === type
-                ? 'border-blue-500 bg-blue-900/30 shadow-lg'
-                : 'border-gray-600 hover:border-blue-700 bg-gray-800'
+                ? 'border-blue-600 bg-blue-50 shadow-xl ring-4 ring-blue-200'
+                : 'border-gray-300 hover:border-blue-400 bg-white hover:bg-gray-50 shadow-md'
               }
             `}
           >
@@ -94,19 +94,19 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 {type === 'CONTROL_PESOS' && '⚖️'}
               </div>
               <span className={`
-                text-base sm:text-lg font-semibold leading-tight
+                text-base sm:text-lg font-bold leading-tight
                 ${selectedType === type
-                  ? 'text-blue-300'
-                  : 'text-slate-200'
+                  ? 'text-blue-700'
+                  : 'text-gray-700'
                 }
               `}>
                 {PRODUCT_TYPE_LABELS[type]}
               </span>
             </div>
             {selectedType === type && (
-              <div className="absolute top-2 right-2">
-                <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <div className="absolute top-2 right-2 bg-blue-600 rounded-full p-1">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
             )}
@@ -118,7 +118,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
           <button
             type="button"
             onClick={() => setIsEditing(false)}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-2 border-gray-300"
           >
             Cancelar
           </button>
