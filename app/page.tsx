@@ -196,6 +196,37 @@ const NO_OP = () => { };
 
 export default function Home() {
   const { isAuthenticated, user, loading, login, logout } = useGoogleAuth();
+  const [initialAnalyses, setInitialAnalyses] = useState<any[]>([]);
+  const [loadingAnalyses, setLoadingAnalyses] = useState(false);
+
+  // Fetch analyses when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchAnalyses = async () => {
+        setLoadingAnalyses(true);
+        try {
+          // Import dynamically to avoid server-side issues if any
+          const { getAnalysesByDate } = await import('@/lib/analysisService');
+
+          // Get today's date in YYYY-MM-DD format
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          const today = `${year}-${month}-${day}`;
+
+          const data = await getAnalysesByDate(today);
+          setInitialAnalyses(data);
+        } catch (error) {
+          console.error('Error fetching initial analyses:', error);
+        } finally {
+          setLoadingAnalyses(false);
+        }
+      };
+
+      fetchAnalyses();
+    }
+  }, [isAuthenticated]);
 
   // Loading state
   if (loading) {
@@ -212,7 +243,13 @@ export default function Home() {
     <div className="min-h-screen pb-10">
       <AppHeader user={user} onLogout={logout} />
       <main className="animate-fade-in">
-        <AnalysisDashboard />
+        {loadingAnalyses ? (
+          <div className="flex justify-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <AnalysisDashboard initialAnalyses={initialAnalyses} />
+        )}
       </main>
     </div>
   );

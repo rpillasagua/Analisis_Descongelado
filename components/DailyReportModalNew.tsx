@@ -308,7 +308,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
               <label className="text-sm font-semibold text-[#262626]">Turno</label>
               <select
                 value={selectedShift}
-                onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
                 className="w-full bg-white border border-[#dbdbdb] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all text-[#262626] appearance-none"
                 style={{ colorScheme: 'light' }}
               >
