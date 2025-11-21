@@ -11,8 +11,17 @@ interface DailyReportModalProps {
   onClose: () => void;
 }
 
+// Función para obtener fecha local en formato YYYY-MM-DD
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
   const [isLoading, setIsLoading] = useState(false);
   const [analyses, setAnalyses] = useState<QualityAnalysis[]>([]);
   const [selectedShift, setSelectedShift] = useState<'ALL' | WorkShift>('ALL');
@@ -21,6 +30,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
   const handleGenerateReport = async () => {
     setIsLoading(true);
+    console.log(`🔍 Buscando análisis para fecha: ${selectedDate}, Turno: ${selectedShift}`);
     try {
       let data: QualityAnalysis[];
 
@@ -30,10 +40,11 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
         data = await getAnalysesByShift(selectedDate, selectedShift);
       }
 
+      console.log(`✅ Encontrados ${data.length} análisis`);
       setAnalyses(data);
 
       if (data.length === 0) {
-        alert('No se encontraron análisis para esta fecha/turno.');
+        alert(`No se encontraron análisis para la fecha ${selectedDate} y turno ${selectedShift}.`);
       }
     } catch (error: any) {
       console.error('Error al cargar análisis:', error);
@@ -266,7 +277,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-slate-700">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Reporte Diario de Análisis</h2>
           <button onClick={onClose} className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
@@ -274,7 +285,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
           {/* Selector de fecha */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Fecha</label>
