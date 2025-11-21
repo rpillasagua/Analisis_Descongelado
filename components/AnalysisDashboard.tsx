@@ -6,6 +6,7 @@ import { Plus, FileText, Search, Filter } from 'lucide-react';
 import { getAnalysesByDate, deleteAnalysis, updateAnalysis } from '@/lib/analysisService';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS, ANALYST_COLOR_HEX } from '@/lib/types';
 import DailyReportModal from '@/components/DailyReportModalNew';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 export default function AnalysisDashboard() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function AnalysisDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'TODOS' | 'EN_PROGRESO' | 'COMPLETADO'>('TODOS');
+
+  // Delete Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [analysisToDelete, setAnalysisToDelete] = useState<{ id: string, lote: string } | null>(null);
 
   useEffect(() => {
     loadAnalyses();
@@ -55,6 +60,25 @@ export default function AnalysisDashboard() {
 
   const handleEdit = (id: string, status?: string) => {
     router.push(`/dashboard/tests/new?id=${id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, id: string, lote: string) => {
+    e.stopPropagation();
+    setAnalysisToDelete({ id, lote });
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!analysisToDelete) return;
+
+    try {
+      await deleteAnalysis(analysisToDelete.id);
+      setAnalyses(prev => prev.filter(a => a.id !== analysisToDelete.id));
+      // Optional: Show success toast
+    } catch (error) {
+      console.error('Error eliminando análisis:', error);
+      alert('Error al eliminar el análisis');
+    }
   };
 
   const filteredAnalyses = analyses.filter(analysis => {
@@ -200,20 +224,17 @@ export default function AnalysisDashboard() {
                               {analysis.lote}
                             </h3>
 
-                            {/* Secondary Info: Code & Talla */}
-                            <div className="flex items-center gap-3 text-xs text-slate-400 mb-3">
-                              <span className="flex items-center gap-1">
-                                <span className="font-medium text-slate-500">Código:</span>
-                                {analysis.codigo}
-                              </span>
+                            {/* Secondary Info: Code & Talla - Improved Layout */}
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-3">
+                              <div className="flex flex-col">
+                                <span className="text-slate-500 font-medium">Código</span>
+                                <span className="text-slate-300 font-mono">{analysis.codigo}</span>
+                              </div>
                               {analysis.talla && (
-                                <>
-                                  <span className="text-slate-700">|</span>
-                                  <span className="flex items-center gap-1">
-                                    <span className="font-medium text-slate-500">Talla:</span>
-                                    {analysis.talla}
-                                  </span>
-                                </>
+                                <div className="flex flex-col">
+                                  <span className="text-slate-500 font-medium">Talla</span>
+                                  <span className="text-slate-300 font-mono">{analysis.talla}</span>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -234,8 +255,19 @@ export default function AnalysisDashboard() {
                         </div>
 
                         <div className="flex items-center justify-between pt-3 border-t border-slate-800/50">
+                          <div className="flex items-center gap-3">
+                            {/* Delete Button */}
+                            <button
+                              onClick={(e) => handleDeleteClick(e, analysis.id, analysis.lote)}
+                              className="text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-400/10 px-2 py-1 rounded transition-colors"
+                              title="Eliminar análisis"
+                            >
+                              Borrar
+                            </button>
+                          </div>
+
                           {analysis.status !== 'COMPLETADO' ? (
-                            <>
+                            <div className="flex items-center gap-3">
                               <span className="text-xs font-medium text-amber-500 flex items-center gap-1.5">
                                 <span className="relative flex h-2 w-2">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -252,7 +284,7 @@ export default function AnalysisDashboard() {
                               >
                                 Completar
                               </button>
-                            </>
+                            </div>
                           ) : (
                             <span className="text-xs font-medium text-emerald-500 flex items-center gap-1.5">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
@@ -274,6 +306,13 @@ export default function AnalysisDashboard() {
       <DailyReportModal
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemName={analysisToDelete?.lote}
       />
     </div >
   );
