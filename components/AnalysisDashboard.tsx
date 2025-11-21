@@ -125,13 +125,13 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                     )}
                   </div>
                   <div className="text-xs text-[#8e8e8e] font-medium">
-                    {new Date(analysis.fecha).toLocaleDateString()} • {analysis.hora}
+                    {new Date(analysis.date).toLocaleDateString()} • {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
                 <div
                   className="w-3 h-3 rounded-full ring-2 ring-white shadow-sm"
-                  style={{ backgroundColor: analysis.analistaColor || '#ccc' }}
-                  title={analysis.analista}
+                  style={{ backgroundColor: analysis.analystColor || '#ccc' }}
+                  title={analysis.createdBy}
                 />
               </div>
 
