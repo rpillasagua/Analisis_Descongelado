@@ -77,8 +77,8 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Lote y Código */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Lote, Código y Talla */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="lote">
                                 📦 Lote <span className="text-red-400">*</span>
@@ -102,6 +102,19 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                                 placeholder="Ej: C-789"
                                 value={codigo}
                                 onChange={(e) => setCodigo(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="talla">
+                                📏 Talla <span className="text-red-400">*</span>
+                            </Label>
+                            <Input
+                                id="talla"
+                                placeholder="Ej: 41-50"
+                                value={talla}
+                                onChange={(e) => setTalla(e.target.value)}
                                 required
                             />
                         </div>
