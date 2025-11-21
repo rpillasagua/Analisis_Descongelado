@@ -276,119 +276,99 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white rounded-xl shadow-lg border border-[#dbdbdb] overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white flex-shrink-0">
-          <h2 className="text-base font-semibold text-[#262626]">Reporte Diario</h2>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#efefef]">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-[#fafafa] rounded-full border border-[#dbdbdb]">
+              <Calendar className="h-4 w-4 text-[#262626]" />
+            </div>
+            <h2 className="text-sm font-semibold text-[#262626]">Reporte Diario</h2>
+          </div>
           <button
             onClick={onClose}
-            className="p-1 text-[#262626] hover:bg-gray-100 rounded-full transition-colors"
+            className="text-[#8e8e8e] hover:text-[#262626] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="p-4 space-y-5 overflow-y-auto flex-1 bg-white">
-          {/* Selector de fecha */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#8e8e8e] uppercase tracking-wide">Fecha</label>
-            <div className="relative">
+        {/* Content */}
+        <div className="p-4 space-y-4">
+          {/* Controls Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold text-[#8e8e8e] uppercase tracking-wide">Fecha</label>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#a8a8a8] transition-all text-[#262626]"
-                style={{ colorScheme: 'light' }}
+                className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#a8a8a8] transition-all text-[#262626]"
               />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold text-[#8e8e8e] uppercase tracking-wide">Turno</label>
+              <select
+                value={selectedShift}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
+                className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#a8a8a8] transition-all text-[#262626]"
+              >
+                <option value="ALL">Todos</option>
+                <option value="DIA">Día</option>
+                <option value="NOCHE">Noche</option>
+              </select>
             </div>
           </div>
 
-          {/* Selector de turno */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[#8e8e8e] uppercase tracking-wide">Turno</label>
-            <select
-              value={selectedShift}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-              className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#a8a8a8] transition-all text-[#262626] appearance-none"
-              style={{ colorScheme: 'light' }}
-            >
-              <option value="ALL">Todos los turnos</option>
-              <option value="DIA">Turno Día (7:10 AM - 7:10 PM)</option>
-              <option value="NOCHE">Turno Noche (7:10 PM - 7:10 AM)</option>
-            </select>
-          </div>
-
-          {/* Botón generar */}
+          {/* Action Button */}
           <button
             onClick={handleGenerateReport}
             disabled={isLoading}
-            className="w-full bg-[#0095f6] text-white px-4 py-2.5 rounded-lg hover:bg-[#1877f2] active:bg-[#1877f2] disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+            className="w-full bg-[#0095f6] text-white py-2 rounded-lg text-xs font-semibold hover:bg-[#1877f2] active:bg-[#1877f2] disabled:opacity-50 transition-all shadow-sm flex items-center justify-center gap-2"
           >
             {isLoading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               'Buscar Análisis'
             )}
           </button>
 
-          {!isLoading && analyses.length === 0 && (
-            <div className="text-center py-4">
-              <p className="text-xs text-[#8e8e8e]">
-                Selecciona una fecha y busca para ver resultados
-              </p>
-            </div>
-          )}
-
-          {/* Resumen */}
+          {/* Results Section */}
           {analyses.length > 0 && (
-            <div className="bg-[#fafafa] border border-[#dbdbdb] rounded-lg p-3">
-              <h3 className="font-semibold text-xs text-[#262626] mb-3 uppercase tracking-wide">Resumen</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white p-2 rounded border border-[#efefef]">
-                  <span className="text-[10px] text-[#8e8e8e] block mb-0.5">Total</span>
-                  <span className="font-semibold text-lg text-[#262626]">{analyses.length}</span>
+            <div className="space-y-3 pt-2 border-t border-[#efefef]">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-[#fafafa] border border-[#efefef] rounded p-2 text-center">
+                  <span className="block text-[10px] text-[#8e8e8e] uppercase">Total</span>
+                  <span className="block text-sm font-bold text-[#262626]">{analyses.length}</span>
                 </div>
-                <div className="bg-white p-2 rounded border border-[#efefef]">
-                  <span className="text-[10px] text-[#8e8e8e] block mb-0.5">Productos</span>
-                  <span className="font-semibold text-lg text-[#262626]">
-                    {new Set(analyses.map(a => a.codigo)).size}
-                  </span>
+                <div className="bg-[#fafafa] border border-[#efefef] rounded p-2 text-center">
+                  <span className="block text-[10px] text-[#8e8e8e] uppercase">Día</span>
+                  <span className="block text-sm font-bold text-[#262626]">{analyses.filter(a => a.shift === 'DIA').length}</span>
                 </div>
-                <div className="bg-white p-2 rounded border border-[#efefef]">
-                  <span className="text-[10px] text-[#8e8e8e] block mb-0.5">Día</span>
-                  <span className="font-semibold text-lg text-[#262626]">
-                    {analyses.filter(a => a.shift === 'DIA').length}
-                  </span>
-                </div>
-                <div className="bg-white p-2 rounded border border-[#efefef]">
-                  <span className="text-[10px] text-[#8e8e8e] block mb-0.5">Noche</span>
-                  <span className="font-semibold text-lg text-[#262626]">
-                    {analyses.filter(a => a.shift === 'NOCHE').length}
-                  </span>
+                <div className="bg-[#fafafa] border border-[#efefef] rounded p-2 text-center">
+                  <span className="block text-[10px] text-[#8e8e8e] uppercase">Noche</span>
+                  <span className="block text-sm font-bold text-[#262626]">{analyses.filter(a => a.shift === 'NOCHE').length}</span>
                 </div>
               </div>
+
+              <button
+                onClick={handleDownloadReport}
+                disabled={isLoading}
+                className="w-full bg-white border border-[#dbdbdb] text-[#262626] py-2 rounded-lg text-xs font-semibold hover:bg-[#fafafa] active:bg-[#efefef] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Descargar Excel
+              </button>
             </div>
           )}
-        </div>
 
-        {/* Footer with Download Button */}
-        {analyses.length > 0 && (
-          <div className="p-4 border-t border-gray-100 bg-white flex-shrink-0 pb-safe">
-            <button
-              onClick={handleDownloadReport}
-              disabled={isLoading}
-              className="w-full bg-white border border-[#dbdbdb] text-[#262626] px-4 py-2.5 rounded-lg hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm flex items-center justify-center gap-2 transition-all"
-            >
-              <Download className="h-4 w-4" />
-              {isLoading ? 'Generando...' : 'Descargar Excel'}
-            </button>
-            <p className="text-[10px] text-center text-[#8e8e8e] mt-2">
-              {analyses.length} análisis listos para exportar
+          {!isLoading && analyses.length === 0 && (
+            <p className="text-center text-[10px] text-[#8e8e8e] py-2">
+              Selecciona fecha y turno para generar reporte
             </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
