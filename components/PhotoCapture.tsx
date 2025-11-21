@@ -106,9 +106,9 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full p-3 bg-black/20 rounded-xl border border-white/5">
             <div className="relative group self-center sm:self-auto w-24 h-24 sm:w-20 sm:h-20 flex-shrink-0">
               {(isLoading || isRetrying || isUploading) && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/80 rounded-lg z-10 backdrop-blur-sm">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mb-1"></div>
-                  <span className="text-[10px] font-medium text-blue-400">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-lg z-10 backdrop-blur-sm transition-all duration-300">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500/30 border-t-blue-500 mb-2"></div>
+                  <span className="text-[10px] font-bold text-white tracking-wide uppercase">
                     {isUploading ? 'Subiendo...' : isRetrying ? 'Reconectando...' : 'Cargando...'}
                   </span>
                 </div>
@@ -315,15 +315,15 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                       No se puede recuperar automáticamente
                     </div>
                   )}
-                  {photoUrl && photoUrl.startsWith('http') && errorType !== 'blob' && (
+                  {photoUrl && photoUrl.includes('drive.google.com') && (
                     <a
-                      href={photoUrl}
+                      href={photoUrl.replace('export=download', 'view').replace('thumbnail', 'view')}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-medium bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-lg text-gray-300 inline-block text-center flex-1 transition-colors"
+                      className="text-xs font-bold bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg text-white flex-1 transition-colors shadow-lg text-center flex items-center justify-center gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Ver en navegador
+                      <span>Ver en Drive</span>
                     </a>
                   )}
                 </div>

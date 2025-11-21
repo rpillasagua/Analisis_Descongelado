@@ -205,6 +205,20 @@ class GoogleDriveService {
   }
 
   /**
+   * Comparte un archivo con un usuario específico
+   */
+  async shareWithUser(fileId: string, email: string): Promise<void> {
+    console.log(`👤 Compartiendo archivo ${fileId} con ${email}`);
+    try {
+      await this.addPermission(fileId, 'user', 'reader', email);
+      console.log(`✅ Archivo compartido exitosamente con ${email}`);
+    } catch (error: any) {
+      console.warn(`⚠️ No se pudo compartir con ${email}:`, error.message);
+      // No lanzamos error para no interrumpir el flujo principal
+    }
+  }
+
+  /**
    * Hace un archivo público para que pueda ser visualizado
    */
   async makeFilePublic(fileId: string): Promise<void> {
@@ -232,15 +246,6 @@ class GoogleDriveService {
         return;
       } catch (publicError: any) {
         console.warn('⚠️ No se pudo configurar permiso público ("anyone").', publicError.message);
-
-        // Si falla "anyone", es probable que la organización restrinja compartir fuera del dominio.
-        // Intentamos configurar permiso de dominio, pero necesitamos saber el dominio.
-        // Como no tenemos el dominio fácilmente accesible, intentaremos un fallback genérico
-        // o simplemente dejaremos que el usuario lo maneje manualmente si es estricto.
-
-        // NOTA: Para usar type='domain', se requiere el campo 'domain'. 
-        // Si no lo tenemos, no podemos usarlo.
-        // Por ahora, solo logueamos el error y no bloqueamos el flujo.
         console.log('ℹ️ El archivo se subió pero puede requerir permisos manuales si la organización es estricta.');
       }
     } catch (error) {
@@ -252,7 +257,16 @@ class GoogleDriveService {
   /**
    * Helper para agregar un permiso específico
    */
-  private async addPermission(fileId: string, type: string, role: string): Promise<void> {
+  private async addPermission(fileId: string, type: string, role: string, emailAddress?: string): Promise<void> {
+    const body: any = {
+      role: role,
+      type: type
+    };
+
+    if (emailAddress) {
+      body.emailAddress = emailAddress;
+    }
+
     const response = await fetch(
       `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
       {
@@ -261,10 +275,7 @@ class GoogleDriveService {
           'Authorization': `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          role: role,
-          type: type
-        })
+        body: JSON.stringify(body)
       }
     );
 
@@ -440,7 +451,8 @@ class GoogleDriveService {
     codigo: string,
     lote: string,
     photoType: string,
-    oldPhotoUrl?: string
+    oldPhotoUrl?: string,
+    viewerEmail?: string
   ): Promise<string> {
     try {
       console.log(`📸 Subiendo foto: ${photoType} (${file.size} bytes)`);
@@ -506,6 +518,16 @@ class GoogleDriveService {
       const url = await this.uploadFile(file, fileName, loteFolderId);
 
       console.log(`✅ Foto subida exitosamente: descongelado/${codigo}/${lote}/${fileName}`);
+
+      // Si se proporcionó un email de visualizador, compartir explícitamente
+      if (viewerEmail) {
+        // Extraer ID del archivo nuevo
+        const newFileId = this.extractFileIdFromUrl(url);
+        if (newFileId) {
+          await this.shareWithUser(newFileId, viewerEmail);
+        }
+      }
+
       console.log(`🔗 URL generada: ${url}`);
 
       return url;

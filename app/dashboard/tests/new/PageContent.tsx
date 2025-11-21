@@ -244,11 +244,16 @@ export default function NewMultiAnalysisPageContent() {
             const { googleDriveService } = await import('@/lib/googleDriveService');
             await googleDriveService.initialize();
 
+            const { googleAuthService } = await import('@/lib/googleAuthService');
+            const user = googleAuthService.getUser();
+
             const url = await googleDriveService.uploadAnalysisPhoto(
                 file,
                 codigo,
                 lote,
-                `${field}_analysis${activeAnalysisIndex + 1}`
+                `${field}_analysis${activeAnalysisIndex + 1}`,
+                undefined, // oldPhotoUrl
+                user?.email // viewerEmail
             );
 
             // Update analysis with photo URL
@@ -305,11 +310,16 @@ export default function NewMultiAnalysisPageContent() {
             const { googleDriveService } = await import('@/lib/googleDriveService');
             await googleDriveService.initialize();
 
+            const { googleAuthService } = await import('@/lib/googleAuthService');
+            const user = googleAuthService.getUser();
+
             const url = await googleDriveService.uploadAnalysisPhoto(
                 file,
                 codigo,
                 lote,
-                `peso_bruto_${registroId}_analysis${activeAnalysisIndex + 1}`
+                `peso_bruto_${registroId}_analysis${activeAnalysisIndex + 1}`,
+                undefined, // oldPhotoUrl
+                user?.email // viewerEmail
             );
 
             // Update the specific registro
@@ -685,6 +695,17 @@ export default function NewMultiAnalysisPageContent() {
                     </Card>
                 </div>
             </div>
+
+            {/* Global Upload Indicator */}
+            {uploadingPhotos.size > 0 && (
+                <div className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300 border border-blue-400/30 backdrop-blur-md">
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="flex flex-col">
+                        <span className="font-bold text-sm">Subiendo {uploadingPhotos.size} foto{uploadingPhotos.size > 1 ? 's' : ''}...</span>
+                        <span className="text-xs text-blue-100">Por favor espera</span>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
