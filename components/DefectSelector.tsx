@@ -13,7 +13,7 @@ import {
 interface DefectItem {
   key: string;
   label: string;
-  quantity: number;
+  quantity: number | '';
 }
 
 interface DefectSelectorProps {
@@ -57,17 +57,18 @@ export default function DefectSelector({
   useEffect(() => {
     const newSelectedDefects: { [key: string]: number } = {};
     selectedItems.forEach(item => {
-      if (item.quantity > 0) { // Solo incluir defectos con cantidad > 0
-        newSelectedDefects[item.key] = item.quantity;
-      }
+      // Incluir TODOS los defectos, incluso con cantidad 0 o vacía
+      // Convertir vacío ('') a 0
+      const quantity = item.quantity === '' ? 0 : item.quantity;
+      newSelectedDefects[item.key] = quantity;
     });
-    
+
     // Comparar con el estado actual para evitar bucles
     const currentDefects = selectedDefects || {};
-    const hasChanges = 
+    const hasChanges =
       Object.keys(newSelectedDefects).length !== Object.keys(currentDefects).length ||
       Object.keys(newSelectedDefects).some(key => newSelectedDefects[key] !== currentDefects[key]);
-    
+
     if (hasChanges) {
       onDefectsChange(newSelectedDefects);
     }
@@ -88,7 +89,7 @@ export default function DefectSelector({
     const newItem: DefectItem = {
       key: defectoKey,
       label,
-      quantity: 0
+      quantity: '' // Empezar con campo vacío en lugar de 0
     };
 
     setSelectedItems(prev => [...prev, newItem]);
@@ -101,13 +102,20 @@ export default function DefectSelector({
     setSelectedItems(prev => prev.filter(item => item.key !== defectoKey));
   };
 
-  const handleQuantityChange = (defectoKey: string, quantity: number) => {
+  const handleQuantityChange = (defectoKey: string, value: string) => {
     setSelectedItems(prev =>
-      prev.map(item =>
-        item.key === defectoKey
-          ? { ...item, quantity: Math.max(0, quantity) }
-          : item
-      )
+      prev.map(item => {
+        if (item.key === defectoKey) {
+          // Si está vacío, permitir campo vacío
+          if (value === '') {
+            return { ...item, quantity: '' };
+          }
+          // Convertir a número y asegurar que no sea negativo
+          const numValue = parseInt(value);
+          return { ...item, quantity: isNaN(numValue) ? 0 : Math.max(0, numValue) };
+        }
+        return item;
+      })
     );
   };
 
@@ -174,11 +182,10 @@ export default function DefectSelector({
             <button
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                isEditMode 
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+                }`}
               title={isEditMode ? 'Finalizar edición' : 'Editar defectos'}
             >
               {isEditMode ? (
@@ -210,7 +217,8 @@ export default function DefectSelector({
                     type="number"
                     min="0"
                     value={item.quantity}
-                    onChange={(e) => handleQuantityChange(item.key, parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleQuantityChange(item.key, e.target.value)}
+                    placeholder="0"
                     className="w-20 sm:w-24 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
