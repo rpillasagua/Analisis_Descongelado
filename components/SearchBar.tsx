@@ -8,9 +8,9 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ 
-  onSearch, 
-  placeholder = "Buscar por lote, proveedor o piscina..." 
+const SearchBar: React.FC<SearchBarProps> = ({
+  onSearch,
+  placeholder = "Buscar por lote, proveedor o piscina..."
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -32,7 +32,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
-          className="block w-full px-4 py-3 sm:py-2.5 border-2 border-blue-500 rounded-lg bg-gray-900 dark:bg-gray-800 text-white font-medium placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200 hover:border-blue-400 text-base"
+          className="block w-full px-4 py-2.5 bg-[#efefef] border-none rounded-lg text-[#262626] placeholder-[#8e8e8e] focus:ring-0 focus:bg-white focus:shadow-sm transition-all duration-200 text-sm"
         />
         {searchTerm && (
           <button

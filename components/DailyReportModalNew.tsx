@@ -278,24 +278,26 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col h-full overflow-hidden">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
-            <h2 className="text-2xl font-bold text-gray-900">Reporte Diario de Análisis</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-2xl border border-[#dbdbdb] flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-[#dbdbdb] bg-white flex-shrink-0">
+            <h2 className="text-lg font-bold text-[#262626]">Reporte Diario</h2>
+            <button onClick={onClose} className="text-[#262626] hover:text-gray-500 transition-colors">
               <X className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="p-6 space-y-6 overflow-y-auto flex-1">
+          {/* Scrollable Content */}
+          <div className="p-6 space-y-6 overflow-y-auto flex-1 bg-[#fafafa]">
             {/* Selector de fecha */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Fecha</label>
+              <label className="text-sm font-semibold text-[#262626]">Fecha</label>
               <div className="relative">
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="flex min-h-[44px] w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full bg-white border border-[#dbdbdb] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all text-[#262626]"
                   style={{ colorScheme: 'light' }}
                 />
               </div>
@@ -303,11 +305,11 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
             {/* Selector de turno */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Turno</label>
+              <label className="text-sm font-semibold text-[#262626]">Turno</label>
               <select
                 value={selectedShift}
                 onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                className="flex min-h-[44px] w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full bg-white border border-[#dbdbdb] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all text-[#262626] appearance-none"
                 style={{ colorScheme: 'light' }}
               >
                 <option value="ALL">Todos los turnos</option>
@@ -320,64 +322,64 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
             <button
               onClick={handleGenerateReport}
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white px-6 py-3 min-h-[48px] rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base shadow-lg hover:shadow-xl transition-all"
+              className="w-full bg-[#0095f6] text-white px-6 py-3 rounded-lg hover:bg-[#1877f2] active:bg-[#1877f2] disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all shadow-sm"
             >
-              {isLoading ? '⏳ Buscando...' : '🔍 Paso 1: Buscar Análisis'}
+              {isLoading ? 'Buscando...' : 'Buscar Análisis'}
             </button>
             {!isLoading && analyses.length === 0 && (
-              <p className="text-sm text-center text-gray-600 mt-2">
-                👆 Haz clic para buscar los análisis de la fecha seleccionada
+              <p className="text-xs text-center text-[#8e8e8e] mt-2">
+                Selecciona una fecha y busca para ver resultados
               </p>
             )}
 
             {/* Resumen */}
             {analyses.length > 0 && (
-              <div className="border-2 border-gray-200 rounded-xl p-5 bg-gradient-to-br from-blue-50 to-indigo-50">
-                <h3 className="font-bold text-lg mb-4 text-gray-900">Resumen</h3>
+              <div className="bg-white border border-[#dbdbdb] rounded-lg p-4">
+                <h3 className="font-semibold text-sm mb-4 text-[#262626]">Resumen del Día</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-700 font-medium">Total de análisis:</p>
-                    <p className="font-bold text-2xl text-blue-600">{analyses.length}</p>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#8e8e8e]">Total</span>
+                    <span className="font-bold text-xl text-[#262626]">{analyses.length}</span>
                   </div>
-                  <div>
-                    <p className="text-gray-700 font-medium">Turno Día:</p>
-                    <p className="font-bold text-2xl text-blue-600">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#8e8e8e]">Día</span>
+                    <span className="font-bold text-xl text-[#262626]">
                       {analyses.filter(a => a.shift === 'DIA').length}
-                    </p>
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-gray-700 font-medium">Turno Noche:</p>
-                    <p className="font-bold text-2xl text-blue-600">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#8e8e8e]">Noche</span>
+                    <span className="font-bold text-xl text-[#262626]">
                       {analyses.filter(a => a.shift === 'NOCHE').length}
-                    </p>
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-gray-700 font-medium">Productos únicos:</p>
-                    <p className="font-bold text-2xl text-blue-600">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#8e8e8e]">Productos</span>
+                    <span className="font-bold text-xl text-[#262626]">
                       {new Set(analyses.map(a => a.codigo)).size}
-                    </p>
+                    </span>
                   </div>
                 </div>
               </div>
             )}
-
-            {/* Botón descargar */}
-            {analyses.length > 0 && (
-              <div className="space-y-2">
-                <button
-                  onClick={handleDownloadReport}
-                  disabled={isLoading}
-                  className="w-full bg-green-600 text-white px-6 py-3 min-h-[48px] rounded-lg hover:bg-green-700 active:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all"
-                >
-                  <Download className="h-5 w-5" />
-                  {isLoading ? '📊 Generando Excel...' : '⬇️ Paso 2: Descargar Reporte Excel'}
-                </button>
-                <p className="text-sm text-center text-gray-700 font-medium">
-                  ✅ {analyses.length} análisis encontrados. El Excel se descargará automáticamente.
-                </p>
-              </div>
-            )}
           </div>
+
+          {/* Footer with Download Button */}
+          {analyses.length > 0 && (
+            <div className="p-4 border-t border-[#dbdbdb] bg-white flex-shrink-0">
+              <button
+                onClick={handleDownloadReport}
+                disabled={isLoading}
+                className="w-full bg-white border border-[#dbdbdb] text-[#262626] px-6 py-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+              >
+                <Download className="h-4 w-4" />
+                {isLoading ? 'Generando...' : 'Descargar Excel'}
+              </button>
+              <p className="text-xs text-center text-[#8e8e8e] mt-2">
+                {analyses.length} análisis listos para exportar
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

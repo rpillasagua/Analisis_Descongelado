@@ -20,10 +20,10 @@ interface InitialFormProps {
 }
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    <input {...props} style={{ colorScheme: 'dark' }} className="flex min-h-[44px] w-full rounded-lg border-2 border-slate-600 bg-slate-800 text-slate-100 px-3 py-2 text-sm sm:text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 shadow-sm transition-all placeholder:text-slate-400" />;
+    <input {...props} style={{ colorScheme: 'light' }} className="w-full bg-white border border-[#dbdbdb] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all text-[#262626] placeholder-gray-400" />;
 
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-    <label {...props} className="text-sm font-medium leading-tight text-slate-200" />;
+    <label {...props} className="text-sm font-semibold text-[#262626] block mb-1" />;
 
 export default function InitialForm({ onComplete, initialData }: InitialFormProps) {
     const [lote, setLote] = useState(initialData?.lote || '');
@@ -65,23 +65,23 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
     const isValid = lote.trim() && codigo.trim() && talla.trim() && color !== null;
 
     return (
-        <div className="max-w-3xl mx-auto">
-            <div className="glass-card rounded-2xl p-6 sm:p-8">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                        📋 Información Básica del Análisis
+        <div className="max-w-xl mx-auto">
+            <div className="bg-white rounded-xl shadow-sm border border-[#dbdbdb] p-6 sm:p-8">
+                <div className="mb-8 text-center">
+                    <h2 className="text-xl font-bold text-[#262626] mb-2">
+                        Nuevo Análisis
                     </h2>
-                    <p className="text-gray-400 text-sm">
-                        Completa estos campos obligatorios para comenzar. Una vez guardados, podrás realizar múltiples análisis para este lote.
+                    <p className="text-[#8e8e8e] text-sm">
+                        Ingresa los datos básicos para comenzar.
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Lote, Código y Talla */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
+                    <div className="space-y-4">
+                        <div>
                             <Label htmlFor="lote">
-                                📦 Lote <span className="text-red-400">*</span>
+                                Lote <span className="text-red-500">*</span>
                             </Label>
                             <Input
                                 id="lote"
@@ -93,9 +93,9 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div>
                             <Label htmlFor="codigo">
-                                🔢 Código <span className="text-red-400">*</span>
+                                Código <span className="text-red-500">*</span>
                             </Label>
                             <Input
                                 id="codigo"
@@ -106,9 +106,9 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             />
                         </div>
 
-                        <div className="space-y-2">
+                        <div>
                             <Label htmlFor="talla">
-                                📏 Talla <span className="text-red-400">*</span>
+                                Talla <span className="text-red-500">*</span>
                             </Label>
                             <Input
                                 id="talla"
@@ -122,33 +122,26 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
 
                     {/* Color del Analista */}
                     <AnalystColorSelector
-                        selectedColor={color}
-                        onColorChange={setColor}
+                        selectedColor={color || ''}
+                        onSelect={(c) => setColor(c as AnalystColor)}
                     />
 
                     {/* Submit Button */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <div className="pt-2">
                         <button
                             type="submit"
                             disabled={!isValid}
                             className={`
-                flex-1 px-6 py-3 rounded-xl font-semibold text-base min-h-[48px]
-                transition-all shadow-lg
-                ${isValid
-                                    ? 'bg-gradient-to-br from-[#06b6d4] to-[#0891b2] text-white hover:from-[#0891b2] hover:to-[#067e8f] hover:scale-105 active:scale-95'
-                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                w-full px-6 py-3 rounded-lg font-semibold text-sm transition-all shadow-sm
+                                ${isValid
+                                    ? 'bg-[#0095f6] text-white hover:bg-[#1877f2] active:bg-[#1877f2]'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }
-              `}
+                            `}
                         >
-                            ✅ Guardar y Continuar
+                            Comenzar Análisis
                         </button>
                     </div>
-
-                    {!isValid && (
-                        <p className="text-sm text-gray-500 text-center">
-                            Completa los campos obligatorios y selecciona tu color para continuar
-                        </p>
-                    )}
                 </form>
             </div>
         </div>

@@ -14,10 +14,10 @@ interface ControlPesosBrutosProps {
 }
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-  <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-gray-300 bg-white text-gray-900 px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 dark:border-gray-600 dark:bg-slate-700 dark:text-white shadow-sm transition-all placeholder:text-gray-400" />;
+  <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border border-[#dbdbdb] bg-white text-[#262626] px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-gray-400 shadow-sm transition-all placeholder-gray-400" />;
 
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-  <label {...props} className="text-xs sm:text-sm font-medium leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700 dark:text-gray-300" />;
+  <label {...props} className="text-xs sm:text-sm font-medium leading-tight text-[#262626]" />;
 
 export default function ControlPesosBrutos({
   registros,
@@ -98,8 +98,8 @@ export default function ControlPesosBrutos({
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               title={isEditMode ? 'Finalizar edición' : 'Editar registros'}
             >

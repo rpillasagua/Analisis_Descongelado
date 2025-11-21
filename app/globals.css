@@ -2,71 +2,94 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Professional Corporate Design */
+/* Instagram-inspired Professional Theme */
+:root {
+  --ig-primary-button: #0095f6;
+  --ig-primary-button-hover: #1877f2;
+  --ig-secondary-background: #fafafa;
+  --ig-border-color: #dbdbdb;
+  --ig-text-primary: #262626;
+  --ig-text-secondary: #8e8e8e;
+  --ig-link: #00376b;
+}
+
 body {
-  background: #f8fafc;
-  color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--ig-secondary-background);
+  color: var(--ig-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle background pattern for depth */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgb(239, 246, 255) 0%, transparent 50%),
-    radial-gradient(circle at 90% 80%, rgb(243, 244, 246) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Mobile Touch Targets */
-@media (max-width: 768px) {
-  body {
-    font-size: 16px;
-  }
-
-  input[type="text"],
-  input[type="date"],
-  input[type="number"],
-  select,
-  textarea {
-    min-height: 44px;
-    font-size: 16px;
-  }
-
-  button {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* Professional Scrollbar */
+/* Clean, subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: #c7c7c7;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #a0a0a0;
 }
 
-/* Smooth transitions */
-* {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+/* Utilities */
+.ig-card {
+  background-color: white;
+  border: 1px solid var(--ig-border-color);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.ig-input {
+  background: #fafafa;
+  border: 1px solid var(--ig-border-color);
+  border-radius: 3px;
+  padding: 9px 8px 7px;
+  outline: none;
+}
+
+.ig-input:focus {
+  border-color: #a8a8a8;
+}
+
+.ig-button-primary {
+  background-color: var(--ig-primary-button);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 7px 16px;
+  transition: background-color 0.2s;
+}
+
+.ig-button-primary:hover {
+  background-color: var(--ig-primary-button-hover);
+}
+
+.ig-button-secondary {
+  background-color: transparent;
+  color: var(--ig-text-primary);
+  border: 1px solid var(--ig-border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 7px 16px;
+}
+
+.ig-button-secondary:hover {
+  background-color: #efefef;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .ig-card {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
 }

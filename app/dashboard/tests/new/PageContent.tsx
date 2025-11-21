@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import ProductTypeSelector from '@/components/ProductTypeSelector';
 import InitialForm from '@/components/InitialForm';
 import AnalysisTabs from '@/components/AnalysisTabs';
@@ -10,6 +10,7 @@ import PhotoCapture from '@/components/PhotoCapture';
 import ControlPesosBrutos from '@/components/ControlPesosBrutos';
 import DefectSelector from '@/components/DefectSelector';
 import AutoSaveIndicatorNew from '@/components/AutoSaveIndicatorNew';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import {
     ProductType,
     QualityAnalysis,
@@ -29,16 +30,16 @@ const createEmptyAnalysis = (numero: number): Analysis => ({
 
 // Componentes UI Modernizados (Clean & Professional)
 const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`card overflow-hidden ${className}`}>{children}</div>;
+    <div className={`bg-white rounded-xl border border-[#dbdbdb] overflow-hidden ${className}`}>{children}</div>;
 
 const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`px-6 py-4 border-b border-slate-800 bg-slate-900/50 ${className}`}>{children}</div>;
+    <div className={`px-6 py-4 border-b border-[#efefef] bg-white ${className}`}>{children}</div>;
 
 const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <h2 className={`text-lg font-semibold text-slate-100 flex items-center gap-2 ${className}`}>{children}</h2>;
+    <h2 className={`text-base font-bold text-[#262626] flex items-center gap-2 ${className}`}>{children}</h2>;
 
 const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <p className={`text-sm text-slate-400 mt-0.5 ${className}`}>{children}</p>;
+    <p className={`text-xs text-[#8e8e8e] mt-0.5 ${className}`}>{children}</p>;
 
 const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
     <div className={`p-6 ${className}`}>{children}</div>;
@@ -53,23 +54,23 @@ interface ButtonProps {
 }
 
 const Button = ({ children, onClick, className = '', variant = 'default', type = 'button', disabled = false }: ButtonProps) => {
-    const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all h-10 px-4 disabled:opacity-50 disabled:cursor-not-allowed";
+    const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition-all h-10 px-4 disabled:opacity-50 disabled:cursor-not-allowed";
     const variantClasses = {
-        default: 'btn-primary shadow-sm',
-        outline: 'btn-secondary',
-        ghost: 'text-slate-400 hover:text-slate-100 hover:bg-slate-800',
+        default: 'bg-[#0095f6] text-white hover:bg-[#1877f2] shadow-sm',
+        outline: 'bg-white text-[#262626] border border-[#dbdbdb] hover:bg-gray-50',
+        ghost: 'text-[#8e8e8e] hover:text-[#262626] hover:bg-gray-100',
     };
     return <button disabled={disabled} type={type} onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>{children}</button>;
 };
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    <input {...props} className="modern-input w-full px-3 py-2 text-sm" />;
+    <input {...props} className="w-full px-3 py-2 text-sm bg-[#fafafa] border border-[#dbdbdb] rounded-md focus:outline-none focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626]" />;
 
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-    <label {...props} className="text-sm font-medium text-slate-300 mb-1.5 block" />;
+    <label {...props} className="text-xs font-semibold text-[#262626] mb-2 block" />;
 
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
-    <textarea {...props} className="modern-input w-full px-3 py-2 text-sm min-h-[100px]" />;
+    <textarea {...props} className="w-full px-3 py-2 text-sm bg-[#fafafa] border border-[#dbdbdb] rounded-md focus:outline-none focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] min-h-[100px]" />;
 
 export default function NewMultiAnalysisPageContent() {
     const router = useRouter();
@@ -99,6 +100,19 @@ export default function NewMultiAnalysisPageContent() {
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const handleDeleteAnalysis = async () => {
+        if (!analysisId) return;
+        try {
+            const { deleteAnalysis } = await import('@/lib/analysisService');
+            await deleteAnalysis(analysisId);
+            router.push('/');
+        } catch (error) {
+            console.error('Error deleting analysis:', error);
+            alert('Error al eliminar el análisis');
+        }
+    };
 
     // Load existing analysis if id parameter is present
     useEffect(() => {
@@ -492,7 +506,7 @@ export default function NewMultiAnalysisPageContent() {
                                             step="0.01"
                                             placeholder="0.00"
                                             value={currentAnalysis.pesoBruto?.valor || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 pesoBruto: {
                                                     ...currentAnalysis.pesoBruto,
                                                     valor: parseFloat(e.target.value) || undefined
@@ -516,7 +530,7 @@ export default function NewMultiAnalysisPageContent() {
                                             step="0.01"
                                             placeholder="0.00"
                                             value={currentAnalysis.pesoCongelado?.valor || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 pesoCongelado: {
                                                     ...currentAnalysis.pesoCongelado,
                                                     valor: parseFloat(e.target.value) || undefined
@@ -540,7 +554,7 @@ export default function NewMultiAnalysisPageContent() {
                                             step="0.01"
                                             placeholder="0.00"
                                             value={currentAnalysis.pesoNeto?.valor || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 pesoNeto: {
                                                     ...currentAnalysis.pesoNeto,
                                                     valor: parseFloat(e.target.value) || undefined
@@ -565,7 +579,7 @@ export default function NewMultiAnalysisPageContent() {
                                             type="number"
                                             placeholder="0"
                                             value={currentAnalysis.conteo || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 conteo: parseInt(e.target.value) || undefined
                                             })}
                                         />
@@ -601,7 +615,7 @@ export default function NewMultiAnalysisPageContent() {
                                             step="0.01"
                                             placeholder="0.00"
                                             value={currentAnalysis.uniformidad?.grandes?.valor || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 uniformidad: {
                                                     ...currentAnalysis.uniformidad,
                                                     grandes: {
@@ -627,7 +641,7 @@ export default function NewMultiAnalysisPageContent() {
                                             step="0.01"
                                             placeholder="0.00"
                                             value={currentAnalysis.uniformidad?.pequenos?.valor || ''}
-                                            onChange={(e) => updateCurrentAnalysis({
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
                                                 uniformidad: {
                                                     ...currentAnalysis.uniformidad,
                                                     pequenos: {
@@ -689,10 +703,21 @@ export default function NewMultiAnalysisPageContent() {
                             <Textarea
                                 placeholder="Escribe cualquier observación adicional aquí..."
                                 value={currentAnalysis.observations || ''}
-                                onChange={(e) => updateCurrentAnalysis({ observations: e.target.value })}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => updateCurrentAnalysis({ observations: e.target.value })}
                             />
                         </CardContent>
                     </Card>
+
+                    {/* Delete Button */}
+                    <div className="pt-4 flex justify-center">
+                        <button
+                            onClick={() => setShowDeleteModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Borrar Análisis
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -706,6 +731,15 @@ export default function NewMultiAnalysisPageContent() {
                     </div>
                 </div>
             )}
+
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteAnalysis}
+                analysisCode={codigo}
+                analysisLote={lote}
+                type="confirmar"
+            />
         </div>
     );
 }
