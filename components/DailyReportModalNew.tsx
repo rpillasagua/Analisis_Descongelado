@@ -285,7 +285,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
           {/* Selector de fecha */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Fecha</label>

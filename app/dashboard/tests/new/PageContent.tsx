@@ -373,7 +373,7 @@ export default function NewMultiAnalysisPageContent() {
                 <div className="max-w-4xl mx-auto">
                     {/* Botón Volver al Dashboard */}
                     <button
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/')}
                         className="flex items-center gap-2 px-4 py-2.5 mb-6 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-lg transition-all border border-slate-800 hover:border-slate-700"
                     >
                         <ArrowLeft size={20} />
