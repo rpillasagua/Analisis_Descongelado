@@ -56,7 +56,7 @@ export default function AnalystColorSelector({
 
                             {/* Label */}
                             <span className={`
-                text-sm font-semibold transition-colors text-white
+                text-base font-bold transition-colors text-white
               `}>
                                 {ANALYST_COLOR_LABELS[color]}
                             </span>
