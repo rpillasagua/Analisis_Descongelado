@@ -55,7 +55,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
   // Mostrar selector completo si no hay selección o si está editando
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+      <label className="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-3">
         {selectedType ? 'Selecciona un nuevo tipo de producto *' : '¿Qué tipo de producto vas a descongelar? *'}
       </label>
       {selectedType && isEditing && (

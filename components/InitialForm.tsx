@@ -20,10 +20,10 @@ interface InitialFormProps {
 }
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border-2 border-[rgba(6,182,212,0.2)] bg-[rgba(6,182,212,0.05)] text-[#f3f4f6] px-3 py-2 text-xs sm:text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#06b6d4] focus-visible:border-[#06b6d4] shadow-sm transition-all placeholder:text-[#6b7280]" />;
+    <input {...props} style={{ colorScheme: 'dark' }} className="flex min-h-[44px] w-full rounded-lg border-2 border-slate-600 bg-slate-800 text-slate-100 px-3 py-2 text-sm sm:text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 shadow-sm transition-all placeholder:text-slate-400" />;
 
 const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-    <label {...props} className="text-xs sm:text-sm font-medium leading-tight text-[#f3f4f6]" />;
+    <label {...props} className="text-sm font-medium leading-tight text-slate-200" />;
 
 export default function InitialForm({ onComplete, initialData }: InitialFormProps) {
     const [lote, setLote] = useState(initialData?.lote || '');
@@ -127,7 +127,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             type="submit"
                             disabled={!isValid}
                             className={`
-                flex-1 px-6 py-3 rounded-xl font-semibold text-base
+                flex-1 px-6 py-3 rounded-xl font-semibold text-base min-h-[48px]
                 transition-all shadow-lg
                 ${isValid
                                     ? 'bg-gradient-to-br from-[#06b6d4] to-[#0891b2] text-white hover:from-[#0891b2] hover:to-[#067e8f] hover:scale-105 active:scale-95'
