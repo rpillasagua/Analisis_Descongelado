@@ -138,7 +138,7 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
         <div className="flex justify-between items-center">
           {/* Logo / Brand */}
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent font-instagram">
+            <h1 className="text-sm font-bold text-[#262626] font-instagram tracking-wide">
               Análisis en Descongelado
             </h1>
           </div>
