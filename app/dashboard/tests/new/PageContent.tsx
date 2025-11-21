@@ -72,6 +72,45 @@ const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
     <textarea {...props} className="w-full px-3 py-2 text-sm bg-[#fafafa] border border-[#dbdbdb] rounded-md focus:outline-none focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] min-h-[100px]" />;
 
+const ViewModeSelector = ({ mode, onChange }: { mode: 'compact' | 'loose'; onChange: (m: 'compact' | 'loose') => void }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="relative mb-4">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm"
+            >
+                <span>👁️ Apariencia</span>
+            </button>
+
+            {isOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 p-1.5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                    <button
+                        onClick={() => { onChange('compact'); setIsOpen(false); }}
+                        className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-3 ${mode === 'compact' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="w-5 h-5 flex items-center justify-center border border-current rounded-[4px] bg-white">
+                            <span className="w-3 h-3 bg-current rounded-[1.5px]" />
+                        </span>
+                        Compactado
+                    </button>
+                    <button
+                        onClick={() => { onChange('loose'); setIsOpen(false); }}
+                        className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-3 ${mode === 'loose' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="w-5 h-5 flex items-center justify-center border border-current rounded-[4px] bg-white gap-[2px]">
+                            <span className="w-1.5 h-1.5 bg-current rounded-[1px]" />
+                            <span className="w-1.5 h-1.5 bg-current rounded-[1px]" />
+                        </span>
+                        Suelto
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function NewMultiAnalysisPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -101,16 +140,23 @@ export default function NewMultiAnalysisPageContent() {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [viewMode, setViewMode] = useState<'compact' | 'loose'>('loose');
 
     const handleDeleteAnalysis = async () => {
         if (!analysisId) return;
         try {
+            // No usamos setIsLoading(true) aquí para evitar que el modal se desmonte
+            // El modal maneja su propio estado de carga (isDeleting)
             const { deleteAnalysis } = await import('@/lib/analysisService');
             await deleteAnalysis(analysisId);
+
+            // Forzar refresco de datos y redirigir
+            router.refresh();
             router.push('/');
         } catch (error) {
             console.error('Error deleting analysis:', error);
-            alert('Error al eliminar el análisis');
+            alert('Error al eliminar el análisis. Por favor intenta de nuevo.');
+            // setIsLoading(false); // Ya no es necesario
         }
     };
 
@@ -488,6 +534,11 @@ export default function NewMultiAnalysisPageContent() {
 
                 {/* Current Analysis Form */}
                 <div className="space-y-6">
+                    {/* Appearance Selector */}
+                    <div className="flex justify-end">
+                        <ViewModeSelector mode={viewMode} onChange={setViewMode} />
+                    </div>
+
                     {/* Pesos Section */}
                     {productType !== 'CONTROL_PESOS' && (
                         <Card>
@@ -495,8 +546,8 @@ export default function NewMultiAnalysisPageContent() {
                                 <CardTitle>⚖️ Pesos</CardTitle>
                                 <CardDescription>Registra los pesos con fotos</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6'}>
+                                <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6'}>
                                     {/* Peso Bruto */}
                                     <div className="space-y-3">
                                         <Label htmlFor="peso-bruto">Peso Bruto (kg)</Label>
@@ -605,8 +656,8 @@ export default function NewMultiAnalysisPageContent() {
                             <CardHeader>
                                 <CardTitle>📏 Uniformidad</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6'}>
+                                <div className={viewMode === 'compact' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
                                     {/* Grandes */}
                                     <div className="space-y-3">
                                         <Label>Grandes (kg)</Label>
@@ -711,7 +762,11 @@ export default function NewMultiAnalysisPageContent() {
                     {/* Delete Button */}
                     <div className="pt-4 flex justify-center">
                         <button
-                            onClick={() => setShowDeleteModal(true)}
+                            type="button"
+                            onClick={() => {
+                                console.log('Delete button clicked');
+                                setShowDeleteModal(true);
+                            }}
                             className="flex items-center gap-2 px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                         >
                             <Trash2 className="w-4 h-4" />

@@ -395,23 +395,37 @@ class GoogleDriveService {
         // Continuar de todos modos
       }
 
-      // ESTRATEGIA DE URLs (en orden de prioridad):
-      // 1. thumbnailLink (más estable, menos rate limiting) - escalado a 2000px para calidad
-      // 2. webViewLink (preview page, siempre funciona)
-      // 3. Construir URL de visualización con file/d/{id}/view
-      let publicUrl: string;
+      // ESTRATEGIA DE URLs:
+      // 1. thumbnailLink: Es la más confiable para <img> tags (googleusercontent.com), evitamos 403s.
+      //    Viene pequeña (s220), así que la agrandamos a s2000.
+      // 2. uc?export=view: Fallback si no hay thumbnail.
 
-      if (data.thumbnailLink) {
-        // thumbnailLink viene como =s220, lo cambiamos a =s2000 para mejor calidad
-        publicUrl = data.thumbnailLink.replace('=s220', '=s2000');
-        console.log(`🔗 Usando thumbnailLink (calidad mejorada): ${publicUrl}`);
-      } else if (data.webViewLink) {
-        publicUrl = data.webViewLink;
-        console.log(`🔗 Usando webViewLink: ${publicUrl}`);
+      let publicUrl: string;
+      let thumbnailLink = data.thumbnailLink;
+
+      // Si no hay thumbnailLink, intentamos obtenerlo nuevamente después de un breve delay
+      if (!thumbnailLink) {
+        console.log('⚠️ thumbnailLink no disponible inmediatamente, reintentando obtener metadatos...');
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos
+        try {
+          const fileMetadata = await this.getFile(data.id);
+          if (fileMetadata && fileMetadata.thumbnailLink) {
+            thumbnailLink = fileMetadata.thumbnailLink;
+            console.log('✅ thumbnailLink recuperado en segundo intento');
+          }
+        } catch (e) {
+          console.warn('⚠️ Falló el reintento de obtener metadatos:', e);
+        }
+      }
+
+      if (thumbnailLink) {
+        // Reemplazar el tamaño (=s220) por uno grande (=s2000) para mantener calidad
+        publicUrl = thumbnailLink.replace(/=s\d+/, '=s2000');
+        console.log(`🔗 Usando thumbnailLink optimizado: ${publicUrl}`);
       } else {
-        // Fallback: URL de visualización estándar
-        publicUrl = `https://drive.google.com/file/d/${data.id}/view`;
-        console.log(`🔗 Usando URL de visualización: ${publicUrl}`);
+        // Fallback a la URL directa
+        publicUrl = `https://drive.google.com/uc?export=view&id=${data.id}`;
+        console.log(`🔗 Usando URL directa (fallback): ${publicUrl}`);
       }
 
       return publicUrl;
@@ -419,6 +433,29 @@ class GoogleDriveService {
       console.error('❌ Error uploading file:', error);
       throw error;
     }
+  }
+
+  /**
+   * Obtiene los metadatos de un archivo
+   */
+  async getFile(fileId: string): Promise<any> {
+    await this.ensureToken();
+
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,webViewLink,webContentLink,thumbnailLink`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to get file: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   /**
@@ -546,7 +583,7 @@ class GoogleDriveService {
       await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`
+          'Authorization': `Bearer ${this.accessToken} `
         }
       });
     } catch (error) {
@@ -569,7 +606,7 @@ class GoogleDriveService {
       // Hacer una petición simple para verificar conectividad
       const response = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`
+          'Authorization': `Bearer ${this.accessToken} `
         }
       });
 
@@ -598,11 +635,11 @@ class GoogleDriveService {
     for (const fileId of fileIds) {
       try {
         await this.makeFilePublic(fileId);
-        console.log(`✅ Permisos renovados para: ${fileId}`);
+        console.log(`✅ Permisos renovados para: ${fileId} `);
         // Pequeño delay para no sobrecargar la API
         await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error: any) {
-        console.warn(`⚠️ Error renovando permisos para ${fileId}:`, error?.message || 'Error desconocido');
+        console.warn(`⚠️ Error renovando permisos para ${fileId}: `, error?.message || 'Error desconocido');
       }
     }
 

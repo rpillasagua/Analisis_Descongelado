@@ -19,6 +19,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
   const [isRetrying, setIsRetrying] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [cacheBuster, setCacheBuster] = useState('');
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Función para generar URLs alternativas de Google Drive
@@ -38,11 +39,28 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
     setIsLoading(!!photoUrl); // Mostrar loading si hay URL
     setIsRetrying(false);
     setRetryCount(0); // Reset retry count
+
+    // Si llega una URL del servidor, limpiar la preview local
+    if (photoUrl && localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+
     // Actualizar cache buster solo en el cliente para evitar hydration error
     if (photoUrl) {
-      setCacheBuster(`?t=${Date.now()}`);
+      const separator = photoUrl.includes('?') ? '&' : '?';
+      setCacheBuster(`${separator}t=${Date.now()}`);
     }
   }, [photoUrl]);
+
+  // Cleanup de blob URLs cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl);
+      }
+    };
+  }, [localPreviewUrl]);
 
   // Timeout de seguridad para prevenir loading infinito
   useEffect(() => {
@@ -71,7 +89,16 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
         alert('⚠️ Las fotos en formato HEIC (iPhone) pueden no visualizarse correctamente en Windows. Por favor intenta cambiar la configuración de tu cámara a "Más compatible" (JPEG) o usa otra foto.');
       }
 
+      // Limpiar URL blob anterior si existe
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl);
+      }
+
+      // Crear URL blob para vista previa local inmediata
+      const previewUrl = URL.createObjectURL(file);
+      setLocalPreviewUrl(previewUrl);
       setImageError(false);
+
       onPhotoCapture(file);
     }
   };
@@ -102,7 +129,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
           className="hidden"
         />
 
-        {photoUrl && !imageError ? (
+        {(photoUrl || localPreviewUrl) && !imageError ? (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full p-3 bg-black/20 rounded-xl border border-white/5">
             <div className="relative group self-center sm:self-auto w-24 h-24 sm:w-20 sm:h-20 flex-shrink-0">
               {(isLoading || isRetrying || isUploading) && (
@@ -114,16 +141,23 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                 </div>
               )}
               <img
-                src={photoUrl}
+                src={localPreviewUrl || photoUrl}
                 alt={label}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover rounded-lg border border-white/10 cursor-pointer hover:border-blue-500 transition-all shadow-lg"
                 onClick={handleImageClick}
                 onError={async (e) => {
+                  // Solo manejar errores para URLs del servidor, no para previews locales
+                  if (localPreviewUrl) {
+                    console.warn(`⚠️ Error en preview local, ignorando...`);
+                    return;
+                  }
+
                   console.warn(`⚠️ No se pudo cargar la imagen ${label}:`, photoUrl);
                   console.warn('Error details:', e);
 
                   // Determinar el tipo de URL y manejar el error apropiadamente
-                  if (photoUrl.startsWith('blob:')) {
+                  if (photoUrl && photoUrl.startsWith('blob:')) {
                     // URLs blob son temporales y expiran, no se pueden recuperar
                     console.warn('URL blob expirada, no se puede recuperar');
                     setErrorType('blob');
@@ -134,12 +168,12 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                   }
 
                   // Si es una URL de Google Drive, intentar diferentes estrategias de recuperación
-                  if (photoUrl.includes('drive.google.com') && retryCount < 2) {
+                  if (photoUrl && photoUrl.includes('drive.google.com') && retryCount < 2) {
                     setRetryCount(prev => prev + 1);
                     console.log(`🔄 Intento ${retryCount + 1} de recuperación para Google Drive`);
 
                     // Primero intentar con URL alternativa sin autenticación
-                    const altUrl = getAlternativeDriveUrl(photoUrl);
+                    const altUrl = photoUrl ? getAlternativeDriveUrl(photoUrl) : null;
                     if (altUrl) {
                       console.log('🔄 Intentando con URL alternativa:', altUrl);
                       setTimeout(() => {
@@ -167,7 +201,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                       }
 
                       // Intentar refrescar permisos
-                      const fileIdMatch = photoUrl.match(/[?&]id=([^&]+)/);
+                      const fileIdMatch = photoUrl ? photoUrl.match(/[?&]id=([^&]+)/) : null;
                       if (fileIdMatch) {
                         console.warn('Intentando refrescar permisos para archivo:', fileIdMatch[1]);
                         try {
@@ -177,7 +211,8 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                           // Reintentar con la URL original después de refrescar permisos
                           setTimeout(() => {
                             const img = e.target as HTMLImageElement;
-                            const newCacheBuster = `?t=${Date.now()}`;
+                            const separator = photoUrl && photoUrl.includes('?') ? '&' : '?';
+                            const newCacheBuster = `${separator}t=${Date.now()}`;
                             setCacheBuster(newCacheBuster);
                             img.src = photoUrl + newCacheBuster;
                             setIsRetrying(false);
@@ -203,7 +238,7 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                       setIsLoading(false);
                       setIsRetrying(false);
                     }
-                  } else if (photoUrl.includes('drive.google.com') && retryCount >= 2) {
+                  } else if (photoUrl && photoUrl.includes('drive.google.com') && retryCount >= 2) {
                     // Máximo de reintentos alcanzado
                     console.warn('⚠️ Máximo de reintentos alcanzado para Google Drive');
                     setErrorType('drive_permissions');
@@ -300,7 +335,8 @@ export default function PhotoCapture({ label, photoUrl, onPhotoCapture, onPhotoR
                         setTimeout(() => {
                           const img = document.querySelector(`img[alt="${label}"]`) as HTMLImageElement;
                           if (img && photoUrl) {
-                            const newCacheBuster = `?t=${Date.now()}`;
+                            const separator = photoUrl.includes('?') ? '&' : '?';
+                            const newCacheBuster = `${separator}t=${Date.now()}`;
                             setCacheBuster(newCacheBuster);
                             img.src = photoUrl + newCacheBuster;
                           }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface DeleteConfirmationModalProps {
@@ -17,19 +18,27 @@ export default function DeleteConfirmationModal({
     onClose,
     onConfirm,
     analysisCode,
-    analysisLote
+    analysisLote,
+    type = 'confirmar'
 }: DeleteConfirmationModalProps) {
+    const [mounted, setMounted] = useState(false);
     const [confirmText, setConfirmText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         if (isOpen) {
             setConfirmText('');
             setIsDeleting(false);
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
         }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     const handleConfirm = async () => {
         if (confirmText.toLowerCase() !== 'confirmar') return;
@@ -42,9 +51,9 @@ export default function DeleteConfirmationModal({
 
     const isConfirmEnabled = confirmText.toLowerCase() === 'confirmar';
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-[#dbdbdb]">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden border border-[#dbdbdb]">
 
                 {/* Header */}
                 <div className="p-6 border-b border-[#efefef] flex items-start justify-between bg-white">
@@ -94,7 +103,7 @@ export default function DeleteConfirmationModal({
                             value={confirmText}
                             onChange={(e) => setConfirmText(e.target.value)}
                             placeholder="confirmar"
-                            className="w-full px-3 py-2 border border-[#dbdbdb] rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-sm"
+                            className="w-full px-3 py-2 border border-[#dbdbdb] rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-sm bg-white text-black"
                             autoFocus
                         />
                     </div>
@@ -123,6 +132,7 @@ export default function DeleteConfirmationModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
