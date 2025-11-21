@@ -17,7 +17,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
   if (selectedType && !isEditing) {
     return (
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <label className="block text-sm font-medium text-slate-300 mb-3">
           Tipo de producto seleccionado
         </label>
         <div className="relative p-6">
@@ -55,12 +55,12 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
   // Mostrar selector completo si no hay selección o si está editando
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-3">
+      <label className="block text-sm font-medium text-slate-200 mb-3">
         {selectedType ? 'Selecciona un nuevo tipo de producto *' : '¿Qué tipo de producto vas a descongelar? *'}
       </label>
       {selectedType && isEditing && (
-        <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <div className="mb-3 p-3 bg-yellow-900/20 border border-yellow-700 rounded-lg">
+          <p className="text-sm text-yellow-200">
             ⚠️ Al cambiar el tipo de producto, los defectos registrados se perderán si no son compatibles.
           </p>
         </div>
@@ -77,8 +77,8 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
             className={`
               relative p-4 sm:p-6 rounded-lg border-2 transition-all duration-200
               ${selectedType === type
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg'
-                : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-gray-800'
+                ? 'border-blue-500 bg-blue-900/30 shadow-lg'
+                : 'border-gray-600 hover:border-blue-700 bg-gray-800'
               }
             `}
           >
@@ -96,8 +96,8 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
               <span className={`
                 text-base sm:text-lg font-semibold leading-tight
                 ${selectedType === type
-                  ? 'text-blue-700 dark:text-blue-300'
-                  : 'text-gray-700 dark:text-slate-200'
+                  ? 'text-blue-300'
+                  : 'text-slate-200'
                 }
               `}>
                 {PRODUCT_TYPE_LABELS[type]}

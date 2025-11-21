@@ -17,7 +17,7 @@ export default function AnalystColorSelector({
 }: AnalystColorSelectorProps) {
     return (
         <div className="space-y-3">
-            <label className="text-sm font-medium text-slate-200 block">
+            <label className="text-sm font-medium text-white block">
                 {label} <span className="text-red-400">*</span>
             </label>
 
@@ -84,7 +84,7 @@ export default function AnalystColorSelector({
             </div>
 
             {!selectedColor && (
-                <p className="text-xs text-slate-200 mt-2">
+                <p className="text-xs text-slate-300 mt-2">
                     Este color te identificará en todos los análisis que realices hoy
                 </p>
             )}
