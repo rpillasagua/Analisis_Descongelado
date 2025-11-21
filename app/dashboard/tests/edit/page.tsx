@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function EditAnalysisRedirect() {
@@ -31,6 +31,15 @@ function EditAnalysisRedirect() {
 
 export default function EditAnalysisPage() {
   return (
-    <EditAnalysisRedirect />
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-[#f3f4f6]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <EditAnalysisRedirect />
+    </Suspense>
   );
 }
