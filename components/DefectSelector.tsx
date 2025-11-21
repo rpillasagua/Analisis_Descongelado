@@ -74,7 +74,8 @@ export default function DefectSelector({
     }
   }, [selectedItems, onDefectsChange, selectedDefects]);
 
-  // Cargar defectos existentes al montar
+  // Cargar defectos existentes SOLO al montar el componente
+  // No incluir selectedDefects en dependencias para evitar loop infinito
   useEffect(() => {
     const existingItems: DefectItem[] = Object.entries(selectedDefects).map(([key, quantity]) => ({
       key,
@@ -82,7 +83,8 @@ export default function DefectSelector({
       quantity
     }));
     setSelectedItems(existingItems);
-  }, [selectedDefects]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo cargar al montar
 
   const handleAddDefect = (defectoKey: string) => {
     const label = DEFECTO_LABELS[defectoKey] || defectoKey;
@@ -183,8 +185,8 @@ export default function DefectSelector({
               type="button"
               onClick={() => setIsEditMode(!isEditMode)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${isEditMode
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               title={isEditMode ? 'Finalizar edición' : 'Editar defectos'}
             >

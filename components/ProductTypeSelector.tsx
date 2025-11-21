@@ -97,7 +97,7 @@ export default function ProductTypeSelector({ selectedType, onSelect }: ProductT
                 text-base sm:text-lg font-semibold leading-tight
                 ${selectedType === type
                   ? 'text-blue-700 dark:text-blue-300'
-                  : 'text-gray-700 dark:text-gray-300'
+                  : 'text-gray-700 dark:text-slate-200'
                 }
               `}>
                 {PRODUCT_TYPE_LABELS[type]}

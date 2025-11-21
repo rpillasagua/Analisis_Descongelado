@@ -49,6 +49,11 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
             return;
         }
 
+        if (!talla.trim()) {
+            alert('La talla es obligatoria');
+            return;
+        }
+
         onComplete({
             lote: lote.trim(),
             codigo: codigo.trim(),
@@ -57,7 +62,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
         });
     };
 
-    const isValid = lote.trim() && codigo.trim() && color !== null;
+    const isValid = lote.trim() && codigo.trim() && talla.trim() && color !== null;
 
     return (
         <div className="max-w-3xl mx-auto">
@@ -100,19 +105,6 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                                 required
                             />
                         </div>
-                    </div>
-
-                    {/* Talla */}
-                    <div className="space-y-2">
-                        <Label htmlFor="talla">
-                            📏 Talla <span className="text-gray-500">(opcional)</span>
-                        </Label>
-                        <Input
-                            id="talla"
-                            placeholder="Ej: 16/20, 21/25, etc."
-                            value={talla}
-                            onChange={(e) => setTalla(e.target.value)}
-                        />
                     </div>
 
                     {/* Color del Analista */}
