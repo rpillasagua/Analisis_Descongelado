@@ -133,34 +133,30 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-[#dbdbdb] sticky top-0 z-50 mb-6">
-      <div className="max-w-5xl mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          {/* Logo / Brand */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-bold text-[#262626] font-instagram tracking-wide">
-              Análisis en Descongelado
-            </h1>
-          </div>
+    <header className="bg-white pt-6 pb-2 px-4 sticky top-0 z-50">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          {/* Title */}
+          <h1 className="text-3xl font-bold text-[#262626] leading-tight max-w-[70%]">
+            Análisis en<br />Descongelado
+          </h1>
 
-          {/* User Profile Dropdown */}
+          {/* User Profile */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 focus:outline-none group"
+              className="focus:outline-none group transition-transform active:scale-95"
             >
               {user.picture ? (
-                <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 group-hover:from-yellow-500 group-hover:via-red-600 group-hover:to-purple-700 transition-all">
-                  <img
-                    src={user.picture}
-                    alt={user.name}
-                    referrerPolicy="no-referrer"
-                    className="w-6 h-6 rounded-full border-2 border-white object-cover"
-                  />
-                </div>
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  referrerPolicy="no-referrer"
+                  className="w-14 h-14 rounded-full object-cover shadow-md hover:shadow-lg transition-shadow"
+                />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-600">
-                  <span className="text-xs font-bold">{user.name.charAt(0)}</span>
+                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
+                  <span className="text-xl font-bold">{user.name.charAt(0)}</span>
                 </div>
               )}
             </button>
@@ -172,17 +168,17 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-[#dbdbdb] rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-[#262626] truncate">{user.name}</p>
-                    <p className="text-xs text-[#8e8e8e] truncate">{user.email}</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-gray-50 flex items-center gap-2 transition-colors font-medium"
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
                   >
                     <LogOut size={16} />
                     Cerrar Sesión
