@@ -57,7 +57,7 @@ export default function AnalystColorSelector({
                             {/* Label */}
                             <span className={`
                 text-sm font-semibold transition-colors
-                ${isSelected ? 'text-white' : 'text-gray-400'}
+                ${isSelected ? 'text-white' : 'text-slate-200'}
               `}>
                                 {ANALYST_COLOR_LABELS[color]}
                             </span>
@@ -84,7 +84,7 @@ export default function AnalystColorSelector({
             </div>
 
             {!selectedColor && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-slate-300 mt-2">
                     Este color te identificará en todos los análisis que realices hoy
                 </p>
             )}
