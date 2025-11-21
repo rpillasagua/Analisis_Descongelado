@@ -38,33 +38,33 @@ export default function DeleteConfirmationModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-slate-900 border border-red-500/30 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white border-2 border-red-200 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-800 flex items-start justify-between">
+                <div className="p-6 border-b border-gray-200 flex items-start justify-between bg-gradient-to-r from-red-50 to-orange-50">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                            <AlertTriangle className="w-5 h-5 text-red-500" />
+                        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                            <AlertTriangle className="w-6 h-6 text-red-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-white">Eliminar Análisis</h3>
-                            <p className="text-sm text-slate-400">Esta acción no se puede deshacer</p>
+                            <h3 className="text-xl font-bold text-gray-900">Eliminar Análisis</h3>
+                            <p className="text-sm text-gray-600">Esta acción no se puede deshacer</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-800 rounded-lg"
+                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
                     >
-                        <X size={20} />
+                        <X size={24} />
                     </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 space-y-4">
-                    <p className="text-slate-300">
-                        Estás a punto de eliminar el análisis {itemName ? <span className="font-semibold text-white">"{itemName}"</span> : ''}.
-                        Para confirmar, escribe <span className="font-bold text-red-400">confirmar</span> abajo:
+                    <p className="text-gray-700 leading-relaxed">
+                        Estás a punto de eliminar el análisis {itemName ? <span className="font-bold text-gray-900">"{itemName}"</span> : ''}.
+                        Para confirmar, escribe <span className="font-bold text-red-600">confirmar</span> abajo:
                     </p>
 
                     <input
@@ -72,16 +72,16 @@ export default function DeleteConfirmationModal({
                         value={confirmText}
                         onChange={(e) => setConfirmText(e.target.value)}
                         placeholder="Escribe 'confirmar'"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+                        className="w-full bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all placeholder:text-gray-400"
                         autoFocus
                     />
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-slate-950/50 border-t border-slate-800 flex justify-end gap-3">
+                <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-slate-300 hover:text-white font-medium transition-colors"
+                        className="px-5 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-colors hover:bg-gray-200 rounded-lg"
                         disabled={isDeleting}
                     >
                         Cancelar
@@ -90,10 +90,10 @@ export default function DeleteConfirmationModal({
                         onClick={handleConfirm}
                         disabled={confirmText.toLowerCase() !== 'confirmar' || isDeleting}
                         className={`
-              px-6 py-2 rounded-xl font-bold text-white transition-all flex items-center gap-2
+              px-6 py-2.5 rounded-xl font-bold text-white transition-all flex items-center gap-2
               ${confirmText.toLowerCase() === 'confirmar'
-                                ? 'bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20'
-                                : 'bg-slate-800 text-slate-500 cursor-not-allowed'}
+                                ? 'bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
             `}
                     >
                         {isDeleting ? 'Eliminando...' : 'Eliminar'}
