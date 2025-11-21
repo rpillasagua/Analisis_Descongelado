@@ -276,17 +276,17 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto">
-      <div className="min-h-screen p-4 flex items-start justify-center">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8 border border-gray-200">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-2xl my-8">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[85vh] flex flex-col">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
             <h2 className="text-2xl font-bold text-gray-900">Reporte Diario de Análisis</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
               <X className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6 overflow-y-auto flex-1">
             {/* Selector de fecha */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Fecha</label>
