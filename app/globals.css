@@ -81,6 +81,89 @@ body {
   padding: 7px 16px;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Instagram-inspired Professional Theme */
+:root {
+  --ig-primary-button: #0095f6;
+  --ig-primary-button-hover: #1877f2;
+  --ig-secondary-background: #fafafa;
+  --ig-border-color: #dbdbdb;
+  --ig-text-primary: #262626;
+  --ig-text-secondary: #8e8e8e;
+  --ig-link: #00376b;
+}
+
+body {
+  background-color: var(--ig-secondary-background);
+  color: var(--ig-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clean, subtle scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Utilities */
+.ig-card {
+  background-color: white;
+  border: 1px solid var(--ig-border-color);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.ig-input {
+  background: #fafafa;
+  border: 1px solid var(--ig-border-color);
+  border-radius: 3px;
+  padding: 9px 8px 7px;
+  outline: none;
+}
+
+.ig-input:focus {
+  border-color: #a8a8a8;
+}
+
+.ig-button-primary {
+  background-color: var(--ig-primary-button);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 7px 16px;
+  transition: background-color 0.2s;
+}
+
+.ig-button-primary:hover {
+  background-color: var(--ig-primary-button-hover);
+}
+
+.ig-button-secondary {
+  background-color: transparent;
+  color: var(--ig-text-primary);
+  border: 1px solid var(--ig-border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 7px 16px;
+}
+
 .ig-button-secondary:hover {
   background-color: #efefef;
 }
@@ -92,4 +175,9 @@ body {
     border-right: none;
     border-radius: 0;
   }
+}
+
+.font-instagram {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: -0.025em;
 }

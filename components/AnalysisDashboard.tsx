@@ -111,74 +111,6 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
               : 'bg-white border border-[#dbdbdb] text-[#262626] hover:bg-[#fafafa]'
               }`}
           >
-            Completados
-          </button>
-        </div>
-
-        {/* Analysis Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAnalyses.map((analysis) => (
-            <div
-              key={analysis.id}
-              onClick={() => router.push(`/dashboard/tests/${analysis.id}`)}
-              className="bg-white border border-[#dbdbdb] rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
-            >
-              {/* Card Header */}
-              <div className="p-3 flex items-center justify-between border-b border-[#efefef]">
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${analysis.shift === 'DIA' ? 'bg-orange-400' : 'bg-indigo-500'
-                    }`}>
-                    {analysis.shift === 'DIA' ? 'D' : 'N'}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[#262626]">{analysis.lote}</p>
-                    <p className="text-xs text-[#8e8e8e]">
-                      {new Date(analysis.createdAt).toLocaleDateString()} • {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                </div>
-                {analysis.analystColor && (
-                  <div
-                    className="w-6 h-6 rounded-full border border-white shadow-sm"
-                    style={{ backgroundColor: analysis.analystColor }}
-                    title="Color del Analista"
-                  />
-                )}
-              </div>
-
-              {/* Card Content */}
-              <div className="p-3 space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-[#fafafa] p-2 rounded border border-[#efefef]">
-                    <p className="text-xs text-[#8e8e8e] mb-0.5">Código</p>
-                    <p className="text-sm font-semibold text-[#262626]">{analysis.codigo}</p>
-                  </div>
-                  {analysis.talla && (
-                    <div className="bg-[#fafafa] p-2 rounded border border-[#efefef]">
-                      <p className="text-xs text-[#8e8e8e] mb-0.5">Talla</p>
-                      <p className="text-sm font-semibold text-[#262626]">{analysis.talla}</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                    {PRODUCT_TYPE_LABELS[analysis.productType]}
-                  </span>
-
-                  {analysis.status === 'COMPLETADO' ? (
-                    <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                      <CheckCircle className="w-3 h-3" />
-                      Completado
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
-                      <Clock className="w-3 h-3" />
-                      En Progreso
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           ))}
         </div>
@@ -198,6 +130,6 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
       />
-    </div>
+    </div >
   );
 }

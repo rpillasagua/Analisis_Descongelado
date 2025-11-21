@@ -133,28 +133,34 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-slate-950 border-b border-slate-800 sticky top-0 z-50 mb-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+    <header className="bg-white border-b border-[#dbdbdb] sticky top-0 z-50 mb-6">
+      <div className="max-w-5xl mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo Removed */}
-          <div></div>
+          {/* Logo / Brand */}
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent font-instagram">
+              QualityControl
+            </h1>
+          </div>
 
           {/* User Profile Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 focus:outline-none"
+              className="flex items-center gap-2 focus:outline-none group"
             >
               {user.picture ? (
-                <img
-                  src={user.picture}
-                  alt={user.name}
-                  referrerPolicy="no-referrer"
-                  className="w-6 h-6 rounded-full border border-slate-700 hover:border-slate-500 transition-colors"
-                />
+                <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 group-hover:from-yellow-500 group-hover:via-red-600 group-hover:to-purple-700 transition-all">
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    referrerPolicy="no-referrer"
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  />
+                </div>
               ) : (
-                <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 hover:border-slate-500 transition-colors">
-                  <span className="text-[10px] font-bold text-slate-400">{user.name.charAt(0)}</span>
+                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-600">
+                  <span className="text-xs font-bold">{user.name.charAt(0)}</span>
                 </div>
               )}
             </button>
@@ -166,19 +172,19 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 border-b border-slate-800">
-                    <p className="text-sm font-medium text-slate-200 truncate">{user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-[#dbdbdb] rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-semibold text-[#262626] truncate">{user.name}</p>
+                    <p className="text-xs text-[#8e8e8e] truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-800 hover:text-red-300 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-gray-50 flex items-center gap-2 transition-colors font-medium"
                   >
-                    <LogOut size={14} />
+                    <LogOut size={16} />
                     Cerrar Sesión
                   </button>
                 </div>
