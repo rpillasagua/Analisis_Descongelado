@@ -346,7 +346,7 @@ class GoogleDriveService {
       form.append('file', file);
 
       const response = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink',
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink,thumbnailLink',
         {
           method: 'POST',
           headers: {
@@ -374,17 +374,34 @@ class GoogleDriveService {
       try {
         await this.makeFilePublic(data.id);
         console.log('✅ Permisos públicos configurados');
+
+        // Agregar delay de 2 segundos para que los permisos se propaguen
+        console.log('⏳ Esperando propagación de permisos...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('✅ Propagación completada');
       } catch (error: any) {
         console.warn('⚠️ No se pudieron configurar permisos públicos:', error?.message || 'Error desconocido');
         // Continuar de todos modos
       }
 
-      // Usar webContentLink primero (menos rate limiting) o construir URL de descarga directa
-      // webContentLink es más estable y tiene menos límites de rate limiting que thumbnailLink
-      const publicUrl = data.webContentLink ||
-        `https://drive.google.com/uc?id=${data.id}&export=download`;
+      // ESTRATEGIA DE URLs (en orden de prioridad):
+      // 1. thumbnailLink (más estable, menos rate limiting) - escalado a 2000px para calidad
+      // 2. webViewLink (preview page, siempre funciona)
+      // 3. Construir URL de visualización con file/d/{id}/view
+      let publicUrl: string;
 
-      console.log(`🔗 URL pública generada: ${publicUrl}`);
+      if (data.thumbnailLink) {
+        // thumbnailLink viene como =s220, lo cambiamos a =s2000 para mejor calidad
+        publicUrl = data.thumbnailLink.replace('=s220', '=s2000');
+        console.log(`🔗 Usando thumbnailLink (calidad mejorada): ${publicUrl}`);
+      } else if (data.webViewLink) {
+        publicUrl = data.webViewLink;
+        console.log(`🔗 Usando webViewLink: ${publicUrl}`);
+      } else {
+        // Fallback: URL de visualización estándar
+        publicUrl = `https://drive.google.com/file/d/${data.id}/view`;
+        console.log(`🔗 Usando URL de visualización: ${publicUrl}`);
+      }
 
       return publicUrl;
     } catch (error) {
