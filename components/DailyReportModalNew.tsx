@@ -276,9 +276,9 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl my-8">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="bg-white rounded-2xl shadow-2xl border-2 border-gray-200 flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
             <h2 className="text-2xl font-bold text-gray-900">Reporte Diario de Análisis</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
