@@ -277,8 +277,8 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto">
-      <div className="min-h-screen px-4 py-8 flex items-center justify-center">
-        <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col relative animate-in zoom-in-95 duration-200">
+      <div className="min-h-screen p-4 flex items-start justify-center">
+        <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl my-8">
           <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-slate-700">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Reporte Diario de Análisis</h2>
             <button onClick={onClose} className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">

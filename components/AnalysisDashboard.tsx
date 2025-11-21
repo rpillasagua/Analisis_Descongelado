@@ -105,6 +105,13 @@ export default function AnalysisDashboard() {
 
         {/* Top Actions: Report & New Analysis */}
         <div className="flex gap-3 sm:gap-4">
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-3 min-h-[44px] bg-slate-900 border border-slate-800 text-slate-300 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-medium text-sm sm:text-base"
+          >
+            <FileText size={20} />
+            <span>Reporte</span>
+          </button>
 
 
           <button
@@ -296,17 +303,6 @@ export default function AnalysisDashboard() {
         </div>
       )
       }
-
-      {/* Bottom Actions: Report Button */}
-      <div className="mt-8 mb-20">
-        <button
-          onClick={() => setShowReportModal(true)}
-          className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-medium text-lg shadow-lg"
-        >
-          <FileText size={24} />
-          <span>Generar Reporte Diario</span>
-        </button>
-      </div>
 
       <DailyReportModal
         isOpen={showReportModal}
