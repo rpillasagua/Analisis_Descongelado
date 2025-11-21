@@ -285,6 +285,7 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="flex min-h-[44px] w-full pl-10 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                style={{ colorScheme: 'dark' }}
               />
             </div>
           </div>
@@ -295,7 +296,8 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
             <select
               value={selectedShift}
               onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-              className="flex min-h-[44px] w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="flex min-h-[44px] w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&>option]:bg-white [&>option]:dark:bg-slate-800 [&>option]:text-slate-900 [&>option]:dark:text-slate-100"
+              style={{ colorScheme: 'dark' }}
             >
               <option value="ALL">Todos los turnos</option>
               <option value="DIA">Turno Día (7:10 AM - 7:10 PM)</option>
