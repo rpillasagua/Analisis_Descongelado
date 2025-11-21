@@ -192,3 +192,83 @@ h6 {
 .animate-subtle-pulse {
   animation: subtle-pulse 2s ease-in-out infinite;
 }
+
+/* Mobile Touch Targets & Accessibility */
+@media (max-width: 768px) {
+
+  /* Ensure minimum 44px touch targets on mobile */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Increase text size for better readability */
+  body {
+    font-size: 16px;
+    /* Prevent mobile zoom on input focus */
+  }
+
+  /* Better spacing for mobile cards */
+  .card {
+    padding: 1rem;
+  }
+
+  /* Improve input touch targets */
+  .modern-input,
+  input[type="text"],
+  input[type="date"],
+  select {
+    min-height: 44px;
+    font-size: 16px;
+    /* Prevent iOS zoom */
+  }
+}
+
+/* High Contrast Text Utilities (WCAG AA Compliant) */
+.text-high-contrast {
+  color: #f1f5f9 !important;
+  /* Slate 100 - better contrast than gray-400 */
+}
+
+.text-medium-contrast {
+  color: #cbd5e1 !important;
+  /* Slate 300 - better than gray-500 */
+}
+
+/* Mobile-optimized button class */
+.btn-mobile {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Better modal text contrast */
+.modal-text {
+  color: #e2e8f0 !important;
+  /* Slate 200 - excellent contrast on dark backgrounds */
+}
+
+.modal-label {
+  color: #f1f5f9 !important;
+  /* Slate 100 - high contrast for labels */
+  font-weight: 500;
+}
+
+/* Responsive touch-friendly spacing */
+@media (max-width: 640px) {
+
+  /* Increase spacing between tappable elements */
+  .space-y-6>*+* {
+    margin-top: 1.75rem;
+  }
+
+  /* Better button spacing in button groups */
+  .flex.gap-4 {
+    gap: 0.75rem;
+  }
+}

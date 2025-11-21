@@ -80,10 +80,10 @@ export default function AnalysisDashboard() {
       <div className="flex flex-col gap-6 mb-8">
 
         {/* Top Actions: Report & New Analysis */}
-        <div className="flex gap-4">
+        <div className="flex gap-3 sm:gap-4">
           <button
             onClick={() => setShowReportModal(true)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-3 min-h-[44px] bg-slate-900 border border-slate-800 text-slate-300 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-medium text-sm sm:text-base"
           >
             <FileText size={20} />
             <span>Reporte</span>
@@ -91,7 +91,7 @@ export default function AnalysisDashboard() {
 
           <button
             onClick={() => router.push('/dashboard/tests/new')}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition-all shadow-lg shadow-sky-500/20 font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-4 py-3 sm:py-3 min-h-[44px] bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition-all shadow-lg shadow-sky-500/20 font-medium text-sm sm:text-base"
           >
             <Plus size={20} />
             <span>Nuevo Análisis</span>
@@ -248,7 +248,7 @@ export default function AnalysisDashboard() {
                                   e.stopPropagation();
                                   handleComplete(analysis.id);
                                 }}
-                                className="text-xs font-medium text-slate-300 hover:text-white px-3 py-1 rounded hover:bg-slate-800 transition-colors"
+                                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white px-3 sm:px-4 py-2 sm:py-2 min-h-[40px] sm:min-h-[44px] rounded-lg hover:bg-slate-800 transition-colors"
                               >
                                 Completar
                               </button>

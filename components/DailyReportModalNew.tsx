@@ -266,36 +266,36 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
-          <h2 className="text-2xl font-bold">Reporte Diario de Análisis</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+      <div className="bg-slate-100 dark:bg-slate-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-slate-700">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Reporte Diario de Análisis</h2>
+          <button onClick={onClose} className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
             <X className="h-6 w-6" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
           {/* Selector de fecha */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Fecha</label>
+            <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Fecha</label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-500 dark:text-slate-400" />
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="flex h-10 w-full pl-10 rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-700"
+                className="flex min-h-[44px] w-full pl-10 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               />
             </div>
           </div>
 
           {/* Selector de turno */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Turno</label>
+            <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Turno</label>
             <select
               value={selectedShift}
               onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-700"
+              className="flex min-h-[44px] w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <option value="ALL">Todos los turnos</option>
               <option value="DIA">Turno Día (7:10 AM - 7:10 PM)</option>
@@ -307,40 +307,40 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
           <button
             onClick={handleGenerateReport}
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="w-full bg-blue-600 text-white px-6 py-3 min-h-[48px] rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base shadow-md transition-all"
           >
             {isLoading ? '⏳ Buscando...' : '🔍 Paso 1: Buscar Análisis'}
           </button>
           {!isLoading && analyses.length === 0 && (
-            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-300 mt-2">
               👆 Haz clic para buscar los análisis de la fecha seleccionada
             </p>
           )}
 
           {/* Resumen */}
           {analyses.length > 0 && (
-            <div className="border dark:border-gray-800 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-              <h3 className="font-semibold mb-3">Resumen</h3>
+            <div className="border border-slate-300 dark:border-slate-700 rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
+              <h3 className="font-semibold mb-3 text-slate-900 dark:text-slate-100">Resumen</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Total de análisis:</p>
-                  <p className="font-medium text-lg">{analyses.length}</p>
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">Total de análisis:</p>
+                  <p className="font-bold text-lg text-slate-900 dark:text-slate-100">{analyses.length}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Turno Día:</p>
-                  <p className="font-medium text-lg">
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">Turno Día:</p>
+                  <p className="font-bold text-lg text-slate-900 dark:text-slate-100">
                     {analyses.filter(a => a.shift === 'DIA').length}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Turno Noche:</p>
-                  <p className="font-medium text-lg">
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">Turno Noche:</p>
+                  <p className="font-bold text-lg text-slate-900 dark:text-slate-100">
                     {analyses.filter(a => a.shift === 'NOCHE').length}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-600 dark:text-gray-400">Productos únicos:</p>
-                  <p className="font-medium text-lg">
+                  <p className="text-slate-700 dark:text-slate-300 font-medium">Productos únicos:</p>
+                  <p className="font-bold text-lg text-slate-900 dark:text-slate-100">
                     {new Set(analyses.map(a => a.codigo)).size}
                   </p>
                 </div>
@@ -354,12 +354,12 @@ const DailyReportModal: React.FC<DailyReportModalProps> = ({ isOpen, onClose }) 
               <button
                 onClick={handleDownloadReport}
                 disabled={isLoading}
-                className="w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 shadow-md"
+                className="w-full bg-green-600 text-white px-6 py-3 min-h-[48px] rounded-lg hover:bg-green-700 active:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base flex items-center justify-center gap-2 shadow-md transition-all"
               >
                 <Download className="h-5 w-5" />
                 {isLoading ? '📊 Generando Excel...' : '⬇️ Paso 2: Descargar Reporte Excel'}
               </button>
-              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm text-center text-slate-600 dark:text-slate-300 font-medium">
                 ✅ {analyses.length} análisis encontrados. El Excel se descargará automáticamente.
               </p>
             </div>
