@@ -102,15 +102,59 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
               : 'bg-white border border-[#dbdbdb] text-[#262626] hover:bg-[#fafafa]'
               }`}
           >
-            En Progreso
+            Completado
           </button>
-          <button
-            onClick={() => setFilterStatus('COMPLETADO')}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${filterStatus === 'COMPLETADO'
-              ? 'bg-[#262626] text-white'
-              : 'bg-white border border-[#dbdbdb] text-[#262626] hover:bg-[#fafafa]'
-              }`}
-          >
+        </div>
+
+        {/* Grid de Análisis */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredAnalyses.map((analysis) => (
+            <div
+              key={analysis.id}
+              onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
+              className="bg-white border border-[#dbdbdb] rounded-lg p-4 hover:bg-[#fafafa] transition-colors cursor-pointer shadow-sm group"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-[#262626] text-lg">
+                      Lote: {analysis.lote}
+                    </span>
+                    {analysis.status === 'COMPLETADO' && (
+                      <CheckCircle className="w-4 h-4 text-blue-500" />
+                    )}
+                  </div>
+                  <div className="text-xs text-[#8e8e8e] font-medium">
+                    {new Date(analysis.fecha).toLocaleDateString()} • {analysis.hora}
+                  </div>
+                </div>
+                <div
+                  className="w-3 h-3 rounded-full ring-2 ring-white shadow-sm"
+                  style={{ backgroundColor: analysis.analistaColor || '#ccc' }}
+                  title={analysis.analista}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+                <div>
+                  <span className="text-[#8e8e8e] text-xs block">Producto</span>
+                  <span className="font-medium text-[#262626]">{analysis.producto}</span>
+                </div>
+                <div>
+                  <span className="text-[#8e8e8e] text-xs block">Variedad</span>
+                  <span className="font-medium text-[#262626]">{analysis.variedad}</span>
+                </div>
+                <div>
+                  <span className="text-[#8e8e8e] text-xs block">Talla</span>
+                  <span className="font-medium text-[#262626]">{analysis.talla}</span>
+                </div>
+                <div>
+                  <span className="text-[#8e8e8e] text-xs block">Tipo</span>
+                  <span className="font-medium text-[#262626]">
+                    {PRODUCT_TYPE_LABELS[analysis.tipoProducto] || analysis.tipoProducto}
+                  </span>
+                </div>
+              </div>
             </div>
           ))}
         </div>
