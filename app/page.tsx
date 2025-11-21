@@ -63,56 +63,48 @@ const useGoogleAuth = () => {
   return { ...authState, login, logout };
 };
 
-// UI Components
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-  <div className={`glass-card rounded-2xl p-1 ${className}`}>{children}</div>;
-
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-  <div className={`p-6 sm:p-8 text-center ${className}`}>{children}</div>;
-
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-  <h2 className={`text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 ${className}`}>{children}</h2>;
-
-const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-  <p className={`text-sm sm:text-base text-gray-400 mt-2 ${className}`}>{children}</p>;
-
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-  <div className={`p-6 sm:p-8 pt-0 ${className}`}>{children}</div>;
+// UI Components removed - using inline styles in LoginPage
 
 // Página de login
 const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[100px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-600/20 blur-[100px]"></div>
+    <main
+      className="flex min-h-screen items-center justify-center p-4"
+      style={{
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+      }}
+    >
+      <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] p-10">
+        {/* Icon/Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-md">
+            <User className="h-8 w-8 text-white" />
+          </div>
+        </div>
+
+        {/* Title */}
+        <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#1a1a1a' }}>
+          Control de Calidad
+        </h1>
+        <h2 className="text-xl font-bold text-center mb-6" style={{ color: '#1a1a1a' }}>
+          Análisis en Descongelado
+        </h2>
+
+        {/* Subtitle */}
+        <p className="text-sm text-center mb-8" style={{ color: '#666' }}>
+          Accede con tu cuenta corporativa para gestionar los análisis
+        </p>
+
+        {/* Google Login Button */}
+        <div className="mb-6">
+          <GoogleLoginButton onLoginSuccess={onLogin} />
+        </div>
+
+        {/* Copyright */}
+        <p className="text-xs text-center" style={{ color: '#999' }}>
+          &copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.
+        </p>
       </div>
-
-      <Card className="max-w-md w-full shadow-2xl border-t border-white/10">
-        <CardHeader>
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <User className="h-10 w-10 text-white" />
-          </div>
-          <CardTitle>Sistema de Análisis</CardTitle>
-          <CardDescription>Control de Calidad y Resistencias</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 backdrop-blur-sm">
-            <p className="text-sm text-blue-200 text-center font-medium">
-              Accede con tu cuenta corporativa para gestionar los análisis.
-            </p>
-          </div>
-
-          <div className="transform hover:scale-[1.02] transition-transform duration-200">
-            <GoogleLoginButton onLoginSuccess={onLogin} />
-          </div>
-
-          <p className="text-xs text-gray-500 text-center">
-            &copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.
-          </p>
-        </CardContent>
-      </Card>
     </main>
   );
 };

@@ -241,40 +241,40 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200 shadow-md relative">
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm relative">
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             >
                 <X className="h-5 w-5" />
             </button>
 
             {/* Header */}
-            <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                    <Calendar className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 mb-5">
+                <div className="p-2.5 bg-blue-50 rounded-lg">
+                    <Calendar className="h-5 w-5 text-blue-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900">Generar Reporte</h2>
+                <h2 className="text-lg font-bold text-gray-900">Generar Reporte Diario</h2>
             </div>
 
             {/* Controls */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Fecha</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Fecha</label>
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Turno</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Turno</label>
                     <select
                         value={selectedShift}
                         onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="ALL">Todos</option>
                         <option value="DIA">Día</option>
@@ -287,33 +287,33 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
             <button
                 onClick={handleGenerateReport}
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-all mb-3"
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-4 shadow-sm"
             >
                 {isLoading ? 'Buscando...' : 'Buscar Análisis'}
             </button>
 
             {/* Results */}
             {analyses.length > 0 && (
-                <div className="space-y-3 pt-3 border-t border-blue-300">
+                <div className="space-y-3 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-white rounded-lg p-2 text-center border border-blue-200">
-                            <span className="block text-xs text-gray-600">Total</span>
-                            <span className="block text-lg font-bold text-gray-900">{analyses.length}</span>
+                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                            <span className="block text-xs text-gray-600 font-medium">Total</span>
+                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.length}</span>
                         </div>
-                        <div className="bg-white rounded-lg p-2 text-center border border-blue-200">
-                            <span className="block text-xs text-gray-600">Día</span>
-                            <span className="block text-lg font-bold text-gray-900">{analyses.filter(a => a.shift === 'DIA').length}</span>
+                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                            <span className="block text-xs text-gray-600 font-medium">Día</span>
+                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.filter(a => a.shift === 'DIA').length}</span>
                         </div>
-                        <div className="bg-white rounded-lg p-2 text-center border border-blue-200">
-                            <span className="block text-xs text-gray-600">Noche</span>
-                            <span className="block text-lg font-bold text-gray-900">{analyses.filter(a => a.shift === 'NOCHE').length}</span>
+                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
+                            <span className="block text-xs text-gray-600 font-medium">Noche</span>
+                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.filter(a => a.shift === 'NOCHE').length}</span>
                         </div>
                     </div>
 
                     <button
                         onClick={handleDownloadReport}
                         disabled={isLoading}
-                        className="w-full bg-green-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-green-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-sm"
                     >
                         <Download className="h-4 w-4" />
                         Descargar Excel
