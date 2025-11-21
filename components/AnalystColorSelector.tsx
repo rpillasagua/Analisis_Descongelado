@@ -48,7 +48,7 @@ export default function AnalystColorSelector({
                             {/* Color circle */}
                             <div
                                 className={`
-                  w-12 h-12 rounded-full border-4 transition-all
+                  w-20 h-20 rounded-full border-4 transition-all
                   ${isSelected ? 'border-white scale-110' : 'border-transparent'}
                 `}
                                 style={{ backgroundColor: hexColor }}
@@ -56,8 +56,7 @@ export default function AnalystColorSelector({
 
                             {/* Label */}
                             <span className={`
-                text-sm font-semibold transition-colors
-                ${isSelected ? 'text-white' : 'text-slate-200'}
+                text-sm font-semibold transition-colors text-white
               `}>
                                 {ANALYST_COLOR_LABELS[color]}
                             </span>
