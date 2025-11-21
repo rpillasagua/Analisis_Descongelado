@@ -138,21 +138,21 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
               <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
                 <div>
                   <span className="text-[#8e8e8e] text-xs block">Producto</span>
-                  <span className="font-medium text-[#262626]">{analysis.producto}</span>
+                  <span className="font-medium text-[#262626]">
+                    {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-[#8e8e8e] text-xs block">Variedad</span>
-                  <span className="font-medium text-[#262626]">{analysis.variedad}</span>
+                  <span className="text-[#8e8e8e] text-xs block">Código</span>
+                  <span className="font-medium text-[#262626]">{analysis.codigo}</span>
                 </div>
                 <div>
                   <span className="text-[#8e8e8e] text-xs block">Talla</span>
-                  <span className="font-medium text-[#262626]">{analysis.talla}</span>
+                  <span className="font-medium text-[#262626]">{analysis.talla || '-'}</span>
                 </div>
                 <div>
-                  <span className="text-[#8e8e8e] text-xs block">Tipo</span>
-                  <span className="font-medium text-[#262626]">
-                    {PRODUCT_TYPE_LABELS[analysis.tipoProducto] || analysis.tipoProducto}
-                  </span>
+                  <span className="text-[#8e8e8e] text-xs block">Turno</span>
+                  <span className="font-medium text-[#262626]">{analysis.shift}</span>
                 </div>
               </div>
             </div>
