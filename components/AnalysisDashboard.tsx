@@ -90,7 +90,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f3f4f6' }}>
       {/* Controls Section - Sticky con glassmorphism */}
-      <div className="sticky top-0 z-30 glass backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4 shadow-lg" style={{ borderBottom: 'none' }}>
+      <div className="sticky top-0 z-30 glass backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4 shadow-lg" style={{ borderBottom: 'none', borderTop: 'none' }}>
         <div className="max-w-7xl mx-auto space-y-3">
           {/* Actions Row - Mobile optimized */}
           <div className="flex gap-2 sm:gap-3">
@@ -136,8 +136,8 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
 
           {/* Search Bar moderno */}
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{ zIndex: 2 }}>
+              <Search className="text-gray-400" style={{ height: '26px', width: '26px' }} />
             </div>
             <input
               type="text"
@@ -149,15 +149,20 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                 backgroundColor: '#F3F4F6',
                 border: '2px solid transparent',
                 borderRadius: '12px',
-                color: '#1F2937'
+                color: '#1F2937',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                position: 'relative',
+                zIndex: 1
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#2563EB';
                 e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'transparent';
                 e.currentTarget.style.backgroundColor = '#F3F4F6';
+                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
               }}
             />
           </div>
