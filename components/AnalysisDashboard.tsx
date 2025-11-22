@@ -102,7 +102,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto p-4 pb-24 space-y-4">
+      <div className="max-w-5xl mx-auto px-4 py-2 pb-24 space-y-2">
         {/* Report Card - Shows at top when active */}
         {showReportModal && (
           <DailyReportCard onClose={() => setShowReportModal(false)} />
@@ -114,64 +114,64 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="bg-white rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer relative overflow-hidden group mb-3"
+              className="bg-white rounded-xl hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden group"
               style={{
                 borderLeft: `8px solid ${analysis.analystColor || '#3B82F6'}`,
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)' // Constant-like shadow for floating effect
               }}
             >
-              <div className="p-1.5">
+              <div className="p-2">
                 {/* Card Header */}
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-gray-900 leading-none">
+                    <h3 className="text-lg font-bold text-gray-900 leading-none">
                       {analysis.lote}
                     </h3>
                     {analysis.status === 'COMPLETADO' && (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-green-500" />
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-medium text-gray-400">
+                    <div className="text-[10px] font-medium text-gray-400 leading-none">
                       {new Date(analysis.date).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
 
                 {/* Card Body Grid */}
-                <div className="grid grid-cols-2 gap-y-0 gap-x-2 mt-0.5">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0">
                   {/* Producto */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0">Producto:</p>
-                    <p className="text-sm font-semibold text-gray-900 leading-tight">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5">Producto:</p>
+                    <p className="text-xs font-bold text-gray-900 leading-none">
                       {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
                     </p>
                   </div>
 
                   {/* Código */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0 flex items-center gap-1">
-                      <QrCode className="w-3.5 h-3.5" /> Código:
+                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5 flex items-center gap-1">
+                      <QrCode className="w-3 h-3" /> Código:
                     </p>
-                    <p className="text-lg font-bold text-gray-800">
+                    <p className="text-sm font-bold text-gray-800 leading-none">
                       {analysis.codigo}
                     </p>
                   </div>
 
                   {/* Talla */}
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0 flex items-center gap-1">
-                      <Ruler className="w-3.5 h-3.5" /> Talla:
+                  <div className="mt-1">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5 flex items-center gap-1">
+                      <Ruler className="w-3 h-3" /> Talla:
                     </p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-xs font-bold text-gray-900 leading-none">
                       {analysis.talla || '-'}
                     </p>
                   </div>
 
                   {/* Turno */}
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0.5">Turno:</p>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${analysis.shift === 'NOCHE'
+                  <div className="mt-1">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5">Turno:</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm ${analysis.shift === 'NOCHE'
                       ? 'bg-[#6B21A8] text-white'
                       : 'bg-amber-400 text-gray-900'
                       }`}>
@@ -194,6 +194,6 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
           </div>
         )}
       </div>
-    </div >
+    </div>
   );
 }
