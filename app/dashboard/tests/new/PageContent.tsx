@@ -521,14 +521,18 @@ export default function NewMultiAnalysisPageContent() {
                                 <ArrowLeft size={20} />
                             </button>
                             <div className="h-5 w-px bg-slate-800"></div>
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-lg font-bold text-slate-100">
-                                    Análisis de Calidad
-                                </h1>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">
-                                    {productType}
-                                </span>
-                            </div>
+                            <h1 className="text-sm font-semibold text-slate-100">
+                                {productType === 'CONTROL_PESOS' ? (
+                                    <span className="text-lg font-bold">CONTROL DE PESOS</span>
+                                ) : (
+                                    <>
+                                        Análisis de Calidad {' '}
+                                        <span className="text-slate-300">
+                                            {productType === 'ENTERO' ? 'Entero' : productType === 'COLA' ? 'Cola' : 'Valor Agregado'}
+                                        </span>
+                                    </>
+                                )}
+                            </h1>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -547,27 +551,7 @@ export default function NewMultiAnalysisPageContent() {
                         </div>
                     </div>
 
-                    {/* Compact Info Bar */}
-                    <div className="flex items-center gap-6 text-sm px-4 py-3 bg-slate-900/50 rounded-lg border border-slate-800">
-                        <div className="flex items-center gap-2">
-                            <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Lote</span>
-                            <span className="text-slate-200 font-mono">{lote}</span>
-                        </div>
-                        <div className="w-px h-3 bg-slate-800"></div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Código</span>
-                            <span className="text-slate-200 font-mono">{codigo}</span>
-                        </div>
-                        {talla && (
-                            <>
-                                <div className="w-px h-3 bg-slate-800"></div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-slate-500 text-xs uppercase tracking-wider font-medium">Talla</span>
-                                    <span className="text-slate-200 font-mono">{talla}</span>
-                                </div>
-                            </>
-                        )}
-                    </div>
+
                 </div>
 
                 {/* Analysis Tabs */}
