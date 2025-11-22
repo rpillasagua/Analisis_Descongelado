@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Download, Calendar } from 'lucide-react';
+import { X, Download, Calendar, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import { getAnalysesByDate, getAnalysesByShift } from '@/lib/analysisService';
-import { QualityAnalysis, WorkShift, PRODUCT_TYPE_LABELS } from '@/lib/types';
-import ExcelJS from 'exceljs';
+import { generateDailyReport } from '@/lib/reportService';
+import { QualityAnalysis, WorkShift } from '@/lib/types';
 
 interface DailyReportCardProps {
     onClose: () => void;
@@ -12,316 +13,189 @@ interface DailyReportCardProps {
 
 const getLocalDateString = () => {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    // Solución robusta para timezone offset
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().split('T')[0];
 };
 
 const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
     const [selectedDate, setSelectedDate] = useState(getLocalDateString());
     const [isLoading, setIsLoading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     const [analyses, setAnalyses] = useState<QualityAnalysis[]>([]);
     const [selectedShift, setSelectedShift] = useState<'ALL' | WorkShift>('ALL');
 
-    const handleGenerateReport = async () => {
+    const handleSearch = async () => {
         setIsLoading(true);
-        console.log(`🔍 Buscando análisis para fecha: ${selectedDate}, Turno: ${selectedShift}`);
+        setAnalyses([]); // Limpiar resultados anteriores
+
         try {
-            let data: QualityAnalysis[];
+            const data = selectedShift === 'ALL'
+                ? await getAnalysesByDate(selectedDate)
+                : await getAnalysesByShift(selectedDate, selectedShift);
 
-            if (selectedShift === 'ALL') {
-                data = await getAnalysesByDate(selectedDate);
-            } else {
-                data = await getAnalysesByShift(selectedDate, selectedShift);
-            }
-
-            console.log(`✅ Encontrados ${data.length} análisis`);
             setAnalyses(data);
 
             if (data.length === 0) {
-                alert(`No se encontraron análisis para la fecha ${selectedDate} y turno ${selectedShift}.`);
+                toast.info('No se encontraron registros para los filtros seleccionados');
+            } else {
+                toast.success(`Se encontraron ${data.length} registros`);
             }
-        } catch (error: any) {
-            console.error('Error al cargar análisis:', error);
-            alert(`Error al cargar análisis: ${error.message}`);
+        } catch (error) {
+            console.error('Error al buscar análisis:', error);
+            toast.error('Error al conectar con la base de datos');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDownloadReport = async () => {
+    const handleDownload = async () => {
         if (analyses.length === 0) {
-            alert('No hay análisis para exportar');
+            toast.warning('No hay datos para exportar');
             return;
         }
 
-        setIsLoading(true);
+        setIsGenerating(true);
         try {
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('Reporte Diario');
+            // Llamada limpia al servicio
+            const blob = await generateDailyReport(analyses, selectedDate, selectedShift);
 
-            // Título del reporte
-            worksheet.mergeCells('A1:M1');
-            const titleCell = worksheet.getCell('A1');
-            titleCell.value = `Reporte de Análisis de Calidad - ${selectedDate}`;
-            titleCell.font = { size: 16, bold: true };
-            titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-            titleCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FF4472C4' }
-            };
-            titleCell.font = { ...titleCell.font, color: { argb: 'FFFFFFFF' } };
-
-            // Subtítulo con turno
-            worksheet.mergeCells('A2:M2');
-            const subtitleCell = worksheet.getCell('A2');
-            subtitleCell.value = selectedShift === 'ALL'
-                ? 'Todos los turnos'
-                : selectedShift === 'DIA'
-                    ? 'Turno Día (7:10 AM - 7:10 PM)'
-                    : 'Turno Noche (7:10 PM - 7:10 AM)';
-            subtitleCell.font = { size: 12, bold: true };
-            subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            worksheet.addRow([]);
-
-            // Encabezados
-            const headerRow = worksheet.addRow([
-                'Hora',
-                'Turno',
-                'Tipo Producto',
-                'Lote',
-                'Código',
-                'Talla',
-                'Peso Bruto',
-                'Peso Congelado',
-                'Peso Neto',
-                'Conteo',
-                'Uniformidad Grandes',
-                'Uniformidad Pequeños',
-                'Total Defectos',
-                'Observaciones'
-            ]);
-
-            headerRow.font = { bold: true };
-            headerRow.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFD9E1F2' }
-            };
-            headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            // Agrupar por turno
-            const analysesByShift = {
-                DIA: analyses.filter(a => a.shift === 'DIA'),
-                NOCHE: analyses.filter(a => a.shift === 'NOCHE')
-            };
-
-            // Agregar datos por turno
-            ['DIA', 'NOCHE'].forEach((shift) => {
-                const shiftAnalyses = analysesByShift[shift as WorkShift];
-
-                if (shiftAnalyses.length > 0) {
-                    // Separador de turno
-                    const separatorRow = worksheet.addRow([shift === 'DIA' ? 'TURNO DÍA' : 'TURNO NOCHE']);
-                    worksheet.mergeCells(`A${separatorRow.number}:N${separatorRow.number}`);
-                    separatorRow.font = { bold: true, size: 12 };
-                    separatorRow.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: shift === 'DIA' ? 'FFFFF2CC' : 'FFE2EFDA' }
-                    };
-
-                    shiftAnalyses.forEach((analysis) => {
-                        const getProp = (prop: string): any => {
-                            return analysis.analyses?.[0]?.[prop as keyof typeof analysis.analyses[0]] || (analysis as any)[prop];
-                        };
-
-                        const defectos = getProp('defectos');
-                        const totalDefectos = defectos
-                            ? Object.values(defectos).reduce((sum: any, val: any) => sum + val, 0)
-                            : 0;
-
-                        const row = worksheet.addRow([
-                            new Date(analysis.createdAt).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' }),
-                            shift === 'DIA' ? 'Día' : 'Noche',
-                            PRODUCT_TYPE_LABELS[analysis.productType],
-                            analysis.lote,
-                            analysis.codigo,
-                            analysis.talla || '-',
-                            getProp('pesoBruto')?.valor || '-',
-                            getProp('pesoCongelado')?.valor || '-',
-                            getProp('pesoNeto')?.valor || '-',
-                            getProp('conteo') || '-',
-                            getProp('uniformidad')?.grandes?.valor || '-',
-                            getProp('uniformidad')?.pequenos?.valor || '-',
-                            totalDefectos,
-                            analysis.observations || '-'
-                        ]);
-
-                        row.alignment = { vertical: 'middle' };
-                    });
-
-                    // Fila de subtotales por turno
-                    const subtotalRow = worksheet.addRow([
-                        '',
-                        `Subtotal ${shift === 'DIA' ? 'Día' : 'Noche'}:`,
-                        `${shiftAnalyses.length} análisis`,
-                        '', '', '', '', '', '', '', '', '', '', ''
-                    ]);
-                    subtotalRow.font = { bold: true };
-                    subtotalRow.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'FFF2F2F2' }
-                    };
-
-                    worksheet.addRow([]);
-                }
-            });
-
-            // Fila de totales
-            const totalRow = worksheet.addRow([
-                '',
-                'TOTAL:',
-                `${analyses.length} análisis`,
-                '', '', '', '', '', '', '', '', '', '', ''
-            ]);
-            totalRow.font = { bold: true, size: 12 };
-            totalRow.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFBDD7EE' }
-            };
-
-            // Ajustar ancho de columnas
-            worksheet.columns = [
-                { width: 10 }, { width: 12 }, { width: 18 }, { width: 15 },
-                { width: 12 }, { width: 10 }, { width: 14 }, { width: 16 },
-                { width: 12 }, { width: 10 }, { width: 18 }, { width: 18 },
-                { width: 15 }, { width: 30 }
-            ];
-
-            // Bordes
-            worksheet.eachRow((row, rowNumber) => {
-                if (rowNumber > 2) {
-                    row.eachCell((cell) => {
-                        cell.border = {
-                            top: { style: 'thin' },
-                            left: { style: 'thin' },
-                            bottom: { style: 'thin' },
-                            right: { style: 'thin' }
-                        };
-                    });
-                }
-            });
-
-            // Generar archivo
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], {
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            });
-
+            // Descarga
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `reporte_calidad_${selectedDate}_${selectedShift}.xlsx`;
+            link.download = `Reporte_Calidad_${selectedDate}_${selectedShift}.xlsx`;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            alert('✅ Reporte descargado exitosamente');
-        } catch (error: any) {
-            console.error('Error al generar reporte:', error);
-            alert(`❌ Error al generar reporte: ${error.message}`);
+            toast.success('Reporte descargado exitosamente');
+        } catch (error) {
+            console.error('Error generando Excel:', error);
+            toast.error('No se pudo generar el archivo Excel');
         } finally {
-            setIsLoading(false);
+            setIsGenerating(false);
         }
     };
 
+    // Cálculos para la UI
+    const countDia = analyses.filter(a => a.shift === 'DIA').length;
+    const countNoche = analyses.filter(a => a.shift === 'NOCHE').length;
+
     return (
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm relative">
-            {/* Close Button */}
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-lg relative animate-in fade-in zoom-in-95 duration-200">
             <button
                 onClick={onClose}
                 className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar"
             >
                 <X className="h-5 w-5" />
             </button>
 
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-blue-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <Calendar className="h-6 w-6 text-blue-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900">Generar Reporte Diario</h2>
+                <div>
+                    <h2 className="text-lg font-bold text-gray-900">Reporte Diario</h2>
+                    <p className="text-xs text-gray-500">Selecciona fecha y turno para exportar</p>
+                </div>
             </div>
 
-            {/* Controls */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-                <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Fecha</label>
+            {/* Controles de Filtro */}
+            <div className="grid grid-cols-2 gap-4 mb-5">
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 ml-1">Fecha</label>
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                 </div>
-                <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Turno</label>
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-gray-700 ml-1">Turno</label>
                     <select
                         value={selectedShift}
                         onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
-                        <option value="ALL">Todos</option>
-                        <option value="DIA">Día</option>
-                        <option value="NOCHE">Noche</option>
+                        <option value="ALL">Todos los turnos</option>
+                        <option value="DIA">Turno Día</option>
+                        <option value="NOCHE">Turno Noche</option>
                     </select>
                 </div>
             </div>
 
-            {/* Action Button */}
+            {/* Botón de Búsqueda */}
             <button
-                onClick={handleGenerateReport}
+                onClick={handleSearch}
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-4 shadow-sm"
+                className="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
-                {isLoading ? 'Buscando...' : 'Buscar Análisis'}
+                {isLoading ? (
+                    <span className="animate-pulse">Buscando...</span>
+                ) : (
+                    <>
+                        <Search className="h-4 w-4" /> Buscar Registros
+                    </>
+                )}
             </button>
 
-            {/* Results */}
+            {/* Resultados y Descarga */}
             {analyses.length > 0 && (
-                <div className="space-y-3 pt-4 border-t border-gray-200">
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-                            <span className="block text-xs text-gray-600 font-medium">Total</span>
-                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.length}</span>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-                            <span className="block text-xs text-gray-600 font-medium">Día</span>
-                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.filter(a => a.shift === 'DIA').length}</span>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-3 text-center border border-gray-200">
-                            <span className="block text-xs text-gray-600 font-medium">Noche</span>
-                            <span className="block text-xl font-bold text-gray-900 mt-1">{analyses.filter(a => a.shift === 'NOCHE').length}</span>
-                        </div>
+                <div className="mt-6 pt-5 border-t border-gray-100 space-y-4 animate-in slide-in-from-top-2 duration-300">
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <StatCard label="Total" value={analyses.length} />
+                        <StatCard label="Día" value={countDia} highlight={countDia > 0} />
+                        <StatCard label="Noche" value={countNoche} highlight={countNoche > 0} />
                     </div>
 
+                    {/* Botón Descargar */}
                     <button
-                        onClick={handleDownloadReport}
-                        disabled={isLoading}
-                        className="w-full bg-green-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-sm"
+                        onClick={handleDownload}
+                        disabled={isGenerating}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <Download className="h-4 w-4" />
-                        Descargar Excel
+                        {isGenerating ? (
+                            <span className="animate-pulse">Generando Excel...</span>
+                        ) : (
+                            <>
+                                <Download className="h-5 w-5" /> Descargar Reporte (.xlsx)
+                            </>
+                        )}
                     </button>
                 </div>
             )}
         </div>
     );
 };
+
+// Subcomponente para limpiar el JSX
+const StatCard = ({
+    label,
+    value,
+    highlight = false
+}: {
+    label: string;
+    value: number;
+    highlight?: boolean;
+}) => (
+    <div className={`p-3 rounded-lg border text-center transition-colors ${highlight
+            ? 'bg-blue-50 border-blue-100'
+            : 'bg-gray-50 border-gray-100'
+        }`}>
+        <span className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+            {label}
+        </span>
+        <span className={`block text-xl font-bold mt-1 ${highlight ? 'text-blue-700' : 'text-gray-700'
+            }`}>
+            {value}
+        </span>
+    </div>
+);
 
 export default DailyReportCard;
