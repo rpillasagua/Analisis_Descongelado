@@ -116,18 +116,28 @@ export default function NewMultiAnalysisPageContent() {
     const [viewMode, setViewMode] = useState<'compact' | 'loose'>('loose');
 
     const handleDeleteAnalysis = async () => {
-        if (!analysisId) return;
+        console.log('🗑️ handleDeleteAnalysis called', { analysisId });
+
+        if (!analysisId) {
+            console.error('❌ No analysisId found to delete');
+            toast.error('No se puede eliminar: ID de análisis no encontrado');
+            return;
+        }
+
         try {
             // No usamos setIsLoading(true) aquí para evitar que el modal se desmonte
             // El modal maneja su propio estado de carga (isDeleting)
             const { deleteAnalysis } = await import('@/lib/analysisService');
+            console.log('Calling deleteAnalysis service...');
             await deleteAnalysis(analysisId);
+            console.log('✅ Analysis deleted successfully');
 
             // Forzar refresco de datos y redirigir
             router.refresh();
             router.push('/');
+            toast.success('Análisis eliminado correctamente');
         } catch (error) {
-            console.error('Error deleting analysis:', error);
+            console.error('❌ Error deleting analysis:', error);
             toast.error('Error al eliminar el análisis. Por favor intenta de nuevo.');
         }
     };
@@ -795,8 +805,16 @@ export default function NewMultiAnalysisPageContent() {
                         <button
                             type="button"
                             onClick={() => {
-                                console.log('Delete button clicked');
+                                console.log('🗑️ Delete button clicked');
+                                console.log('Current analysisId:', analysisId);
+                                if (!analysisId) {
+                                    console.warn('⚠️ Delete clicked but no analysisId present');
+                                    toast.error('Error: No hay análisis cargado para eliminar');
+                                    return;
+                                }
+                                console.log('Setting showDeleteModal to true');
                                 setShowDeleteModal(true);
+                                console.log('Set showDeleteModal command executed');
                             }}
                             className="flex items-center gap-2 px-4 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                         >
