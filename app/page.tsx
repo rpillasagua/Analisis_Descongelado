@@ -115,21 +115,24 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
             >
               {user.picture ? (
                 <div
-                  className="relative h-12 w-12 rounded-full shadow-md border-[3px] border-white transition-transform duration-200 hover:scale-105"
-                  style={{ borderRadius: '50%' }} // Force circular shape
+                  className="relative h-12 w-12 rounded-full overflow-hidden shadow-md transition-transform duration-200 hover:scale-105"
+                  style={{ borderRadius: '50%' }}
                 >
-                  {/* Usamos img estándar para evitar problemas con dominios externos en Next.js */}
                   <img
                     src={user.picture}
                     alt={user.name}
-                    className="h-full w-full object-cover rounded-full"
-                    style={{ borderRadius: '50%' }}
+                    className="h-full w-full object-cover"
+                    style={{ borderRadius: '50%', border: '3px solid white', boxSizing: 'border-box' }}
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement?.classList.add('fallback-avatar');
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.classList.add('fallback-avatar');
+                        const fallback = parent.querySelector('.fallback-text');
+                        if (fallback) fallback.classList.remove('hidden');
+                      }
                     }}
                   />
-                  {/* Fallback text if image fails (hidden by default) */}
                   <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-blue-600 bg-blue-100 rounded-full hidden fallback-text">
                     {user.name.charAt(0)}
                   </span>
@@ -147,19 +150,16 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-3 w-[280px] bg-white rounded-xl p-5 z-[100] animate-in fade-in zoom-in-95 duration-200 flex flex-col gap-3"
+                <div className="absolute right-0 mt-3 w-[240px] bg-white rounded-xl p-4 z-[100] animate-in fade-in zoom-in-95 duration-200 flex flex-col gap-3"
                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
 
-                  {/* Info Usuario */}
                   <div className="flex flex-col items-center text-center">
                     <p className="text-base font-bold text-slate-800 truncate w-full">{user.name}</p>
                     <p className="text-xs text-slate-500 truncate w-full mt-1">{user.email}</p>
                   </div>
 
-                  {/* Separador */}
                   <hr className="border-t border-slate-100 w-full" />
 
-                  {/* Botón Cerrar Sesión */}
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
