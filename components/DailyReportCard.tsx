@@ -80,100 +80,117 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
     const countNoche = analyses.filter(a => a.shift === 'NOCHE').length;
 
     return (
-        <div className="glass rounded-2xl p-2 sm:p-3 shadow-2xl relative animate-slide-up border border-white/20">
-            <button
-                onClick={onClose}
-                className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-gray-400 hover:text-gray-600 transition-all hover:scale-110"
-                aria-label="Cerrar"
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-[3px] animate-fade-in">
+            <style jsx global>{`
+                @keyframes floatUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            `}</style>
+
+            <div
+                className="bg-white w-[90%] max-w-[340px] p-[25px] rounded-[24px] relative text-left"
+                style={{
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    animation: 'floatUp 0.3s ease-out'
+                }}
             >
-                <X className="h-4 w-4" />
-            </button>
+                {/* Botón Cerrar (X) */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-[20px] right-[20px] bg-[#F3F4F6] border-none w-[32px] h-[32px] rounded-full text-[#6B7280] text-[16px] cursor-pointer flex items-center justify-center transition-colors hover:bg-[#E5E7EB] hover:text-black"
+                    aria-label="Cerrar"
+                >
+                    <X className="h-4 w-4" />
+                </button>
 
-            <div className="flex items-center gap-1.5 mb-2">
-                <div className="p-1.5 gradient-blue rounded-xl shadow-lg">
-                    <Calendar className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                    <h2 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">Reporte Diario</h2>
-                    <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Selecciona fecha y turno</p>
-                </div>
-            </div>
+                {/* Títulos */}
+                <h2 className="m-0 text-[22px] font-[800] text-[#111827]">Reporte Diario</h2>
+                <p className="mt-[5px] mb-[25px] text-[14px] text-[#6B7280]">Selecciona los filtros para el reporte</p>
 
-            {/* Controles de Filtro */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mb-2">
-                <div className="space-y-0.5">
-                    <label className="text-[10px] sm:text-xs font-semibold text-gray-700 ml-1">Fecha</label>
-                    <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full glass border-2 border-white/20 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
-                    />
-                </div>
-                <div className="space-y-0.5">
-                    <label className="text-[10px] sm:text-xs font-semibold text-gray-700 ml-1">Turno</label>
-                    <select
-                        value={selectedShift}
-                        onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                        className="w-full glass border-2 border-white/20 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
-                    >
-                        <option value="ALL">Todos los turnos</option>
-                        <option value="DIA">Turno Día</option>
-                        <option value="NOCHE">Turno Noche</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Botón de Búsqueda */}
-            <button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className="w-full gradient-blue text-white py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-            >
-                {isLoading ? (
-                    <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Buscando...</span>
-                    </>
-                ) : (
-                    <>
-                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        <span>Buscar Registros</span>
-                    </>
-                )}
-            </button>
-
-            {/* Resultados y Descarga */}
-            {analyses.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-gray-200/50 space-y-2 animate-slide-up">
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-3 gap-1.5">
-                        <StatCard label="Total" value={analyses.length} highlight={true} />
-                        <StatCard label="Día" value={countDia} highlight={countDia > 0} />
-                        <StatCard label="Noche" value={countNoche} highlight={countNoche > 0} />
+                {/* Input Fecha */}
+                <div className="mb-[16px]">
+                    <label className="block text-[13px] font-[600] text-[#374151] mb-[8px]">Fecha</label>
+                    <div className="flex items-center bg-[#F3F4F6] rounded-[12px] px-[16px] py-[12px] border-2 border-transparent transition-all focus-within:bg-white focus-within:border-[#2563EB] focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]">
+                        <span className="mr-[10px] text-[18px]">📅</span>
+                        <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="border-none bg-transparent w-full text-[15px] text-[#1F2937] outline-none font-[500]"
+                        />
                     </div>
-
-                    {/* Botón Descargar */}
-                    <button
-                        onClick={handleDownload}
-                        disabled={isGenerating}
-                        className="w-full gradient-primary text-white py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        {isGenerating ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                <span>Generando Excel...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                <span>Descargar Reporte (.xlsx)</span>
-                                <Sparkles className="h-3.5 w-3.5" />
-                            </>
-                        )}
-                    </button>
                 </div>
-            )}
+
+                {/* Input Turno */}
+                <div className="mb-[16px]">
+                    <label className="block text-[13px] font-[600] text-[#374151] mb-[8px]">Turno</label>
+                    <div className="flex items-center bg-[#F3F4F6] rounded-[12px] px-[16px] py-[12px] border-2 border-transparent transition-all focus-within:bg-white focus-within:border-[#2563EB] focus-within:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]">
+                        <span className="mr-[10px] text-[18px]">⏰</span>
+                        <select
+                            value={selectedShift}
+                            onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
+                            className="border-none bg-transparent w-full text-[15px] text-[#1F2937] outline-none font-[500] appearance-none cursor-pointer"
+                        >
+                            <option value="ALL">Todos los turnos</option>
+                            <option value="DIA">Turno Día</option>
+                            <option value="NOCHE">Turno Noche</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Botón Buscar */}
+                <button
+                    onClick={handleSearch}
+                    disabled={isLoading}
+                    className="w-full bg-[#2563EB] text-white border-none p-[16px] rounded-[14px] text-[16px] font-[600] mt-[10px] cursor-pointer flex justify-center items-center gap-[8px] transition-transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                    style={{ boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' }}
+                >
+                    {isLoading ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Buscando...</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-[18px]">🔍</span>
+                            <span>Buscar Registros</span>
+                        </>
+                    )}
+                </button>
+
+                {/* Resultados y Descarga */}
+                {analyses.length > 0 && (
+                    <div className="mt-[20px] pt-[20px] border-t border-gray-100 animate-slide-up">
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-3 gap-2 mb-[16px]">
+                            <StatCard label="Total" value={analyses.length} highlight={true} />
+                            <StatCard label="Día" value={countDia} highlight={countDia > 0} />
+                            <StatCard label="Noche" value={countNoche} highlight={countNoche > 0} />
+                        </div>
+
+                        {/* Botón Descargar */}
+                        <button
+                            onClick={handleDownload}
+                            disabled={isGenerating}
+                            className="w-full bg-[#10B981] text-white border-none p-[16px] rounded-[14px] text-[16px] font-[600] cursor-pointer flex justify-center items-center gap-[8px] transition-transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                            style={{ boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)' }}
+                        >
+                            {isGenerating ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Generando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Download className="h-5 w-5" />
+                                    <span>Descargar Excel</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -188,14 +205,14 @@ const StatCard = ({
     value: number;
     highlight?: boolean;
 }) => (
-    <div className={`glass p-1.5 rounded-lg text-center transition-all border ${highlight
-        ? 'border-blue-200 bg-blue-50/50'
-        : 'border-white/20'
-        } shadow-md hover:shadow-lg`}>
-        <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-gray-500 font-semibold leading-tight">
+    <div className={`p-[10px] rounded-[12px] text-center transition-all border ${highlight
+        ? 'bg-blue-50 border-blue-100'
+        : 'bg-gray-50 border-gray-100'
+        }`}>
+        <span className="block text-[10px] uppercase tracking-wider text-gray-500 font-[600]">
             {label}
         </span>
-        <span className={`block text-base sm:text-lg font-bold leading-tight ${highlight ? 'text-blue-700' : 'text-gray-700'
+        <span className={`block text-[18px] font-[700] ${highlight ? 'text-[#2563EB]' : 'text-gray-700'
             }`}>
             {value}
         </span>
@@ -203,4 +220,3 @@ const StatCard = ({
 );
 
 export default DailyReportCard;
-
