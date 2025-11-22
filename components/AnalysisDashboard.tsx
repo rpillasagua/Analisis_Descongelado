@@ -135,40 +135,41 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
           </div>
 
           {/* Search Bar moderno */}
-          <div className="relative" style={{ marginTop: '8px' }}>
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{ zIndex: 2 }}>
-              <Search className="text-gray-400" style={{ height: '26px', width: '26px' }} />
-            </div>
+          <div className="relative" style={{ marginTop: '16px' }}>
             <input
               type="text"
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3.5 text-base transition-all outline-none"
+              className="w-full px-6 text-base transition-all outline-none"
               style={{
                 backgroundColor: '#F3F4F6',
                 border: '2px solid transparent',
                 borderRadius: '12px',
                 color: '#1F2937',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                paddingTop: '14px',
+                paddingBottom: '14px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                 position: 'relative',
                 zIndex: 1
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#2563EB';
                 e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1)';
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'transparent';
                 e.currentTarget.style.backgroundColor = '#F3F4F6';
-                e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             />
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex justify-center">
+          <div className="flex justify-center" style={{ marginTop: '12px', marginBottom: '16px' }}>
             <div className="flex items-center gap-1 glass p-1 rounded-full shadow-md">
               <button
                 onClick={() => setActiveTab('todos')}
