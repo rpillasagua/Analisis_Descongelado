@@ -233,27 +233,28 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                 {/* Hover overlay sutil */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-600/0 group-hover:from-blue-500/5 group-hover:to-purple-600/5 transition-all pointer-events-none" />
               </div>
+            </div>
           ))}
-            </div>
-
-        {/* Loading Spinner */ }
-        { hasMore && !searchTerm && (
-              <div ref={observerTarget} className="flex justify-center py-6 sm:py-8">
-                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 animate-spin" />
-              </div>
-            )}
-
-          {/* Empty state */}
-          {filteredAnalyses.length === 0 && (
-            <div className="text-center py-12 sm:py-16 animate-fade-in">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 glass rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Search className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No se encontraron análisis</h3>
-              <p className="text-sm sm:text-base text-gray-500">Intenta ajustar tu búsqueda o crea un nuevo análisis.</p>
-            </div>
-          )}
         </div>
+
+        {/* Loading Spinner */}
+        {hasMore && !searchTerm && (
+          <div ref={observerTarget} className="flex justify-center py-6 sm:py-8">
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 animate-spin" />
+          </div>
+        )}
+
+        {/* Empty state */}
+        {filteredAnalyses.length === 0 && (
+          <div className="text-center py-12 sm:py-16 animate-fade-in">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 glass rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Search className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No se encontraron análisis</h3>
+            <p className="text-sm sm:text-base text-gray-500">Intenta ajustar tu búsqueda o crea un nuevo análisis.</p>
+          </div>
+        )}
       </div>
-      );
+    </div>
+  );
 }
