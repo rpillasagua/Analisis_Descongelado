@@ -767,6 +767,7 @@ export default function NewMultiAnalysisPageContent() {
                             </CardHeader>
                             <CardContent>
                                 <DefectSelector
+                                    key={`defects-${activeAnalysisIndex}`}
                                     productType={productType}
                                     selectedDefects={currentAnalysis.defectos || {}}
                                     onDefectsChange={handleDefectsChange}
