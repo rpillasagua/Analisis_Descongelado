@@ -27,7 +27,6 @@ body {
 /* Clean, subtle scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  /* Slightly thinner scrollbar */
 }
 
 ::-webkit-scrollbar-track {
@@ -47,20 +46,13 @@ body {
 .ig-card {
   background-color: white;
   border-radius: 12px;
-  /* Slightly more rounded corners */
-  /* Removed border: 1px solid var(--ig-border-color); */
-  /* Removed margin-bottom: 12px; */
 }
 
 .ig-input {
   background: #ffffff;
-  /* White background for input contrast */
   border: 1px solid var(--ig-border-color);
-  /* Maintain subtle border for input */
   border-radius: 10px;
-  /* Rounded input */
   padding: 12px 16px;
-  /* Larger padding for better touch targets */
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -68,7 +60,6 @@ body {
 .ig-input:focus {
   border-color: var(--ig-primary-button);
   box-shadow: 0 0 0 2px rgba(0, 119, 201, 0.2);
-  /* Soft focus ring */
 }
 
 .ig-button-primary {
@@ -79,7 +70,6 @@ body {
   padding: 10px 20px;
   transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
   box-shadow: 0 4px 12px rgba(0, 119, 201, 0.3);
-  /* Subtle button shadow */
 }
 
 .ig-button-primary:hover {
@@ -94,7 +84,6 @@ body {
 .ig-button-secondary {
   background-color: transparent;
   color: var(--ig-primary-button);
-  /* Secondary button uses primary color for text */
   border: 1px solid var(--ig-primary-button);
   border-radius: 10px;
   font-weight: 600;
@@ -104,20 +93,93 @@ body {
 
 .ig-button-secondary:hover {
   background-color: rgba(0, 119, 201, 0.05);
-  /* Light hover effect */
 }
 
 .ig-button-secondary:active {
   transform: scale(0.98);
 }
 
-/* Mobile optimizations: Makes cards edge-to-edge for a feed-like appearance */
+/* Mobile optimizations */
 @media (max-width: 640px) {
   .ig-card-mobile-full {
-    /* New dedicated class for edge-to-edge */
     border-left: none !important;
     border-right: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
   }
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Gradient utilities */
+.gradient-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Floating card effect */
+.card-float {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.2), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-float:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(59, 130, 246, 0.3), 0 12px 20px -8px rgba(0, 0, 0, 0.15);
+}
+
+.card-float:active {
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 300ms ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 300ms ease-out;
 }

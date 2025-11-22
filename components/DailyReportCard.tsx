@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Download, Calendar, Search } from 'lucide-react';
+import { X, Download, Calendar, Search, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAnalysesByDate, getAnalysesByShift } from '@/lib/analysisService';
 import { generateDailyReport } from '@/lib/reportService';
@@ -13,7 +13,6 @@ interface DailyReportCardProps {
 
 const getLocalDateString = () => {
     const now = new Date();
-    // Solución robusta para timezone offset
     const offset = now.getTimezoneOffset() * 60000;
     return new Date(now.getTime() - offset).toISOString().split('T')[0];
 };
@@ -27,7 +26,7 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
 
     const handleSearch = async () => {
         setIsLoading(true);
-        setAnalyses([]); // Limpiar resultados anteriores
+        setAnalyses([]);
 
         try {
             const data = selectedShift === 'ALL'
@@ -57,10 +56,8 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
 
         setIsGenerating(true);
         try {
-            // Llamada limpia al servicio
             const blob = await generateDailyReport(analyses, selectedDate, selectedShift);
 
-            // Descarga
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -79,47 +76,46 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
         }
     };
 
-    // Cálculos para la UI
     const countDia = analyses.filter(a => a.shift === 'DIA').length;
     const countNoche = analyses.filter(a => a.shift === 'NOCHE').length;
 
     return (
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-lg relative animate-in fade-in zoom-in-95 duration-200">
+        <div className="glass rounded-2xl p-4 sm:p-6 shadow-2xl relative animate-slide-up border border-white/20">
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-all hover:scale-110"
                 aria-label="Cerrar"
             >
                 <X className="h-5 w-5" />
             </button>
 
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-blue-50 rounded-lg">
-                    <Calendar className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center gap-3 mb-5">
+                <div className="p-2.5 sm:p-3 gradient-blue rounded-2xl shadow-lg">
+                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-gray-900">Reporte Diario</h2>
-                    <p className="text-xs text-gray-500">Selecciona fecha y turno para exportar</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Reporte Diario</h2>
+                    <p className="text-xs sm:text-sm text-gray-500">Selecciona fecha y turno para exportar</p>
                 </div>
             </div>
 
             {/* Controles de Filtro */}
-            <div className="grid grid-cols-2 gap-4 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 ml-1">Fecha</label>
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700 ml-1">Fecha</label>
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full glass border-2 border-white/20 rounded-xl px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-gray-700 ml-1">Turno</label>
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700 ml-1">Turno</label>
                     <select
                         value={selectedShift}
                         onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full glass border-2 border-white/20 rounded-xl px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
                     >
                         <option value="ALL">Todos los turnos</option>
                         <option value="DIA">Turno Día</option>
@@ -132,24 +128,27 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
             <button
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full gradient-blue text-white py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
             >
                 {isLoading ? (
-                    <span className="animate-pulse">Buscando...</span>
+                    <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Buscando...</span>
+                    </>
                 ) : (
                     <>
-                        <Search className="h-4 w-4" /> Buscar Registros
+                        <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span>Buscar Registros</span>
                     </>
                 )}
             </button>
 
             {/* Resultados y Descarga */}
             {analyses.length > 0 && (
-                <div className="mt-6 pt-5 border-t border-gray-100 space-y-4 animate-in slide-in-from-top-2 duration-300">
-
+                <div className="mt-5 pt-5 border-t border-gray-200/50 space-y-4 animate-slide-up">
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-3 gap-3">
-                        <StatCard label="Total" value={analyses.length} />
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <StatCard label="Total" value={analyses.length} highlight={true} />
                         <StatCard label="Día" value={countDia} highlight={countDia > 0} />
                         <StatCard label="Noche" value={countNoche} highlight={countNoche > 0} />
                     </div>
@@ -158,13 +157,18 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full gradient-primary text-white py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
                     >
                         {isGenerating ? (
-                            <span className="animate-pulse">Generando Excel...</span>
+                            <>
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>Generando Excel...</span>
+                            </>
                         ) : (
                             <>
-                                <Download className="h-5 w-5" /> Descargar Reporte (.xlsx)
+                                <Download className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <span>Descargar Reporte (.xlsx)</span>
+                                <Sparkles className="h-4 w-4" />
                             </>
                         )}
                     </button>
@@ -174,7 +178,7 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
     );
 };
 
-// Subcomponente para limpiar el JSX
+// Subcomponente para stat cards
 const StatCard = ({
     label,
     value,
@@ -184,14 +188,14 @@ const StatCard = ({
     value: number;
     highlight?: boolean;
 }) => (
-    <div className={`p-3 rounded-lg border text-center transition-colors ${highlight
-            ? 'bg-blue-50 border-blue-100'
-            : 'bg-gray-50 border-gray-100'
-        }`}>
-        <span className="block text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+    <div className={`glass p-3 rounded-xl text-center transition-all border ${highlight
+        ? 'border-blue-200 bg-blue-50/50'
+        : 'border-white/20'
+        } shadow-md hover:shadow-lg`}>
+        <span className="block text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">
             {label}
         </span>
-        <span className={`block text-xl font-bold mt-1 ${highlight ? 'text-blue-700' : 'text-gray-700'
+        <span className={`block text-xl sm:text-2xl font-bold ${highlight ? 'text-blue-700' : 'text-gray-700'
             }`}>
             {value}
         </span>
@@ -199,3 +203,4 @@ const StatCard = ({
 );
 
 export default DailyReportCard;
+

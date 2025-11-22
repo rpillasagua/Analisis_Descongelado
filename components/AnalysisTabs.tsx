@@ -1,8 +1,8 @@
 'use client';
 
+import React from 'react';
 import { AnalystColor, ANALYST_COLOR_HEX } from '@/lib/types';
 import { Plus, CheckCircle2 } from 'lucide-react';
-import { adjustColor } from '@/lib/colorUtils';
 
 interface AnalysisTabsProps {
     analysesCount: number;
