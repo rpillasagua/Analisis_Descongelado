@@ -212,16 +212,16 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
               className="cursor-pointer relative overflow-hidden group rounded-lg transition-all duration-300 hover:-translate-y-1"
               style={{
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                borderRadius: '24px',
+                background: 'white',
+                border: 'none',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
               }}
             >
               {/* Franja de color del analista */}
@@ -233,8 +233,8 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                   bottom: 0,
                   width: '8px',
                   backgroundColor: analysis.analystColor ? ANALYST_COLOR_HEX[analysis.analystColor] : '#3b82f6',
-                  borderTopLeftRadius: '8px',
-                  borderBottomLeftRadius: '8px',
+                  borderTopLeftRadius: '24px',
+                  borderBottomLeftRadius: '24px',
                   zIndex: 10
                 }}
               />
