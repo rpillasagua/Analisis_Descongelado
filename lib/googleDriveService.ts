@@ -3,10 +3,31 @@
  * Maneja el almacenamiento de fotos en Google Drive
  */
 
+import { logger } from './logger';
+
 interface GoogleDriveConfig {
   apiKey: string;
   clientId: string;
   rootFolderId: string;
+}
+
+interface GoogleDriveFile {
+  id: string;
+  name: string;
+  thumbnailLink?: string;
+  webViewLink?: string;
+  webContentLink?: string;
+}
+
+interface GoogleDrivePermission {
+  id: string;
+  type: string;
+  role: string;
+  emailAddress?: string;
+}
+
+interface GoogleDriveListResponse {
+  files: GoogleDriveFile[];
 }
 
 class GoogleDriveService {
@@ -50,7 +71,7 @@ class GoogleDriveService {
       // Si ya tenemos un rootFolderId configurado, usarlo
       if (this.config.rootFolderId) {
         this.rootFolderId = this.config.rootFolderId;
-        console.log('✅ Usando carpeta raíz existente:', this.rootFolderId);
+        logger.log('✅ Usando carpeta raíz existente:', this.rootFolderId);
         return;
       }
 
@@ -60,19 +81,19 @@ class GoogleDriveService {
       }
 
       // Si no, buscar o crear la carpeta "descongelado" en el drive
-      console.log('🔍 Buscando carpeta "descongelado"...');
+      logger.log('🔍 Buscando carpeta "descongelado"...');
       const existingFolder = await this.findFolderInRoot(this.ROOT_FOLDER_NAME);
 
       if (existingFolder) {
         this.rootFolderId = existingFolder;
-        console.log('✅ Carpeta "descongelado" encontrada:', this.rootFolderId);
+        logger.log('✅ Carpeta "descongelado" encontrada:', this.rootFolderId);
       } else {
-        console.log('📁 Creando carpeta "descongelado"...');
+        logger.log('📁 Creando carpeta "descongelado"...');
         this.rootFolderId = await this.createRootFolder();
-        console.log('✅ Carpeta "descongelado" creada:', this.rootFolderId);
+        logger.log('✅ Carpeta "descongelado" creada:', this.rootFolderId);
       }
-    } catch (error: any) {
-      console.error('❌ Error inicializando Google Drive:', error);
+    } catch (error) {
+      logger.error('❌ Error inicializando Google Drive:', error);
       throw error;
     }
   }
@@ -93,10 +114,10 @@ class GoogleDriveService {
         }
       );
 
-      const data = await response.json();
+      const data: GoogleDriveListResponse = await response.json();
       return data.files && data.files.length > 0 ? data.files[0].id : null;
-    } catch (error: any) {
-      console.error('Error buscando carpeta en raíz:', error);
+    } catch (error) {
+      logger.error('Error buscando carpeta en raíz:', error);
       return null;
     }
   }
@@ -120,10 +141,10 @@ class GoogleDriveService {
         body: JSON.stringify(metadata)
       });
 
-      const data = await response.json();
+      const data: GoogleDriveFile = await response.json();
       return data.id;
-    } catch (error: any) {
-      console.error('Error creando carpeta raíz:', error);
+    } catch (error) {
+      logger.error('Error creando carpeta raíz:', error);
       throw error;
     }
   }
@@ -150,10 +171,10 @@ class GoogleDriveService {
         body: JSON.stringify(metadata)
       });
 
-      const data = await response.json();
+      const data: GoogleDriveFile = await response.json();
       return data.id;
     } catch (error) {
-      console.error('Error creating folder:', error);
+      logger.error('Error creating folder:', error);
       throw error;
     }
   }
@@ -176,10 +197,10 @@ class GoogleDriveService {
         }
       );
 
-      const data = await response.json();
+      const data: GoogleDriveListResponse = await response.json();
       return data.files && data.files.length > 0 ? data.files[0].id : null;
     } catch (error) {
-      console.error('Error finding folder:', error);
+      logger.error('Error finding folder:', error);
       return null;
     }
   }
@@ -208,12 +229,12 @@ class GoogleDriveService {
    * Comparte un archivo con un usuario específico
    */
   async shareWithUser(fileId: string, email: string): Promise<void> {
-    console.log(`👤 Compartiendo archivo ${fileId} con ${email}`);
+    logger.log(`👤 Compartiendo archivo ${fileId} con ${email}`);
     try {
       await this.addPermission(fileId, 'user', 'reader', email);
-      console.log(`✅ Archivo compartido exitosamente con ${email}`);
-    } catch (error: any) {
-      console.warn(`⚠️ No se pudo compartir con ${email}:`, error.message);
+      logger.log(`✅ Archivo compartido exitosamente con ${email}`);
+    } catch (error) {
+      logger.warn(`⚠️ No se pudo compartir con ${email}:`, error instanceof Error ? error.message : String(error));
       // No lanzamos error para no interrumpir el flujo principal
     }
   }
@@ -222,7 +243,7 @@ class GoogleDriveService {
    * Hace un archivo público para que pueda ser visualizado
    */
   async makeFilePublic(fileId: string): Promise<void> {
-    console.log(`🔓 Configurando permisos para archivo: ${fileId}`);
+    logger.log(`🔓 Configurando permisos para archivo: ${fileId}`);
 
     try {
       // Asegurar token válido antes de cualquier operación
@@ -235,21 +256,21 @@ class GoogleDriveService {
       );
 
       if (hasAccess) {
-        console.log(`✅ Archivo ${fileId} ya tiene permisos de acceso`);
+        logger.log(`✅ Archivo ${fileId} ya tiene permisos de acceso`);
         return;
       }
 
       // Intentar primero permiso público (anyone)
       try {
         await this.addPermission(fileId, 'anyone', 'reader');
-        console.log(`✅ Permisos PÚBLICOS configurados para archivo ${fileId}`);
+        logger.log(`✅ Permisos PÚBLICOS configurados para archivo ${fileId}`);
         return;
-      } catch (publicError: any) {
-        console.warn('⚠️ No se pudo configurar permiso público ("anyone").', publicError.message);
-        console.log('ℹ️ El archivo se subió pero puede requerir permisos manuales si la organización es estricta.');
+      } catch (publicError) {
+        logger.warn('⚠️ No se pudo configurar permiso público ("anyone").', publicError instanceof Error ? publicError.message : String(publicError));
+        logger.info('ℹ️ El archivo se subió pero puede requerir permisos manuales si la organización es estricta.');
       }
     } catch (error) {
-      console.error('❌ Error en makeFilePublic:', error);
+      logger.error('❌ Error en makeFilePublic:', error);
       throw error;
     }
   }
@@ -258,6 +279,7 @@ class GoogleDriveService {
    * Helper para agregar un permiso específico
    */
   private async addPermission(fileId: string, type: string, role: string, emailAddress?: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body: any = {
       role: role,
       type: type
@@ -282,7 +304,7 @@ class GoogleDriveService {
     if (!response.ok) {
       // Si es error de auth (401), intentar una vez más refrescando token explícitamente
       if (response.status === 401) {
-        console.log('🔄 Error 401 en permisos. Reintentando con token fresco...');
+        logger.log('🔄 Error 401 en permisos. Reintentando con token fresco...');
         await this.ensureToken();
 
         const retryResponse = await fetch(
@@ -314,7 +336,7 @@ class GoogleDriveService {
   /**
    * Obtiene los permisos de un archivo
    */
-  async getFilePermissions(fileId: string): Promise<any[]> {
+  async getFilePermissions(fileId: string): Promise<GoogleDrivePermission[]> {
     try {
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
@@ -326,14 +348,14 @@ class GoogleDriveService {
       );
 
       if (!response.ok) {
-        console.warn(`No se pudieron obtener permisos para ${fileId}:`, response.status);
+        logger.warn(`No se pudieron obtener permisos para ${fileId}:`, response.status);
         return [];
       }
 
       const data = await response.json();
       return data.permissions || [];
     } catch (error) {
-      console.error('Error obteniendo permisos:', error);
+      logger.error('Error obteniendo permisos:', error);
       return [];
     }
   }  /**
@@ -344,7 +366,7 @@ class GoogleDriveService {
    */
   async uploadFile(file: File, fileName: string, folderId: string): Promise<string> {
     try {
-      console.log(`⬆️ Subiendo archivo: ${fileName} (${file.size} bytes)`);
+      logger.log(`⬆️ Subiendo archivo: ${fileName} (${file.size} bytes)`);
 
       // Crear metadata
       const metadata = {
@@ -369,12 +391,12 @@ class GoogleDriveService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Error en respuesta de subida:', errorData);
+        logger.error('❌ Error en respuesta de subida:', errorData);
         throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      console.log(`✅ Archivo subido exitosamente. ID: ${data.id}`);
+      const data: GoogleDriveFile = await response.json();
+      logger.log(`✅ Archivo subido exitosamente. ID: ${data.id}`);
 
       // Verificar que tenemos el ID del archivo
       if (!data.id) {
@@ -384,14 +406,14 @@ class GoogleDriveService {
       // Intentar hacer el archivo público para que se pueda visualizar
       try {
         await this.makeFilePublic(data.id);
-        console.log('✅ Permisos públicos configurados');
+        logger.log('✅ Permisos públicos configurados');
 
         // Agregar delay de 2 segundos para que los permisos se propaguen
-        console.log('⏳ Esperando propagación de permisos...');
+        logger.log('⏳ Esperando propagación de permisos...');
         await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('✅ Propagación completada');
-      } catch (error: any) {
-        console.warn('⚠️ No se pudieron configurar permisos públicos:', error?.message || 'Error desconocido');
+        logger.log('✅ Propagación completada');
+      } catch (error) {
+        logger.warn('⚠️ No se pudieron configurar permisos públicos:', error instanceof Error ? error.message : String(error));
         // Continuar de todos modos
       }
 
@@ -405,32 +427,32 @@ class GoogleDriveService {
 
       // Si no hay thumbnailLink, intentamos obtenerlo nuevamente después de un breve delay
       if (!thumbnailLink) {
-        console.log('⚠️ thumbnailLink no disponible inmediatamente, reintentando obtener metadatos...');
+        logger.log('⚠️ thumbnailLink no disponible inmediatamente, reintentando obtener metadatos...');
         await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos
         try {
           const fileMetadata = await this.getFile(data.id);
           if (fileMetadata && fileMetadata.thumbnailLink) {
             thumbnailLink = fileMetadata.thumbnailLink;
-            console.log('✅ thumbnailLink recuperado en segundo intento');
+            logger.log('✅ thumbnailLink recuperado en segundo intento');
           }
         } catch (e) {
-          console.warn('⚠️ Falló el reintento de obtener metadatos:', e);
+          logger.warn('⚠️ Falló el reintento de obtener metadatos:', e);
         }
       }
 
       if (thumbnailLink) {
         // Reemplazar el tamaño (=s220) por uno grande (=s2000) para mantener calidad
         publicUrl = thumbnailLink.replace(/=s\d+/, '=s2000');
-        console.log(`🔗 Usando thumbnailLink optimizado: ${publicUrl}`);
+        logger.log(`🔗 Usando thumbnailLink optimizado: ${publicUrl}`);
       } else {
         // Fallback a la URL directa
         publicUrl = `https://drive.google.com/uc?export=view&id=${data.id}`;
-        console.log(`🔗 Usando URL directa (fallback): ${publicUrl}`);
+        logger.log(`🔗 Usando URL directa (fallback): ${publicUrl}`);
       }
 
       return publicUrl;
     } catch (error) {
-      console.error('❌ Error uploading file:', error);
+      logger.error('❌ Error uploading file:', error);
       throw error;
     }
   }
@@ -438,7 +460,7 @@ class GoogleDriveService {
   /**
    * Obtiene los metadatos de un archivo
    */
-  async getFile(fileId: string): Promise<any> {
+  async getFile(fileId: string): Promise<GoogleDriveFile> {
     await this.ensureToken();
 
     const response = await fetch(
@@ -492,13 +514,13 @@ class GoogleDriveService {
     viewerEmail?: string
   ): Promise<string> {
     try {
-      console.log(`📸 Subiendo foto: ${photoType} (${file.size} bytes)`);
+      logger.log(`📸 Subiendo foto: ${photoType} (${file.size} bytes)`);
 
       // Asegurar token válido antes de comenzar
       await this.ensureToken();
 
       // Verificar conectividad primero
-      console.log('🔍 Verificando conectividad con Google Drive...');
+      logger.log('🔍 Verificando conectividad con Google Drive...');
       const isConnected = await this.checkConnectivity();
       if (!isConnected) {
         // Intentar refrescar token una vez más si falla la conectividad
@@ -508,53 +530,53 @@ class GoogleDriveService {
           throw new Error('Error de conexión con Google Drive. Verifica tu conexión a internet o permisos de Google Drive.');
         }
       }
-      console.log('✅ Conectividad verificada');
+      logger.log('✅ Conectividad verificada');
 
       // Si hay una foto anterior, eliminarla primero
       if (oldPhotoUrl) {
         const oldFileId = this.extractFileIdFromUrl(oldPhotoUrl);
         if (oldFileId) {
           try {
-            console.log(`🗑️ Eliminando foto anterior: ${oldFileId}`);
+            logger.log(`🗑️ Eliminando foto anterior: ${oldFileId}`);
             await this.deleteFile(oldFileId);
-            console.log(`✅ Foto anterior eliminada: ${oldFileId}`);
+            logger.log(`✅ Foto anterior eliminada: ${oldFileId}`);
           } catch (error) {
-            console.warn('No se pudo eliminar la foto anterior:', error);
+            logger.warn('No se pudo eliminar la foto anterior:', error);
             // Continuar aunque falle la eliminación
           }
         }
       }
 
       // Asegurar que la carpeta raíz "descongelado" existe
-      console.log('📁 Verificando carpeta raíz...');
+      logger.log('📁 Verificando carpeta raíz...');
       if (!this.rootFolderId) {
         await this.initialize();
       }
-      console.log('✅ Carpeta raíz verificada:', this.rootFolderId);
+      logger.log('✅ Carpeta raíz verificada:', this.rootFolderId);
 
       // Estructura: descongelado/CODIGO/LOTE/TIPO_FOTO.jpg
 
       // Obtener o crear carpeta del código
-      console.log(`📁 Creando/verificando carpeta del código: ${codigo}`);
+      logger.log(`📁 Creando/verificando carpeta del código: ${codigo}`);
       const codigoFolderId = await this.getOrCreateFolder(codigo, this.rootFolderId || undefined);
-      console.log('✅ Carpeta del código:', codigoFolderId);
+      logger.log('✅ Carpeta del código:', codigoFolderId);
 
       // Obtener o crear carpeta del lote
-      console.log(`📁 Creando/verificando carpeta del lote: ${lote}`);
+      logger.log(`📁 Creando/verificando carpeta del lote: ${lote}`);
       const loteFolderId = await this.getOrCreateFolder(lote, codigoFolderId);
-      console.log('✅ Carpeta del lote:', loteFolderId);
+      logger.log('✅ Carpeta del lote:', loteFolderId);
 
       // Generar nombre de archivo con timestamp para evitar duplicados
       const timestamp = Date.now();
       const extension = file.name.split('.').pop() || 'jpg';
       const fileName = `${photoType}_${timestamp}.${extension}`;
-      console.log(`📄 Nombre de archivo generado: ${fileName}`);
+      logger.log(`📄 Nombre de archivo generado: ${fileName}`);
 
       // Subir archivo
-      console.log(`⬆️ Subiendo archivo a Google Drive...`);
+      logger.log(`⬆️ Subiendo archivo a Google Drive...`);
       const url = await this.uploadFile(file, fileName, loteFolderId);
 
-      console.log(`✅ Foto subida exitosamente: descongelado/${codigo}/${lote}/${fileName}`);
+      logger.log(`✅ Foto subida exitosamente: descongelado/${codigo}/${lote}/${fileName}`);
 
       // Si se proporcionó un email de visualizador, compartir explícitamente
       if (viewerEmail) {
@@ -565,11 +587,11 @@ class GoogleDriveService {
         }
       }
 
-      console.log(`🔗 URL generada: ${url}`);
+      logger.log(`🔗 URL generada: ${url}`);
 
       return url;
     } catch (error) {
-      console.error('❌ Error uploading analysis photo:', error);
+      logger.error('❌ Error uploading analysis photo:', error);
       throw error;
     }
   }
@@ -587,7 +609,7 @@ class GoogleDriveService {
         }
       });
     } catch (error) {
-      console.error('Error deleting file:', error);
+      logger.error('Error deleting file:', error);
       throw error;
     }
   }
@@ -599,7 +621,7 @@ class GoogleDriveService {
     try {
       // Verificar si tenemos token válido
       if (!this.accessToken) {
-        console.warn('❌ No hay token de acceso para verificar conectividad');
+        logger.warn('❌ No hay token de acceso para verificar conectividad');
         return false;
       }
 
@@ -612,15 +634,15 @@ class GoogleDriveService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.warn('❌ Error de conectividad con Google Drive:', response.status, errorText);
+        logger.warn('❌ Error de conectividad con Google Drive:', response.status, errorText);
         return false;
       }
 
       const data = await response.json();
-      console.log('✅ Conectividad con Google Drive verificada para usuario:', data.user?.displayName);
+      logger.log('✅ Conectividad con Google Drive verificada para usuario:', data.user?.displayName);
       return true;
     } catch (error) {
-      console.error('❌ Error verificando conectividad:', error);
+      logger.error('❌ Error verificando conectividad:', error);
       return false;
     }
   }
@@ -630,20 +652,20 @@ class GoogleDriveService {
    * Útil para arreglar permisos expirados en análisis existentes
    */
   async renewPublicPermissions(fileIds: string[]): Promise<void> {
-    console.log(`🔄 Renovando permisos para ${fileIds.length} archivos...`);
+    logger.log(`🔄 Renovando permisos para ${fileIds.length} archivos...`);
 
     for (const fileId of fileIds) {
       try {
         await this.makeFilePublic(fileId);
-        console.log(`✅ Permisos renovados para: ${fileId} `);
+        logger.log(`✅ Permisos renovados para: ${fileId} `);
         // Pequeño delay para no sobrecargar la API
         await new Promise(resolve => setTimeout(resolve, 200));
-      } catch (error: any) {
-        console.warn(`⚠️ Error renovando permisos para ${fileId}: `, error?.message || 'Error desconocido');
+      } catch (error) {
+        logger.warn(`⚠️ Error renovando permisos para ${fileId}: `, error instanceof Error ? error.message : String(error));
       }
     }
 
-    console.log('✅ Renovación de permisos completada');
+    logger.log('✅ Renovación de permisos completada');
   }
 
   /**

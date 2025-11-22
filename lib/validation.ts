@@ -8,26 +8,24 @@ import { z } from 'zod';
 export const PesoSchema = z.object({
     valor: z.number()
         .min(0, 'El peso no puede ser negativo')
-        .max(1000, 'El peso excede el máximo permitido'),
+        .max(1000, 'El peso excede el máximo permitido')
+        .optional(),
     fotoUrl: z.string().url().optional().or(z.literal(''))
 });
 
 // Esquema para registro de peso bruto
 export const PesoBrutoRegistroSchema = z.object({
     id: z.string(),
+    talla: z.string().optional(),
     peso: z.number().min(0),
     timestamp: z.string(),
     fotoUrl: z.string().url().optional().or(z.literal(''))
 });
 
 // Esquema para conteo de uniformidad
-export const ConteoUniformidadSchema = z.object({
-    colas: z.number().int().min(0).optional(),
-    extra: z.number().int().min(0).optional(),
-    primera: z.number().int().min(0).optional(),
-    segunda: z.number().int().min(0).optional(),
-    tercera: z.number().int().min(0).optional(),
-    fotoUrl: z.string().url().optional().or(z.literal(''))
+export const UniformidadSchema = z.object({
+    grandes: PesoSchema.optional(),
+    pequenos: PesoSchema.optional()
 });
 
 // Esquema para defectos
@@ -36,19 +34,18 @@ export const DefectosSchema = z.record(
     z.number().int().min(0)
 );
 
-// Esquema completo de análisis con validación cruzada
-export const AnalysisSchema = z.object({
-    id: z.number().int(),
+// Esquema para un análisis individual (Analysis)
+export const AnalysisItemSchema = z.object({
+    numero: z.number().int(),
     pesoBruto: PesoSchema.optional(),
     pesoNeto: PesoSchema.optional(),
     pesoCongelado: PesoSchema.optional(),
-    pesoGlaseo: PesoSchema.optional(),
-    pesoSinGlaseo: PesoSchema.optional(),
     pesosBrutos: z.array(PesoBrutoRegistroSchema).optional(),
-    conteoUniformidad: ConteoUniformidadSchema.optional(),
+    conteo: z.number().optional(),
+    uniformidad: UniformidadSchema.optional(),
     defectos: DefectosSchema.optional(),
-    observaciones: z.string().optional(),
-    fotoGeneral: z.string().url().optional().or(z.literal(''))
+    fotoCalidad: z.string().url().optional().or(z.literal('')),
+    observations: z.string().optional()
 }).refine(
     (data) => {
         // Validación cruzada: peso neto no puede ser mayor que peso bruto
@@ -61,25 +58,32 @@ export const AnalysisSchema = z.object({
         message: 'El peso neto no puede ser mayor que el peso bruto',
         path: ['pesoNeto']
     }
-).refine(
-    (data) => {
-        // Peso sin glaseo no puede ser mayor que peso congelado
-        if (data.pesoSinGlaseo?.valor && data.pesoCongelado?.valor) {
-            return data.pesoSinGlaseo.valor <= data.pesoCongelado.valor;
-        }
-        return true;
-    },
-    {
-        message: 'El peso sin glaseo no puede ser mayor que el peso congelado',
-        path: ['pesoSinGlaseo']
-    }
 );
+
+// Esquema completo de análisis de calidad (QualityAnalysis)
+export const QualityAnalysisSchema = z.object({
+    id: z.string(),
+    productType: z.enum(['ENTERO', 'COLA', 'VALOR_AGREGADO', 'CONTROL_PESOS']),
+    lote: z.string().min(1, 'El lote es obligatorio'),
+    codigo: z.string().min(1, 'El código es obligatorio'),
+    talla: z.string().optional(),
+    analystColor: z.enum(['red', 'blue', 'green', 'yellow']),
+    analyses: z.array(AnalysisItemSchema).min(1, 'Debe haber al menos un análisis'),
+    createdAt: z.string(),
+    updatedAt: z.string().optional(),
+    createdBy: z.string(),
+    shift: z.enum(['DIA', 'NOCHE']),
+    date: z.string(),
+    status: z.enum(['EN_PROGRESO', 'COMPLETADO']).optional(),
+    completedAt: z.string().optional(),
+    observations: z.string().optional()
+});
 
 /**
  * Helper para validar datos antes de guardar
  */
 export function validateAnalysisData(data: unknown) {
-    return AnalysisSchema.safeParse(data);
+    return QualityAnalysisSchema.safeParse(data);
 }
 
 /**
@@ -96,4 +100,5 @@ export function getValidationErrors(errors: z.ZodError) {
  * Type helpers derivados de los schemas
  */
 export type ValidatedPeso = z.infer<typeof PesoSchema>;
-export type ValidatedAnalysis = z.infer<typeof AnalysisSchema>;
+export type ValidatedAnalysisItem = z.infer<typeof AnalysisItemSchema>;
+export type ValidatedQualityAnalysis = z.infer<typeof QualityAnalysisSchema>;

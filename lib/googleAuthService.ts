@@ -3,7 +3,11 @@
  * - Token guardado en localStorage (persiste entre sesiones)
  * - Auto-refresh de token antes de expirar
  * - Mejor manejo de errores sin clearing agresivo
+ * - Type safety mejorado
+ * - Logger centralizado
  */
+
+import { logger } from './logger';
 
 interface GoogleAuthConfig {
   clientId: string;
@@ -14,15 +18,33 @@ interface GoogleAuthConfig {
 interface TokenInfo {
   expires_in: number;
   access_type: string;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+}
+
+interface TokenResponse {
+  access_token?: string;
+  error?: string;
+  expires_in?: number;
+  [key: string]: unknown;
+}
+
+interface GoogleTokenClient {
+  requestAccessToken: (options?: { prompt?: string }) => void;
 }
 
 class GoogleAuthService {
   private config: GoogleAuthConfig;
-  private tokenClient: any = null;
+  private tokenClient: GoogleTokenClient | null = null;
   private accessToken: string | null = null;
-  private user: any = null;
-  private listeners: ((user: any) => void)[] = [];
+  private user: UserProfile | null = null;
+  private listeners: ((user: UserProfile | null) => void)[] = [];
   private tokenRefreshTimer: NodeJS.Timeout | null = null;
   private TOKEN_STORAGE_KEY = 'google_access_token_v2';
   private USER_STORAGE_KEY = 'google_user_v2';
@@ -51,6 +73,7 @@ class GoogleAuthService {
       await this.loadGoogleScript();
 
       // MEJORÍA: Usar redirect en lugar de popup (evita bloqueo del navegador)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: this.config.clientId,
         scope: this.config.scopes.join(' '),
@@ -65,9 +88,9 @@ class GoogleAuthService {
       // MEJORÍA: Restaurar sesión desde localStorage (persiste entre navegador restarts)
       await this.syncFromPersistentStorage();
 
-      console.log('✅ Google Auth inicializado (modo redirect)');
+      logger.log('✅ Google Auth inicializado (modo redirect)');
     } catch (error) {
-      console.error('❌ Error inicializando Google Auth:', error);
+      logger.error('❌ Error inicializando Google Auth:', error);
       throw error;
     }
   }
@@ -83,14 +106,14 @@ class GoogleAuthService {
     const error = urlParams.get('error');
 
     if (error) {
-      console.error('❌ Error en autenticación Google (redirect):', error);
+      logger.error('❌ Error en autenticación Google (redirect):', error);
       // Limpiar URL sin recargar
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
 
     if (accessToken) {
-      console.log('✅ Token recibido desde redirect');
+      logger.log('✅ Token recibido desde redirect');
 
       // Simular respuesta del callback
       await this.onTokenResponse({ access_token: accessToken });
@@ -113,13 +136,13 @@ class GoogleAuthService {
 
       if (savedToken && savedUser) {
         this.accessToken = savedToken;
-        this.user = JSON.parse(savedUser);
+        this.user = JSON.parse(savedUser) as UserProfile;
 
         // Verificar si el token aún es válido
         const isValid = await this.verifyToken();
 
         if (isValid) {
-          console.log('✅ Token restaurado desde localStorage (persistencia)');
+          logger.log('✅ Token restaurado desde localStorage (persistencia)');
           this.notifyListeners();
 
           // Configurar refresh automático si falta poco para expirar
@@ -136,11 +159,11 @@ class GoogleAuthService {
         }
 
         // Token expirado, limpiar
-        console.warn('⚠️ Token guardado expiró, limpiando...');
+        logger.warn('⚠️ Token guardado expiró, limpiando...');
         this.clearStoredAuth();
       }
     } catch (error) {
-      console.error('Error sincronizando storage:', error);
+      logger.error('Error sincronizando storage:', error);
     }
   }
   /**
@@ -148,6 +171,7 @@ class GoogleAuthService {
    */
   private loadGoogleScript(): Promise<void> {
     return new Promise((resolve, reject) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((window as any).google) {
         resolve();
         return;
@@ -166,9 +190,9 @@ class GoogleAuthService {
   /**
    * Callback cuando se recibe un token (LOGIN)
    */
-  private onTokenResponse = async (response: any) => {
+  private onTokenResponse = async (response: TokenResponse) => {
     if (response.error) {
-      console.error('❌ Error en autenticación Google:', response.error);
+      logger.error('❌ Error en autenticación Google:', response.error);
       alert(`Error de autenticación: ${response.error}`);
       return;
     }
@@ -197,8 +221,9 @@ class GoogleAuthService {
   logout() {
     if (this.tokenClient && this.accessToken) {
       // Revocar token en Google
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).google.accounts.oauth2.revoke(this.accessToken, () => {
-        console.log('Token revocado en Google');
+        logger.log('Token revocado en Google');
       });
     }
 
@@ -234,7 +259,7 @@ class GoogleAuthService {
       await this.initialize();
     }
 
-    this.tokenClient.requestAccessToken();
+    this.tokenClient?.requestAccessToken();
   }
 
   /**
@@ -271,10 +296,10 @@ class GoogleAuthService {
       const expiryTime = Date.now() + 60 * 60 * 1000;
       localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
 
-      console.log('✅ Usuario autenticado:', this.user.name);
+      logger.log('✅ Usuario autenticado:', this.user.name);
       this.notifyListeners();
     } catch (error) {
-      console.error('Error obteniendo info del usuario:', error);
+      logger.error('Error obteniendo info del usuario:', error);
       this.clearStoredAuth();
     }
   }
@@ -292,12 +317,12 @@ class GoogleAuthService {
       );
 
       if (response.status === 401) {
-        console.warn('⚠️ Token inválido (401)');
+        logger.warn('⚠️ Token inválido (401)');
         return false;
       }
 
       if (!response.ok) {
-        console.warn(`⚠️ Token check failed: ${response.status}`);
+        logger.warn(`⚠️ Token check failed: ${response.status}`);
         return false;
       }
 
@@ -305,14 +330,14 @@ class GoogleAuthService {
 
       // Si expira muy pronto, marcar como inválido
       if (tokenInfo.expires_in && tokenInfo.expires_in < 60) {
-        console.warn('⚠️ Token expira en menos de 1 minuto');
+        logger.warn('⚠️ Token expira en menos de 1 minuto');
         return false;
       }
 
-      console.log(`✅ Token válido (expira en ${tokenInfo.expires_in}s)`);
+      logger.log(`✅ Token válido (expira en ${tokenInfo.expires_in}s)`);
       return true;
     } catch (error) {
-      console.warn('Error verificando token:', error);
+      logger.warn('Error verificando token:', error);
       return false;
     }
   }
@@ -327,7 +352,7 @@ class GoogleAuthService {
     }
 
     this.tokenRefreshTimer = setTimeout(async () => {
-      console.log('🔄 Refrescando token automáticamente...');
+      logger.log('🔄 Refrescando token automáticamente...');
 
       if (this.tokenClient) {
         this.tokenClient.requestAccessToken();
@@ -352,12 +377,12 @@ class GoogleAuthService {
       }
 
       // Token inválido, marcar como expirado
-      console.warn('⚠️ Token inválido, usuario debe re-autenticar');
+      logger.warn('⚠️ Token inválido, usuario debe re-autenticar');
       this.clearStoredAuth();
 
       throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     } catch (error) {
-      console.error('Error verificando token:', error);
+      logger.error('Error verificando token:', error);
       this.clearStoredAuth();
       throw error;
     }
@@ -380,7 +405,7 @@ class GoogleAuthService {
   /**
    * Obtiene la información del usuario actual
    */
-  getUser() {
+  getUser(): UserProfile | null {
     return this.user;
   }
 
@@ -394,9 +419,9 @@ class GoogleAuthService {
 
     return new Promise((resolve, reject) => {
       try {
-        console.log('🔄 Refrescando token silenciosamente...');
+        logger.log('🔄 Refrescando token silenciosamente...');
         // Usar prompt: 'none' para intentar refrescar sin interacción del usuario
-        this.tokenClient.requestAccessToken({ prompt: 'none' });
+        this.tokenClient?.requestAccessToken({ prompt: 'none' });
 
         // El callback configurado en initialize manejará la respuesta
         // Pero necesitamos una forma de saber cuándo termina para esta promesa
@@ -413,31 +438,16 @@ class GoogleAuthService {
           }
         }, 2000);
       } catch (error) {
-        console.error('Error refrescando token:', error);
+        logger.error('Error refrescando token:', error);
         reject(error);
       }
     });
   }
 
   /**
-   * Configura el refresco automático del token
-   */
-  private setupAutoRefresh(expiresIn: number) {
-    // Refrescar 5 minutos antes de que expire
-    const refreshTime = (expiresIn - 300) * 1000;
-
-    if (refreshTime > 0) {
-      console.log(`⏰ Auto-refresh programado en ${Math.round(refreshTime / 60000)} minutos`);
-      setTimeout(() => {
-        this.refreshToken().catch(e => console.warn('Auto-refresh falló:', e));
-      }, refreshTime);
-    }
-  }
-
-  /**
    * Suscribe a cambios en el estado de autenticación
    */
-  subscribe(listener: (user: any) => void) {
+  subscribe(listener: (user: UserProfile | null) => void): () => void {
     this.listeners.push(listener);
     // Emitir estado actual inmediatamente
     listener(this.user);

@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface PhotoUploadOptions {
     maxSize?: number; // bytes
@@ -14,6 +15,7 @@ interface PhotoUploadOptions {
  * - Cola de subidas
  * - Retry automático en caso de fallo
  * - Validación de tamaño y tipo
+ * - Prevención de race conditions
  */
 export function usePhotoUpload(
     uploadFunction: (file: File) => Promise<string>,
@@ -26,6 +28,9 @@ export function usePhotoUpload(
 
     const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set());
     const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map());
+
+    // Ref para tracking síncrono de uploads activos (evita race conditions)
+    const uploadingRef = useRef<Set<string>>(new Set());
 
     /**
      * Validar archivo antes de subir
@@ -47,7 +52,8 @@ export function usePhotoUpload(
      */
     const uploadPhoto = useCallback(async (
         file: File,
-        onSuccess: (url: string) => void
+        onSuccess: (url: string) => void,
+        fieldId?: string // ID opcional para prevenir uploads duplicados en el mismo campo
     ): Promise<string | null> => {
         // Validar
         const error = validateFile(file);
@@ -56,15 +62,26 @@ export function usePhotoUpload(
             return null;
         }
 
-        const fileId = `${Date.now()}-${file.name}`;
+        // Generar ID único para el upload
+        // Si se provee fieldId, lo usamos para bloquear uploads concurrentes en el mismo campo
+        const uniqueUploadId = fieldId || `${Date.now()}-${file.name}`;
+
+        // Verificar si ya hay un upload en progreso para este ID
+        if (uploadingRef.current.has(uniqueUploadId)) {
+            logger.warn(`⚠️ Upload ya en progreso para: ${uniqueUploadId}`);
+            return null;
+        }
+
+        // Marcar como subiendo (Ref síncrono)
+        uploadingRef.current.add(uniqueUploadId);
 
         // 1. Crear preview inmediato (Optimistic UI)
         const previewUrl = URL.createObjectURL(file);
         onSuccess(previewUrl); // Mostrar preview inmediatamente
 
-        // 2. Marcar como subiendo
-        setUploadingFiles(prev => new Set(prev).add(fileId));
-        setUploadProgress(prev => new Map(prev).set(fileId, 0));
+        // 2. Marcar como subiendo (State para UI)
+        setUploadingFiles(prev => new Set(prev).add(uniqueUploadId));
+        setUploadProgress(prev => new Map(prev).set(uniqueUploadId, 0));
 
         try {
             // 3. Subir archivo real
@@ -83,19 +100,22 @@ export function usePhotoUpload(
             onSuccess(''); // Limpiar
 
             const errorMessage = error instanceof Error ? error.message : 'Error al subir foto';
+            logger.error('❌ Error subiendo foto:', error);
             toast.error(errorMessage);
 
             return null;
         } finally {
             // 6. Limpiar estado
+            uploadingRef.current.delete(uniqueUploadId);
+
             setUploadingFiles(prev => {
                 const next = new Set(prev);
-                next.delete(fileId);
+                next.delete(uniqueUploadId);
                 return next;
             });
             setUploadProgress(prev => {
                 const next = new Map(prev);
-                next.delete(fileId);
+                next.delete(uniqueUploadId);
                 return next;
             });
         }

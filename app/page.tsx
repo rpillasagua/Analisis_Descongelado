@@ -3,16 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image'; // Optimización de Next.js
 import { User, LogOut, Loader2 } from 'lucide-react';
-import { googleAuthService } from '@/lib/googleAuthService';
+import { googleAuthService, UserProfile } from '@/lib/googleAuthService';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 import AnalysisDashboard from '@/components/AnalysisDashboard';
-
-// --- Types (Idealmente mover a @/lib/types.ts) ---
-interface UserProfile {
-  name: string;
-  email: string;
-  picture?: string;
-}
+import { QualityAnalysis } from '@/lib/types';
+import { logger } from '@/lib/logger';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -37,14 +32,14 @@ const useGoogleAuth = () => {
         const unsubscribe = googleAuthService.subscribe((user) => {
           setAuthState({
             isAuthenticated: !!user,
-            user: user as UserProfile | null,
+            user: user,
             loading: false
           });
         });
 
         return unsubscribe;
       } catch (error) {
-        console.error('Error inicializando Google Auth:', error);
+        logger.error('Error inicializando Google Auth:', error);
         setAuthState(prev => ({ ...prev, loading: false }));
       }
     };
@@ -60,7 +55,7 @@ const useGoogleAuth = () => {
     try {
       await googleAuthService.login();
     } catch (error) {
-      console.error('Error en login:', error);
+      logger.error('Error en login:', error);
     }
   };
 
@@ -196,7 +191,8 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
 
 export default function Home() {
   const { isAuthenticated, user, loading, login, logout } = useGoogleAuth();
-  const [initialAnalyses, setInitialAnalyses] = useState<any[]>([]);
+  const [initialAnalyses, setInitialAnalyses] = useState<QualityAnalysis[]>([]);
+  const [initialLastDoc, setInitialLastDoc] = useState<any>(null);
   const [loadingAnalyses, setLoadingAnalyses] = useState(false);
 
   // Efecto para cargar datos SOLO cuando el usuario se autentica
@@ -207,14 +203,15 @@ export default function Home() {
       const fetchAnalyses = async () => {
         setLoadingAnalyses(true);
         try {
-          const { getRecentAnalyses } = await import('@/lib/analysisService');
-          const data = await getRecentAnalyses(100);
+          const { getPaginatedAnalyses } = await import('@/lib/analysisService');
+          const { analyses, lastDoc } = await getPaginatedAnalyses(20);
 
           if (isMounted) {
-            setInitialAnalyses(data);
+            setInitialAnalyses(analyses);
+            setInitialLastDoc(lastDoc);
           }
         } catch (error) {
-          console.error('Error fetching initial analyses:', error);
+          logger.error('Error fetching initial analyses:', error);
         } finally {
           if (isMounted) {
             setLoadingAnalyses(false);
@@ -226,7 +223,7 @@ export default function Home() {
     }
 
     return () => { isMounted = false; };
-  }, [isAuthenticated, user]); // Dependencias corregidas
+  }, [isAuthenticated, user]);
 
   if (loading) return <LoadingScreen />;
 
@@ -245,7 +242,7 @@ export default function Home() {
             <p className="text-slate-400 text-sm font-medium">Obteniendo registros recientes...</p>
           </div>
         ) : (
-          <AnalysisDashboard initialAnalyses={initialAnalyses} />
+          <AnalysisDashboard initialAnalyses={initialAnalyses} initialLastDoc={initialLastDoc} />
         )}
       </main>
     </div>

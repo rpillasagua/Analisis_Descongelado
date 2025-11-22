@@ -36,6 +36,7 @@ import {
     ANALYST_COLOR_HEX
 } from '@/lib/types';
 import { getWorkShift, formatDate, generateId } from '@/lib/utils';
+import { useWeightInput } from '@/hooks/useWeightInput';
 
 // Helper para crear un análisis vacío
 const createEmptyAnalysis = (numero: number): Analysis => ({
@@ -230,6 +231,8 @@ export default function NewMultiAnalysisPageContent() {
             setIsSaving(true);
             const { saveAnalysis } = await import('@/lib/analysisService');
             const { googleAuthService } = await import('@/lib/googleAuthService');
+            const { validateAnalysisData, getValidationErrors } = await import('@/lib/validation');
+
             const user = googleAuthService.getUser();
             const now = new Date();
 
@@ -248,6 +251,18 @@ export default function NewMultiAnalysisPageContent() {
                 date: formatDate(now),
                 status: 'EN_PROGRESO'
             };
+
+            // Validar datos antes de guardar
+            const validation = validateAnalysisData(document);
+            if (!validation.success) {
+                const errors = getValidationErrors(validation.error);
+                console.warn('⚠️ Validación fallida en auto-save:', errors);
+
+                // No bloqueamos el guardado si son errores menores para no perder datos en progreso,
+                // pero sí bloqueamos si hay errores críticos de estructura o tipos
+                // Por ahora, solo logueamos y permitimos guardar (soft validation)
+                // TODO: Implementar bloqueo estricto cuando la UI muestre errores inline
+            }
 
             await saveAnalysis(document);
             setLastSaved(now);
@@ -425,6 +440,9 @@ export default function NewMultiAnalysisPageContent() {
         updateCurrentAnalysis({ defectos: defects });
     };
 
+    // Use the new hook for weight inputs
+    const { handleWeightChange } = useWeightInput(currentAnalysis, updateCurrentAnalysis);
+
     // Loading state
     if (isLoading) {
         return (
@@ -569,7 +587,7 @@ export default function NewMultiAnalysisPageContent() {
                     </div>
 
                     {/* Pesos Section */}
-                    {productType !== 'CONTROL_PESOS' && (
+                    {(productType === 'ENTERO' || productType === 'COLA' || productType === 'VALOR_AGREGADO') && (
                         <Card>
                             <CardHeader>
                                 <CardTitle>⚖️ Pesos</CardTitle>
@@ -582,12 +600,7 @@ export default function NewMultiAnalysisPageContent() {
                                         label="Peso Bruto"
                                         value={currentAnalysis.pesoBruto?.valor || 0}
                                         photoUrl={currentAnalysis.pesoBruto?.fotoUrl}
-                                        onChange={(valor) => updateCurrentAnalysis({
-                                            pesoBruto: {
-                                                ...currentAnalysis.pesoBruto,
-                                                valor
-                                            }
-                                        })}
+                                        onChange={(valor) => handleWeightChange('pesoBruto', valor)}
                                         onPhotoCapture={(file) => handlePhotoCapture('pesoBruto', file)}
                                         isUploading={isFieldUploading('pesoBruto')}
                                         unit="kg"
@@ -600,12 +613,7 @@ export default function NewMultiAnalysisPageContent() {
                                         label="Peso Congelado"
                                         value={currentAnalysis.pesoCongelado?.valor || 0}
                                         photoUrl={currentAnalysis.pesoCongelado?.fotoUrl}
-                                        onChange={(valor) => updateCurrentAnalysis({
-                                            pesoCongelado: {
-                                                ...currentAnalysis.pesoCongelado,
-                                                valor
-                                            }
-                                        })}
+                                        onChange={(valor) => handleWeightChange('pesoCongelado', valor)}
                                         onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado', file)}
                                         isUploading={isFieldUploading('pesoCongelado')}
                                         unit="kg"
@@ -617,12 +625,7 @@ export default function NewMultiAnalysisPageContent() {
                                         label="Peso Neto"
                                         value={currentAnalysis.pesoNeto?.valor || 0}
                                         photoUrl={currentAnalysis.pesoNeto?.fotoUrl}
-                                        onChange={(valor) => updateCurrentAnalysis({
-                                            pesoNeto: {
-                                                ...currentAnalysis.pesoNeto,
-                                                valor
-                                            }
-                                        })}
+                                        onChange={(valor) => handleWeightChange('pesoNeto', valor)}
                                         onPhotoCapture={(file) => handlePhotoCapture('pesoNeto', file)}
                                         isUploading={isFieldUploading('pesoNeto')}
                                         unit="kg"

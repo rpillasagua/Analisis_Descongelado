@@ -1,25 +1,80 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, FileText, CheckCircle, Plus, Ruler, QrCode } from 'lucide-react';
+import { Search, FileText, CheckCircle, Plus, Ruler, QrCode, Loader2 } from 'lucide-react';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS } from '@/lib/types';
 import DailyReportCard from './DailyReportCard';
+import { logger } from '@/lib/logger';
 
 interface AnalysisDashboardProps {
   initialAnalyses: QualityAnalysis[];
+  initialLastDoc?: any; // Firestore DocumentSnapshot
 }
 
-export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboardProps) {
+export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: AnalysisDashboardProps) {
   const router = useRouter();
   const [analyses, setAnalyses] = useState<QualityAnalysis[]>(initialAnalyses);
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'todos' | 'en_progreso'>('todos');
 
+  // Pagination state
+  const [lastDoc, setLastDoc] = useState<any>(initialLastDoc);
+  const [hasMore, setHasMore] = useState(!!initialLastDoc);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setAnalyses(initialAnalyses);
-  }, [initialAnalyses]);
+    setLastDoc(initialLastDoc);
+    setHasMore(!!initialLastDoc);
+  }, [initialAnalyses, initialLastDoc]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || searchTerm) return;
+
+    setIsLoadingMore(true);
+    try {
+      const { getPaginatedAnalyses } = await import('@/lib/analysisService');
+      const { analyses: newAnalyses, lastDoc: newLastDoc } = await getPaginatedAnalyses(20, lastDoc);
+
+      if (newAnalyses.length === 0) {
+        setHasMore(false);
+      } else {
+        setAnalyses(prev => [...prev, ...newAnalyses]);
+        setLastDoc(newLastDoc);
+        if (newAnalyses.length < 20) {
+          setHasMore(false);
+        }
+      }
+    } catch (error) {
+      logger.error('Error loading more analyses:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, lastDoc, searchTerm]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore && !searchTerm) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [loadMore, hasMore, isLoadingMore, searchTerm]);
 
   const filteredAnalyses = analyses.filter(analysis => {
     // Filter by search term
@@ -178,6 +233,13 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
             </div>
           ))}
         </div>
+
+        {/* Loading Spinner for Infinite Scroll */}
+        {hasMore && !searchTerm && (
+          <div ref={observerTarget} className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+          </div>
+        )}
 
         {filteredAnalyses.length === 0 && (
           <div className="text-center py-12">
