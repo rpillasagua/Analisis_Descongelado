@@ -210,18 +210,18 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="cursor-pointer relative overflow-hidden group rounded-lg transition-all duration-300 hover:-translate-y-1"
+              className="cursor-pointer relative overflow-hidden group transition-all duration-300 hover:-translate-y-1"
               style={{
-                borderRadius: '24px',
-                background: 'white',
-                border: 'none',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                borderRadius: '24px !important',
+                background: 'white !important',
+                border: 'none !important',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+                e.currentTarget.style.setProperty('box-shadow', '0 25px 50px -12px rgba(0, 0, 0, 0.25)', 'important');
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                e.currentTarget.style.setProperty('box-shadow', '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', 'important');
               }}
             >
               {/* Franja de color del analista */}
