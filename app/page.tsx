@@ -114,8 +114,18 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
               className="focus:outline-none group transition-transform active:scale-95 flex items-center gap-2"
             >
               {user.picture ? (
-                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md border-2 border-white bg-gray-300 group-hover:ring-2 group-hover:ring-blue-400 transition-all">
-                  <Image src={user.picture} alt={user.name} fill className="object-cover" referrerPolicy="no-referrer" sizes="48px" />
+                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md border-2 border-white bg-blue-100 flex items-center justify-center group-hover:ring-2 group-hover:ring-blue-400 transition-all" style={{ minWidth: '48px', minHeight: '48px' }}>
+                  {/* Usamos img estándar para evitar problemas con dominios externos en Next.js */}
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement?.classList.add('fallback-avatar');
+                    }}
+                  />
+                  <span className="absolute text-lg font-bold text-blue-600 fallback-text hidden">{user.name.charAt(0)}</span>
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
