@@ -571,8 +571,8 @@ export default function NewMultiAnalysisPageContent() {
                                 <CardTitle>⚖️ Pesos</CardTitle>
                                 <CardDescription>Registra los pesos con fotos</CardDescription>
                             </CardHeader>
-                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
-                                <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4'}>
+                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6'}>
+                                <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6'}>
                                     {/* Peso Bruto */}
                                     <div className="space-y-3">
                                         <Label required>Peso Bruto (kg)</Label>
@@ -659,100 +659,107 @@ export default function NewMultiAnalysisPageContent() {
                                     </div>
                                 </div>
                             </CardContent>
-                        </Card>
-                    )}
+                        </Card >
+                    )
+                    }
 
                     {/* Control de Pesos Brutos */}
-                    {productType === 'CONTROL_PESOS' && (
-                        <ControlPesosBrutos
-                            registros={currentAnalysis.pesosBrutos || []}
-                            onChange={handlePesosBrutosChange}
-                            onPhotoCapture={handlePesoBrutoPhotoCapture}
-                            onDeleteRequest={handlePesoBrutoDelete}
-                            isPhotoUploading={isPesoBrutoUploading}
-                        />
-                    )}
+                    {
+                        productType === 'CONTROL_PESOS' && (
+                            <ControlPesosBrutos
+                                registros={currentAnalysis.pesosBrutos || []}
+                                onChange={handlePesosBrutosChange}
+                                onPhotoCapture={handlePesoBrutoPhotoCapture}
+                                onDeleteRequest={handlePesoBrutoDelete}
+                                isPhotoUploading={isPesoBrutoUploading}
+                            />
+                        )
+                    }
 
                     {/* Uniformidad (Solo Entero y Cola) */}
-                    {(productType === 'ENTERO' || productType === 'COLA') && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>📏 Uniformidad</CardTitle>
-                            </CardHeader>
-                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
-                                <div className={viewMode === 'compact' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4'}>
-                                    {/* Grandes */}
-                                    <div className="space-y-3">
-                                        <Label>Grandes (kg)</Label>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            value={currentAnalysis.uniformidad?.grandes?.valor || ''}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
-                                                uniformidad: {
-                                                    ...currentAnalysis.uniformidad,
-                                                    grandes: {
-                                                        ...currentAnalysis.uniformidad?.grandes,
-                                                        valor: parseFloat(e.target.value) || undefined
+                    {
+                        (productType === 'ENTERO' || productType === 'COLA') && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>📏 Uniformidad</CardTitle>
+                                </CardHeader>
+                                <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
+                                    <div className={viewMode === 'compact' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4'}>
+                                        {/* Grandes */}
+                                        <div className="space-y-3">
+                                            <Label>Grandes (kg)</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={currentAnalysis.uniformidad?.grandes?.valor || ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
+                                                    uniformidad: {
+                                                        ...currentAnalysis.uniformidad,
+                                                        grandes: {
+                                                            ...currentAnalysis.uniformidad?.grandes,
+                                                            valor: parseFloat(e.target.value) || undefined
+                                                        }
                                                     }
-                                                }
-                                            })}
-                                        />
-                                        <PhotoCapture
-                                            label="Foto Grandes"
-                                            photoUrl={currentAnalysis.uniformidad?.grandes?.fotoUrl}
-                                            onPhotoCapture={(file) => handlePhotoCapture('uniformidad_grandes', file)}
-                                            isUploading={isFieldUploading('uniformidad_grandes')}
-                                        />
-                                    </div>
+                                                })}
+                                            />
+                                            <PhotoCapture
+                                                label="Foto Grandes"
+                                                photoUrl={currentAnalysis.uniformidad?.grandes?.fotoUrl}
+                                                onPhotoCapture={(file) => handlePhotoCapture('uniformidad_grandes', file)}
+                                                isUploading={isFieldUploading('uniformidad_grandes')}
+                                            />
+                                        </div>
 
-                                    {/* Pequeños */}
-                                    <div className="space-y-3">
-                                        <Label>Pequeños (kg)</Label>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="0.00"
-                                            value={currentAnalysis.uniformidad?.pequenos?.valor || ''}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
-                                                uniformidad: {
-                                                    ...currentAnalysis.uniformidad,
-                                                    pequenos: {
-                                                        ...currentAnalysis.uniformidad?.pequenos,
-                                                        valor: parseFloat(e.target.value) || undefined
+                                        {/* Pequeños */}
+                                        <div className="space-y-3">
+                                            <Label>Pequeños (kg)</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="0.00"
+                                                value={currentAnalysis.uniformidad?.pequenos?.valor || ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
+                                                    uniformidad: {
+                                                        ...currentAnalysis.uniformidad,
+                                                        pequenos: {
+                                                            ...currentAnalysis.uniformidad?.pequenos,
+                                                            valor: parseFloat(e.target.value) || undefined
+                                                        }
                                                     }
-                                                }
-                                            })}
-                                        />
-                                        <PhotoCapture
-                                            label="Foto Pequeños"
-                                            photoUrl={currentAnalysis.uniformidad?.pequenos?.fotoUrl}
-                                            onPhotoCapture={(file) => handlePhotoCapture('uniformidad_pequenos', file)}
-                                            isUploading={isFieldUploading('uniformidad_pequenos')}
-                                        />
+                                                })}
+                                            />
+                                            <PhotoCapture
+                                                label="Foto Pequeños"
+                                                photoUrl={currentAnalysis.uniformidad?.pequenos?.fotoUrl}
+                                                onPhotoCapture={(file) => handlePhotoCapture('uniformidad_pequenos', file)}
+                                                isUploading={isFieldUploading('uniformidad_pequenos')}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                                </CardContent>
+                            </Card>
+                        )
+                    }
 
                     {/* Defectos de Calidad */}
-                    {productType !== 'CONTROL_PESOS' && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>🐛 Defectos de Calidad</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <DefectSelector
-                                    key={`defects-${activeAnalysisIndex}`}
-                                    productType={productType}
-                                    selectedDefects={currentAnalysis.defectos || {}}
-                                    onDefectsChange={handleDefectsChange}
-                                />
-                            </CardContent>
-                        </Card>
-                    )}
+                    {
+                        productType !== 'CONTROL_PESOS' && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>🐛 Defectos de Calidad</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <DefectSelector
+                                        key={`defects-${activeAnalysisIndex}`}
+                                        productType={productType}
+                                        selectedDefects={currentAnalysis.defectos || {}}
+                                        onDefectsChange={handleDefectsChange}
+                                    />
+                                </CardContent>
+                            </Card>
+                        )
+                    }
 
                     {/* Foto de Calidad General */}
                     <Card>
@@ -797,19 +804,21 @@ export default function NewMultiAnalysisPageContent() {
                             Borrar Análisis
                         </button>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
 
             {/* Global Upload Indicator */}
-            {uploadingPhotos.size > 0 && (
-                <div className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300 border border-blue-400/30 backdrop-blur-md">
-                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <div className="flex flex-col">
-                        <span className="font-bold text-sm">Subiendo {uploadingPhotos.size} foto{uploadingPhotos.size > 1 ? 's' : ''}...</span>
-                        <span className="text-xs text-blue-100">Por favor espera</span>
+            {
+                uploadingPhotos.size > 0 && (
+                    <div className="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300 border border-blue-400/30 backdrop-blur-md">
+                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div className="flex flex-col">
+                            <span className="font-bold text-sm">Subiendo {uploadingPhotos.size} foto{uploadingPhotos.size > 1 ? 's' : ''}...</span>
+                            <span className="text-xs text-blue-100">Por favor espera</span>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <DeleteConfirmationModal
                 isOpen={showDeleteModal}
@@ -819,6 +828,6 @@ export default function NewMultiAnalysisPageContent() {
                 analysisLote={lote}
                 type="confirmar"
             />
-        </div>
+        </div >
     );
 }
