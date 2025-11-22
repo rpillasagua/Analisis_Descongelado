@@ -214,8 +214,14 @@ export default function NewMultiAnalysisPageContent() {
         lote: string;
         codigo: string;
         talla: string;
-        color: AnalystColor;
+        color: AnalystColor | null;
     }) => {
+        // Validation: color should never be null if form validation works properly
+        if (!data.color) {
+            console.error('Color is required');
+            return;
+        }
+
         setLote(data.lote);
         setCodigo(data.codigo);
         setTalla(data.talla);
