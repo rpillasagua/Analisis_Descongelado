@@ -141,28 +141,28 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full px-6 text-base transition-all outline-none"
+              className="w-full px-4 text-base transition-all outline-none text-center"
               style={{
                 backgroundColor: '#F3F4F6',
                 border: '2px solid transparent',
                 borderRadius: '12px',
                 color: '#1F2937',
-                paddingTop: '14px',
-                paddingBottom: '14px',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                paddingTop: '12px',
+                paddingBottom: '12px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', // Sombra más fuerte para efecto flotante
                 position: 'relative',
                 zIndex: 1
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#2563EB';
                 e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(37, 99, 235, 0.25)'; // Sombra azul intensa al enfocar
+                e.currentTarget.style.transform = 'translateY(-4px)'; // Elevación más notable
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'transparent';
                 e.currentTarget.style.backgroundColor = '#F3F4F6';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             />
