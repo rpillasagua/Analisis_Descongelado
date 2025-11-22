@@ -135,7 +135,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
           </div>
 
           {/* Search Bar moderno */}
-          <div className="relative">
+          <div className="relative" style={{ marginTop: '8px' }}>
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" style={{ zIndex: 2 }}>
               <Search className="text-gray-400" style={{ height: '26px', width: '26px' }} />
             </div>
@@ -176,6 +176,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                   ? 'gradient-blue text-white shadow-md'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                   }`}
+                style={{ border: 'none' }}
               >
                 Todos
               </button>
@@ -185,6 +186,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                   ? 'gradient-blue text-white shadow-md'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
                   }`}
+                style={{ border: 'none' }}
               >
                 En Progreso
               </button>
