@@ -596,41 +596,73 @@ export default function NewMultiAnalysisPageContent() {
                             <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
                                 <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4'}>
                                     {/* Peso Bruto */}
-                                    <SmartInputGroup
-                                        label="Peso Bruto"
-                                        value={currentAnalysis.pesoBruto?.valor || 0}
-                                        photoUrl={currentAnalysis.pesoBruto?.fotoUrl}
-                                        onChange={(valor) => handleWeightChange('pesoBruto', valor)}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoBruto', file)}
-                                        isUploading={isFieldUploading('pesoBruto')}
-                                        unit="kg"
-                                        placeholder="0.00"
-                                        required
-                                    />
+                                    <div className="space-y-3">
+                                        <Label required>Peso Bruto (kg)</Label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoBruto?.valor || ''}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
+                                                pesoBruto: {
+                                                    ...currentAnalysis.pesoBruto,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Bruto"
+                                            photoUrl={currentAnalysis.pesoBruto?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoBruto', file)}
+                                            isUploading={isFieldUploading('pesoBruto')}
+                                        />
+                                    </div>
 
                                     {/* Peso Congelado */}
-                                    <SmartInputGroup
-                                        label="Peso Congelado"
-                                        value={currentAnalysis.pesoCongelado?.valor || 0}
-                                        photoUrl={currentAnalysis.pesoCongelado?.fotoUrl}
-                                        onChange={(valor) => handleWeightChange('pesoCongelado', valor)}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado', file)}
-                                        isUploading={isFieldUploading('pesoCongelado')}
-                                        unit="kg"
-                                        placeholder="0.00"
-                                    />
+                                    <div className="space-y-3">
+                                        <Label>Peso Congelado (kg)</Label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoCongelado?.valor || ''}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
+                                                pesoCongelado: {
+                                                    ...currentAnalysis.pesoCongelado,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Congelado"
+                                            photoUrl={currentAnalysis.pesoCongelado?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoCongelado', file)}
+                                            isUploading={isFieldUploading('pesoCongelado')}
+                                        />
+                                    </div>
 
                                     {/* Peso Neto */}
-                                    <SmartInputGroup
-                                        label="Peso Neto"
-                                        value={currentAnalysis.pesoNeto?.valor || 0}
-                                        photoUrl={currentAnalysis.pesoNeto?.fotoUrl}
-                                        onChange={(valor) => handleWeightChange('pesoNeto', valor)}
-                                        onPhotoCapture={(file) => handlePhotoCapture('pesoNeto', file)}
-                                        isUploading={isFieldUploading('pesoNeto')}
-                                        unit="kg"
-                                        placeholder="0.00"
-                                    />
+                                    <div className="space-y-3">
+                                        <Label>Peso Neto (kg)</Label>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value={currentAnalysis.pesoNeto?.valor || ''}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateCurrentAnalysis({
+                                                pesoNeto: {
+                                                    ...currentAnalysis.pesoNeto,
+                                                    valor: parseFloat(e.target.value) || undefined
+                                                }
+                                            })}
+                                        />
+                                        <PhotoCapture
+                                            label="Foto Peso Neto"
+                                            photoUrl={currentAnalysis.pesoNeto?.fotoUrl}
+                                            onPhotoCapture={(file) => handlePhotoCapture('pesoNeto', file)}
+                                            isUploading={isFieldUploading('pesoNeto')}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Conteo */}
