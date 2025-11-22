@@ -113,7 +113,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                 boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)' // Constant-like shadow for floating effect
               }}
             >
-              <div className="p-2">
+              <div className="p-3">
                 {/* Card Header */}
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
@@ -132,9 +132,9 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                 </div>
 
                 {/* Card Body Grid */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                   {/* Producto */}
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0">
                     <p className="text-[10px] font-medium text-gray-500 leading-none">Producto:</p>
                     <p className="text-xs font-bold text-gray-900 leading-none">
                       {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
@@ -142,7 +142,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                   </div>
 
                   {/* Código */}
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0">
                     <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
                       <QrCode className="w-3 h-3" /> Código:
                     </p>
@@ -152,7 +152,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                   </div>
 
                   {/* Talla */}
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0">
                     <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
                       <Ruler className="w-3 h-3" /> Talla:
                     </p>
@@ -162,7 +162,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                   </div>
 
                   {/* Turno */}
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0">
                     <p className="text-[10px] font-medium text-gray-500 leading-none">Turno:</p>
                     <div className="flex">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
