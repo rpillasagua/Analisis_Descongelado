@@ -14,58 +14,52 @@ interface AnalysisData {
 }
 
 interface InitialFormProps {
-    onComplete: (data: AnalysisData) => Promise<void> | void; // Soporte para async
+    onComplete: (data: AnalysisData) => Promise<void> | void;
     initialData?: Partial<AnalysisData>;
 }
 
-// 2. Componente Input Reutilizable con estilo Dark Glass y manejo de errores
+// 2. Componente Input Reutilizable (Versión Light/Clean)
 interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label: string;
     error?: string;
     icon?: React.ElementType;
 }
 
-const Input = ({ error, label, id, icon: Icon, ...props }: CustomInputProps) => (
+const CleanInput = ({ error, label, id, icon: Icon, ...props }: CustomInputProps) => (
     <div className="space-y-1.5 group">
-        <label htmlFor={id} className="text-xs font-bold text-blue-200/80 uppercase tracking-wider ml-1 flex items-center gap-2">
-            {label} {props.required && <span className="text-blue-400">*</span>}
+        <label htmlFor={id} className="text-sm font-semibold text-slate-700 ml-1 flex items-center gap-2">
+            {label} {props.required && <span className="text-red-500">*</span>}
         </label>
         <div className="relative">
+            {Icon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <Icon className="w-5 h-5" />
+                </div>
+            )}
             <input
                 id={id}
                 {...props}
                 className={`
-          w-full bg-black/20 border rounded-xl px-4 py-3 text-white placeholder-white/20 
-          transition-all duration-200 outline-none font-mono
-          focus:bg-black/30 focus:ring-2 focus:ring-blue-500/20
-          ${Icon ? 'pl-11' : 'pl-4'}
-          ${error
-                        ? 'border-red-500/50 focus:border-red-500'
-                        : 'border-white/10 focus:border-blue-500/50'
+                    w-full bg-white border rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400
+                    transition-all duration-200 outline-none text-base shadow-sm
+                    ${Icon ? 'pl-12' : 'pl-4'}
+                    ${error
+                        ? 'border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+                        : 'border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:border-slate-300'
                     }
-        `}
+                `}
             />
-            {/* Icono decorativo a la izquierda */}
-            {Icon && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-blue-400 transition-colors">
-                    <Icon className="w-4 h-4" />
-                </div>
-            )}
-
-            {/* Icono de alerta a la derecha si hay error */}
             {error && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 animate-pulse">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500 animate-pulse">
                     <AlertCircle className="w-5 h-5" />
                 </div>
             )}
         </div>
-
-        {/* Mensaje de error animado */}
-        <div className={`overflow-hidden transition-all duration-300 ${error ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <p className="text-xs text-red-400 ml-1 font-medium flex items-center gap-1">
+        {error && (
+            <p className="text-sm text-red-500 font-medium ml-1 animate-in slide-in-from-top-1">
                 {error}
             </p>
-        </div>
+        )}
     </div>
 );
 
@@ -132,27 +126,29 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
     };
 
     return (
-        <div className="w-full max-w-xl mx-auto">
-            {/* Contenedor Glass Panel */}
-            <div className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 shadow-2xl p-8 rounded-2xl overflow-hidden">
+        <div className="w-full max-w-2xl mx-auto px-4">
+            {/* Card Principal: Blanco con sombra elegante */}
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
 
-                {/* Efecto de fondo (brillo azul) */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
-                {/* Header */}
-                <div className="relative z-10 mb-8 border-b border-white/5 pb-6">
-                    <h2 className="text-2xl font-bold text-white mb-2 tracking-tight flex items-center gap-2">
-                        Nuevo Análisis
-                    </h2>
-                    <p className="text-blue-200/60 text-sm">
-                        Ingresa los datos de identificación del lote para comenzar el proceso.
+                {/* Header con fondo suave */}
+                <div className="bg-slate-50/50 border-b border-slate-100 p-8 pb-6">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <Layers className="w-6 h-6" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                            Nuevo Análisis de Calidad
+                        </h2>
+                    </div>
+                    <p className="text-slate-500 text-sm ml-1">
+                        Ingresa los datos de identificación del lote para comenzar.
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                    {/* Inputs */}
-                    <div className="space-y-5">
-                        <Input
+                <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                    {/* Grid de Inputs */}
+                    <div className="space-y-6">
+                        <CleanInput
                             id="lote"
                             label="Lote de Producción"
                             icon={Layers}
@@ -165,8 +161,8 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             autoFocus
                         />
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <Input
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <CleanInput
                                 id="codigo"
                                 label="Código Referencia"
                                 icon={FileText}
@@ -177,8 +173,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                                 error={touched.codigo ? errors.codigo : undefined}
                                 required
                             />
-
-                            <Input
+                            <CleanInput
                                 id="talla"
                                 label="Talla / Calibre"
                                 icon={Tag}
@@ -192,22 +187,12 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                         </div>
                     </div>
 
-                    {/* Selector de Color con estilo integrado */}
-                    <div className={`p-4 rounded-xl border transition-all duration-300 ${errors.color && touched.color
-                            ? 'bg-red-500/5 border-red-500/30'
-                            : 'bg-white/5 border-white/10'
+                    {/* Selector de Color (Adaptado a Light Mode) */}
+                    <div className={`p-5 rounded-xl border transition-all duration-300 ${errors.color && touched.color ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'
                         }`}>
-                        <div className="flex items-center justify-between mb-4">
-                            <span className="text-xs font-bold text-blue-200/80 uppercase tracking-wider flex items-center gap-2">
-                                Color del Analista *
-                            </span>
-                            {errors.color && touched.color && (
-                                <span className="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded border border-red-500/20">
-                                    Requerido
-                                </span>
-                            )}
-                        </div>
-
+                        <label className="block text-sm font-semibold text-slate-700 mb-4">
+                            Color del Analista <span className="text-red-500">*</span>
+                        </label>
                         <AnalystColorSelector
                             selectedColor={formData.color || ''}
                             onSelect={(c) => {
@@ -217,37 +202,31 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                         />
                     </div>
 
-                    {/* Botón de Acción */}
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`
-                group w-full relative overflow-hidden rounded-xl py-4 font-bold text-sm uppercase tracking-widest transition-all
-                ${isSubmitting
-                                    ? 'bg-gray-800 text-gray-400 cursor-wait'
-                                    : 'bg-blue-600 text-white hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:-translate-y-0.5 active:translate-y-0'
-                                }
-              `}
-                        >
-                            {/* Fondo con brillo animado */}
-                            {!isSubmitting && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />}
-
-                            <div className="flex items-center justify-center gap-2 relative z-10">
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span>Procesando...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>Comenzar Análisis</span>
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
-                            </div>
-                        </button>
-                    </div>
+                    {/* Botón Principal */}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`
+                            w-full py-4 rounded-xl font-bold text-base shadow-lg shadow-blue-500/20 transition-all transform
+                            flex items-center justify-center gap-2
+                            ${isSubmitting
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-blue-600/30 active:translate-y-0'
+                            }
+                        `}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Procesando...
+                            </>
+                        ) : (
+                            <>
+                                Comenzar Análisis
+                                <ArrowRight className="w-5 h-5" />
+                            </>
+                        )}
+                    </button>
                 </form>
             </div>
         </div>
