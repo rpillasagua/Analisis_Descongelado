@@ -36,10 +36,10 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
   return (
     <div className="min-h-screen bg-[#f3f4f6]">
-      {/* Controls Section - Sticky */}
+      {/* Controls Section - Sticky (ESENCIAL PARA MÓVIL) */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 py-4 shadow-sm">
         <div className="max-w-5xl mx-auto space-y-4">
-          {/* Actions Row */}
+          {/* Actions Row - Botones grandes y táctiles */}
           <div className="flex gap-3">
             <button
               onClick={() => router.push('/dashboard/tests/new')}
@@ -95,25 +95,25 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-2 pb-24 space-y-2">
+      <div className="max-w-5xl mx-auto px-4 py-2 pb-8 space-y-2"> {/* AJUSTE: pb-24 -> pb-8 (Compacidad Global) */}
         {/* Report Card - Shows at top when active */}
         {showReportModal && (
           <DailyReportCard onClose={() => setShowReportModal(false)} />
         )}
 
-        {/* Grid de Análisis */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        {/* Grid de Análisis (RESPONSIVE: grid-cols-1 por defecto en móvil) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-start"> {/* AJUSTE: gap-4 -> gap-3 (Compacidad entre tarjetas) */}
           {filteredAnalyses.map((analysis) => (
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="bg-white rounded-xl hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden group h-fit"
+              className="bg-white rounded-xl hover:shadow-xl active:scale-[0.99] active:shadow-2xl transition-all duration-200 cursor-pointer relative overflow-hidden group h-fit"
               style={{
                 borderLeft: `8px solid ${analysis.analystColor || '#3B82F6'}`,
-                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)' // Constant-like shadow for floating effect
+                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)'
               }}
             >
-              <div className="p-3">
+              <div className="p-2"> {/* AJUSTE: p-3 -> p-2 (Tarjeta más compacta) */}
                 {/* Card Header */}
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
@@ -125,25 +125,25 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] font-medium text-gray-400 leading-none">
+                    <div className="text-xs font-medium text-gray-400 leading-none"> {/* AJUSTE: text-[10px] -> text-xs (Legibilidad) */}
                       {new Date(analysis.date).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
 
-                {/* Card Body Grid */}
+                {/* Card Body Grid (RESPONSIVE: 2 columnas OK en ancho móvil) */}
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                   {/* Producto */}
                   <div className="flex flex-col gap-0">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none">Producto:</p>
-                    <p className="text-xs font-bold text-gray-900 leading-none">
+                    <p className="text-xs font-medium text-gray-500 leading-none">Producto:</p> {/* AJUSTE: text-[10px] -> text-xs (Legibilidad) */}
+                    <p className="text-sm font-bold text-gray-900 leading-none"> {/* AJUSTE: text-xs -> text-sm (Legibilidad) */}
                       {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
                     </p>
                   </div>
 
                   {/* Código */}
                   <div className="flex flex-col gap-0">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
+                    <p className="text-xs font-medium text-gray-500 leading-none flex items-center gap-1"> {/* AJUSTE: text-[10px] -> text-xs (Legibilidad) */}
                       <QrCode className="w-3 h-3" /> Código:
                     </p>
                     <p className="text-sm font-bold text-gray-800 leading-none">
@@ -153,19 +153,19 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
                   {/* Talla */}
                   <div className="flex flex-col gap-0">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
+                    <p className="text-xs font-medium text-gray-500 leading-none flex items-center gap-1"> {/* AJUSTE: text-[10px] -> text-xs (Legibilidad) */}
                       <Ruler className="w-3 h-3" /> Talla:
                     </p>
-                    <p className="text-xs font-bold text-gray-900 leading-none">
+                    <p className="text-sm font-bold text-gray-900 leading-none"> {/* AJUSTE: text-xs -> text-sm (Legibilidad) */}
                       {analysis.talla || '-'}
                     </p>
                   </div>
 
                   {/* Turno */}
                   <div className="flex flex-col gap-0">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none">Turno:</p>
+                    <p className="text-xs font-medium text-gray-500 leading-none">Turno:</p> {/* AJUSTE: text-[10px] -> text-xs (Legibilidad) */}
                     <div className="flex">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
                         ? 'bg-[#6B21A8] text-white'
                         : 'bg-amber-400 text-gray-900'
                         }`}>
