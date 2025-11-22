@@ -122,7 +122,7 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                     src={user.picture}
                     alt={user.name}
                     className="h-full w-full object-cover"
-                    style={{ borderRadius: '50%', border: '3px solid white', boxSizing: 'border-box' }}
+                    style={{ borderRadius: '50%' }}
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
@@ -138,7 +138,7 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                   </span>
                 </div>
               ) : (
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md border-[3px] border-white hover:scale-105 transition-transform duration-200">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md hover:scale-105 transition-transform duration-200">
                   <span className="text-lg font-bold">{user.name.charAt(0)}</span>
                 </div>
               )}
@@ -150,12 +150,12 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-3 w-[240px] bg-white rounded-xl p-4 z-[100] animate-in fade-in zoom-in-95 duration-200 flex flex-col gap-3"
+                <div className="absolute right-4 mt-3 w-[160px] bg-white rounded-xl p-3 z-[100] animate-in fade-in zoom-in-95 duration-200 flex flex-col gap-2"
                   style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
 
                   <div className="flex flex-col items-center text-center">
-                    <p className="text-base font-bold text-slate-800 truncate w-full">{user.name}</p>
-                    <p className="text-xs text-slate-500 truncate w-full mt-1">{user.email}</p>
+                    <p className="text-sm font-bold text-slate-800 truncate w-full">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate w-full mt-0.5">{user.email}</p>
                   </div>
 
                   <hr className="border-t border-slate-100 w-full" />
@@ -165,9 +165,9 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                       setIsDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200"
+                    className="w-full px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 rounded-lg flex items-center justify-center gap-1.5 transition-colors duration-200"
                   >
-                    <LogOut size={16} />
+                    <LogOut size={14} />
                     Cerrar Sesión
                   </button>
                 </div>
