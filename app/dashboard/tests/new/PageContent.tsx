@@ -475,8 +475,22 @@ export default function NewMultiAnalysisPageContent() {
     const colorHex = analystColor ? ANALYST_COLOR_HEX[analystColor] : '#0ea5e9';
 
     return (
-        <div className="min-h-screen p-4 pb-20">
-            <div className="max-w-5xl mx-auto space-y-6">
+        <div className="min-h-screen pb-20">
+            {/* Sticky Header */}
+            {basicsCompleted && analystColor && (
+                <StickyHeader
+                    lote={lote}
+                    codigo={codigo}
+                    talla={talla}
+                    analystColor={analystColor}
+                    activeAnalysisIndex={activeAnalysisIndex}
+                    totalAnalyses={analyses.length}
+                    saveState={isSaving ? 'saving' : saveError ? 'error' : 'saved'}
+                    lastSaved={lastSaved}
+                />
+            )}
+
+            <div className="max-w-5xl mx-auto space-y-6 p-4">
                 {/* Minimalist Header */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
