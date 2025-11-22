@@ -89,7 +89,7 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
             `}</style>
 
             <div
-                className="bg-white w-[90%] max-w-[340px] p-[25px] rounded-[24px] relative text-left"
+                className="bg-white w-[90%] max-w-[340px] p-[25px] rounded-[24px] relative text-left max-h-[90vh] overflow-y-auto"
                 style={{
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                     animation: 'floatUp 0.3s ease-out'
