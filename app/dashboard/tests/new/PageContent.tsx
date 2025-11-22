@@ -3,6 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+// UI Components
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { Input } from '@/components/ui';
+import { Label } from '@/components/ui';
+import { Textarea } from '@/components/ui';
+
+// Specialized Components
+import SmartInputGroup from '@/components/SmartInputGroup';
+import StickyHeader from '@/components/StickyHeader';
+
+// Existing Components
 import ProductTypeSelector from '@/components/ProductTypeSelector';
 import InitialForm from '@/components/InitialForm';
 import AnalysisTabs from '@/components/AnalysisTabs';
@@ -11,6 +25,8 @@ import ControlPesosBrutos from '@/components/ControlPesosBrutos';
 import DefectSelector from '@/components/DefectSelector';
 import AutoSaveIndicatorNew from '@/components/AutoSaveIndicatorNew';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+
+// Types and Utils
 import {
     ProductType,
     QualityAnalysis,
@@ -27,50 +43,6 @@ const createEmptyAnalysis = (numero: number): Analysis => ({
     pesosBrutos: [],
     defectos: {}
 });
-
-// Componentes UI Modernizados (Clean & Professional)
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`bg-white rounded-xl border border-[#dbdbdb] overflow-hidden ${className}`}>{children}</div>;
-
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`px-6 py-4 border-b border-[#efefef] bg-white ${className}`}>{children}</div>;
-
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <h2 className={`text-base font-bold text-[#262626] flex items-center gap-2 ${className}`}>{children}</h2>;
-
-const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <p className={`text-xs text-[#8e8e8e] mt-0.5 ${className}`}>{children}</p>;
-
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) =>
-    <div className={`p-6 ${className}`}>{children}</div>;
-
-interface ButtonProps {
-    children: React.ReactNode;
-    onClick?: () => void;
-    className?: string;
-    variant?: 'default' | 'outline' | 'ghost';
-    type?: 'button' | 'submit' | 'reset';
-    disabled?: boolean;
-}
-
-const Button = ({ children, onClick, className = '', variant = 'default', type = 'button', disabled = false }: ButtonProps) => {
-    const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-semibold transition-all h-10 px-4 disabled:opacity-50 disabled:cursor-not-allowed";
-    const variantClasses = {
-        default: 'bg-[#0095f6] text-white hover:bg-[#1877f2] shadow-sm',
-        outline: 'bg-white text-[#262626] border border-[#dbdbdb] hover:bg-gray-50',
-        ghost: 'text-[#8e8e8e] hover:text-[#262626] hover:bg-gray-100',
-    };
-    return <button disabled={disabled} type={type} onClick={onClick} className={`${baseClasses} ${variantClasses[variant]} ${className}`}>{children}</button>;
-};
-
-const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-    <input {...props} className="w-full px-3 py-2 text-sm bg-[#fafafa] border border-[#dbdbdb] rounded-md focus:outline-none focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626]" />;
-
-const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-    <label {...props} className="text-xs font-semibold text-[#262626] mb-2 block" />;
-
-const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) =>
-    <textarea {...props} className="w-full px-3 py-2 text-sm bg-[#fafafa] border border-[#dbdbdb] rounded-md focus:outline-none focus:border-[#a8a8a8] transition-all placeholder-[#8e8e8e] text-[#262626] min-h-[100px]" />;
 
 const ViewModeSelector = ({ mode, onChange }: { mode: 'compact' | 'loose'; onChange: (m: 'compact' | 'loose') => void }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -155,8 +127,7 @@ export default function NewMultiAnalysisPageContent() {
             router.push('/');
         } catch (error) {
             console.error('Error deleting analysis:', error);
-            alert('Error al eliminar el análisis. Por favor intenta de nuevo.');
-            // setIsLoading(false); // Ya no es necesario
+            toast.error('Error al eliminar el análisis. Por favor intenta de nuevo.');
         }
     };
 
@@ -348,7 +319,7 @@ export default function NewMultiAnalysisPageContent() {
             }
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Error al subir la foto');
+            toast.error('Error al subir la foto. Intenta de nuevo.');
         } finally {
             setUploadingPhotos(prev => {
                 const next = new Set(prev);
@@ -396,7 +367,7 @@ export default function NewMultiAnalysisPageContent() {
             });
         } catch (error) {
             console.error('Error uploading peso bruto photo:', error);
-            alert('Error al subir la foto');
+            toast.error('Error al subir la foto del peso bruto');
         } finally {
             setUploadingPhotos(prev => {
                 const next = new Set(prev);
