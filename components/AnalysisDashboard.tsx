@@ -88,39 +88,77 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: '#f3f4f6' }}>
       {/* Controls Section - Sticky con glassmorphism */}
-      <div className="sticky top-0 z-30 glass border-b border-white/20 backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4 shadow-lg">
+      <div className="sticky top-0 z-30 glass backdrop-blur-xl px-3 py-3 sm:px-4 sm:py-4 shadow-lg" style={{ borderBottom: 'none' }}>
         <div className="max-w-7xl mx-auto space-y-3">
           {/* Actions Row - Mobile optimized */}
           <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => router.push('/dashboard/tests/new')}
-              className="flex-1 gradient-blue text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-full text-sm sm:text-base font-bold hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md min-w-0"
+              className="flex-1 text-white px-4 py-3 text-base font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 min-w-0"
+              style={{
+                backgroundColor: '#2563EB',
+                borderRadius: '12px',
+                border: 'none',
+                boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#1d4ed8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#2563EB';
+              }}
             >
-              <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <Plus className="h-5 w-5 flex-shrink-0" />
               <span className="truncate">Nuevo</span>
             </button>
             <button
               onClick={() => setShowReportModal(!showReportModal)}
-              className="flex-1 bg-white/90 backdrop-blur text-blue-600 border-2 border-blue-500/50 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full text-sm sm:text-base font-bold hover:bg-blue-50 hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 min-w-0"
+              className="flex-1 px-4 py-3 text-base font-semibold transition-all flex items-center justify-center gap-2 min-w-0"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#2563EB',
+                border: '2px solid #2563EB',
+                borderRadius: '12px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#eff6ff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <FileText className="h-5 w-5 flex-shrink-0" />
               <span className="truncate">Reporte</span>
             </button>
           </div>
 
-          {/* Search Bar con glassmorphism */}
+          {/* Search Bar moderno */}
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
             <input
               type="text"
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="w-full glass shadow-xl pl-10 sm:pl-11 pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base rounded-2xl border border-white/20 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all placeholder-gray-400 text-gray-900 outline-none"
+              className="w-full pl-12 pr-4 py-3.5 text-base transition-all outline-none"
+              style={{
+                backgroundColor: '#F3F4F6',
+                border: '2px solid transparent',
+                borderRadius: '12px',
+                color: '#1F2937'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#2563EB';
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'transparent';
+                e.currentTarget.style.backgroundColor = '#F3F4F6';
+              }}
             />
           </div>
 
@@ -164,7 +202,19 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="card-float cursor-pointer relative overflow-hidden group bg-white"
+              className="cursor-pointer relative overflow-hidden group rounded-lg transition-all duration-300 hover:-translate-y-1"
+              style={{
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.25), 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+              }}
             >
               {/* Franja de color del analista */}
               <div
@@ -181,7 +231,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                 }}
               />
 
-              <div className="p-3 pl-5" style={{ paddingLeft: '24px' }}>
+              <div className="p-3 pl-5" style={{ paddingLeft: '24px', paddingRight: '20px' }}>
                 {/* Header ultra compacto */}
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-0.5 min-w-0 flex-1">
@@ -192,9 +242,8 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                       <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
                     )}
                   </div>
-                  <div className="flex items-center gap-0.5 text-[10px] text-gray-400 flex-shrink-0 ml-1">
-                    <Calendar className="w-2 h-2" />
-                    <span className="hidden sm:inline">{new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className="text-[10px] text-gray-400 flex-shrink-0 ml-1">
+                    <span>{new Date(analysis.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
 
