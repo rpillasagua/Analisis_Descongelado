@@ -122,30 +122,23 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-100 rounded-xl pl-11 pr-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-gray-400 text-gray-900 shadow-md"
+              className="w-full bg-white border border-gray-100 rounded-xl pl-11 pr-4 py-5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-gray-400 text-gray-900 shadow-md"
             />
           </div>
 
-          {/* Tabs Navigation */}
-          <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl w-fit">
-            <button
-              onClick={() => setActiveTab('todos')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'todos'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
-                }`}
-            >
-              Todos
-            </button>
-            <button
-              onClick={() => setActiveTab('en_progreso')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'en_progreso'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
-                }`}
-            >
-              En Progreso
-            </button>
+          {/* Tabs Navigation - Centered on 'Todos' */}
+          <div className="flex justify-center">
+            <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveTab('todos')}
+                className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'todos'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                  }`}
+              >
+                Todos
+              </button>
+            </div>
           </div>
         </div>
       </div>
