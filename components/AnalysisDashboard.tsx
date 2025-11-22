@@ -114,15 +114,15 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="bg-white rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden group mb-1"
+              className="bg-white rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer relative overflow-hidden group mb-3"
               style={{
                 borderLeft: `8px solid ${analysis.analystColor || '#3B82F6'}`,
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)'
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
               }}
             >
-              <div className="p-3">
+              <div className="p-1.5">
                 {/* Card Header */}
-                <div className="flex justify-between items-start mb-1">
+                <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-bold text-gray-900 leading-none">
                       {analysis.lote}
@@ -139,7 +139,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                 </div>
 
                 {/* Card Body Grid */}
-                <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+                <div className="grid grid-cols-2 gap-y-0 gap-x-2 mt-0.5">
                   {/* Producto */}
                   <div>
                     <p className="text-xs font-medium text-gray-500 mb-0">Producto:</p>
