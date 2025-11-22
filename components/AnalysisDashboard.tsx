@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, FileText, CheckCircle, Plus, Ruler, QrCode, Loader2, Calendar } from 'lucide-react';
-import { QualityAnalysis, PRODUCT_TYPE_LABELS } from '@/lib/types';
+import { QualityAnalysis, PRODUCT_TYPE_LABELS, ANALYST_COLOR_HEX } from '@/lib/types';
 import DailyReportCard from './DailyReportCard';
 import { logger } from '@/lib/logger';
 
@@ -159,7 +159,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
         )}
 
         {/* Grid de Análisis - Compacto y optimizado para móvil */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4" style={{ rowGap: '20px', columnGap: '20px' }}>
           {filteredAnalyses.map((analysis) => (
             <div
               key={analysis.id}
@@ -167,9 +167,12 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
               className="card-float cursor-pointer relative overflow-hidden group bg-white"
             >
               {/* Gradient accent border */}
-              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-600" />
+              <div
+                className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+                style={{ backgroundColor: ANALYST_COLOR_HEX[analysis.analystColor] }}
+              />
 
-              <div className="p-1 pl-1.5">
+              <div className="p-3">
                 {/* Header ultra compacto */}
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-0.5 min-w-0 flex-1">
