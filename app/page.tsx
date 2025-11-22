@@ -62,7 +62,6 @@ const useGoogleAuth = () => {
   const logout = () => {
     googleAuthService.logout();
   };
-
   return { ...authState, login, logout };
 };
 
@@ -72,36 +71,18 @@ const LoginPage = ({ onLoginTrigger }: { onLoginTrigger: () => void }) => {
   return (
     <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-300">
       <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-2xl p-10 animate-in fade-in zoom-in-95 duration-300">
-
-        {/* Icon/Logo */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
             <User className="h-8 w-8 text-white" />
           </div>
         </div>
-
-        {/* Titles */}
         <div className="text-center space-y-2 mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Control de Calidad
-          </h1>
-          <h2 className="text-xl font-semibold text-slate-800">
-            Análisis en Descongelado
-          </h2>
-          <p className="text-sm text-slate-500 mt-2">
-            Accede con tu cuenta corporativa para gestionar los análisis
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">Control de Calidad</h1>
+          <h2 className="text-xl font-semibold text-slate-800">Análisis en Descongelado</h2>
+          <p className="text-sm text-slate-500 mt-2">Accede con tu cuenta corporativa para gestionar los análisis</p>
         </div>
-
-        {/* Login Action */}
-        <div className="mb-8">
-          <GoogleLoginButton onLoginSuccess={onLoginTrigger} />
-        </div>
-
-        {/* Footer */}
-        <p className="text-xs text-center text-slate-400">
-          &copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.
-        </p>
+        <div className="mb-8"><GoogleLoginButton onLoginSuccess={onLoginTrigger} /></div>
+        <p className="text-xs text-center text-slate-400">&copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.</p>
       </div>
     </main>
   );
@@ -113,9 +94,7 @@ const LoadingScreen = () => (
       <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
       <Loader2 className="h-16 w-16 text-blue-500 animate-spin relative z-10" />
     </div>
-    <p className="mt-6 text-lg font-medium text-blue-400 animate-pulse">
-      Iniciando sistema...
-    </p>
+    <p className="mt-6 text-lg font-medium text-blue-400 animate-pulse">Iniciando sistema...</p>
   </div>
 );
 
@@ -126,12 +105,9 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
     <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all" style={{ borderBottom: 'none' }}>
       <div className="max-w-5xl mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
-          {/* Title */}
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
             Análisis en <span className="text-blue-600">Descongelado</span>
           </h1>
-
-          {/* User Profile */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -139,14 +115,7 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
             >
               {user.picture ? (
                 <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md ring-2 ring-transparent group-hover:ring-blue-100 transition-all bg-slate-200">
-                  <Image
-                    src={user.picture}
-                    alt={user.name}
-                    fill
-                    className="object-cover"
-                    referrerPolicy="no-referrer"
-                    sizes="48px"
-                  />
+                  <Image src={user.picture} alt={user.name} fill className="object-cover" referrerPolicy="no-referrer" sizes="48px" />
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
@@ -154,8 +123,6 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                 </div>
               )}
             </button>
-
-            {/* Dropdown Menu */}
             {isDropdownOpen && (
               <>
                 <div
@@ -179,11 +146,12 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                   </button>
                 </div>
               </>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
+            )
+            }
+          </div >
+        </div >
+      </div >
+    </header >
   );
 };
 
