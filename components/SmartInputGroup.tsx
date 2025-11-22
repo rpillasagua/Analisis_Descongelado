@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Image from 'next/image';
 import { Camera, Eye, Loader2, X, CheckCircle2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -190,7 +189,7 @@ export default function SmartInputGroup({
 
                             {onPhotoDelete && (
                                 <button
-                                    onClick={(e) => {
+                                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                         handleDeletePhoto(e);
                                         setShowPhotoPreview(false);
                                     }}
