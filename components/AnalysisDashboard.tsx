@@ -166,13 +166,22 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
               className="card-float cursor-pointer relative overflow-hidden group bg-white"
             >
-              {/* Gradient accent border */}
+              {/* Franja de color del analista */}
               <div
-                className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
-                style={{ backgroundColor: ANALYST_COLOR_HEX[analysis.analystColor] }}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: '8px',
+                  backgroundColor: analysis.analystColor ? ANALYST_COLOR_HEX[analysis.analystColor] : '#3b82f6',
+                  borderTopLeftRadius: '8px',
+                  borderBottomLeftRadius: '8px',
+                  zIndex: 10
+                }}
               />
 
-              <div className="p-3">
+              <div className="p-3 pl-5" style={{ paddingLeft: '24px' }}>
                 {/* Header ultra compacto */}
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-0.5 min-w-0 flex-1">
