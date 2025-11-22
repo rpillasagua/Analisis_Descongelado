@@ -171,57 +171,57 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                 className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-600"
               />
 
-              <div className="p-2.5 sm:p-3">
+              <div className="p-2">
                 {/* Header compacto */}
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-1.5">
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-none truncate">
                       {analysis.lote}
                     </h3>
                     {analysis.status === 'COMPLETADO' && (
-                      <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
+                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
                     )}
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0 ml-1">
-                    <Calendar className="w-3 h-3" />
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400 flex-shrink-0 ml-1">
+                    <Calendar className="w-2.5 h-2.5" />
                     <span className="hidden sm:inline">{new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
 
                 {/* Grid compacto 2x2 */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px]">
                   {/* Producto */}
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-medium text-gray-500 leading-tight mb-0.5">Producto</p>
-                    <p className="text-xs sm:text-sm font-bold text-gray-900 leading-tight truncate">
+                    <p className="text-[9px] font-medium text-gray-500 leading-none mb-0.5">Producto</p>
+                    <p className="text-xs font-bold text-gray-900 leading-none truncate">
                       {PRODUCT_TYPE_LABELS[analysis.productType]}
                     </p>
                   </div>
 
                   {/* Código */}
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-medium text-gray-500 leading-tight flex items-center gap-1 mb-0.5">
+                    <p className="text-[9px] font-medium text-gray-500 leading-none flex items-center gap-1 mb-0.5">
                       <QrCode className="w-2.5 h-2.5" /> Código
                     </p>
-                    <p className="text-xs sm:text-sm font-bold text-gray-800 leading-tight truncate">
+                    <p className="text-xs font-bold text-gray-800 leading-none truncate">
                       {analysis.codigo}
                     </p>
                   </div>
 
                   {/* Talla */}
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-medium text-gray-500 leading-tight flex items-center gap-1 mb-0.5">
+                    <p className="text-[9px] font-medium text-gray-500 leading-none flex items-center gap-1 mb-0.5">
                       <Ruler className="w-2.5 h-2.5" /> Talla
                     </p>
-                    <p className="text-xs sm:text-sm font-bold text-gray-900 leading-tight truncate">
+                    <p className="text-xs font-bold text-gray-900 leading-none truncate">
                       {analysis.talla || '-'}
                     </p>
                   </div>
 
                   {/* Turno */}
                   <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs font-medium text-gray-500 leading-tight mb-0.5">Turno</p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold tracking-wide uppercase shadow-sm leading-tight ${analysis.shift === 'NOCHE'
+                    <p className="text-[9px] font-medium text-gray-500 leading-none mb-0.5">Turno</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
                       ? 'bg-purple-100 text-purple-700'
                       : 'bg-amber-100 text-amber-700'
                       }`}>
@@ -229,32 +229,31 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
                     </span>
                   </div>
                 </div>
+
+                {/* Hover overlay sutil */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-600/0 group-hover:from-blue-500/5 group-hover:to-purple-600/5 transition-all pointer-events-none" />
               </div>
-
-              {/* Hover overlay sutil */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-600/0 group-hover:from-blue-500/5 group-hover:to-purple-600/5 transition-all pointer-events-none" />
-            </div>
           ))}
-        </div>
-
-        {/* Loading Spinner */}
-        {hasMore && !searchTerm && (
-          <div ref={observerTarget} className="flex justify-center py-6 sm:py-8">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 animate-spin" />
-          </div>
-        )}
-
-        {/* Empty state */}
-        {filteredAnalyses.length === 0 && (
-          <div className="text-center py-12 sm:py-16 animate-fade-in">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 glass rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Search className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No se encontraron análisis</h3>
-            <p className="text-sm sm:text-base text-gray-500">Intenta ajustar tu búsqueda o crea un nuevo análisis.</p>
-          </div>
-        )}
+
+        {/* Loading Spinner */ }
+        { hasMore && !searchTerm && (
+              <div ref={observerTarget} className="flex justify-center py-6 sm:py-8">
+                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 animate-spin" />
+              </div>
+            )}
+
+          {/* Empty state */}
+          {filteredAnalyses.length === 0 && (
+            <div className="text-center py-12 sm:py-16 animate-fade-in">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 glass rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Search className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No se encontraron análisis</h3>
+              <p className="text-sm sm:text-base text-gray-500">Intenta ajustar tu búsqueda o crea un nuevo análisis.</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+      );
 }
