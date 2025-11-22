@@ -1,19 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, LogOut } from 'lucide-react';
+import Image from 'next/image'; // Optimización de Next.js
+import { User, LogOut, Loader2 } from 'lucide-react';
 import { googleAuthService } from '@/lib/googleAuthService';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 import AnalysisDashboard from '@/components/AnalysisDashboard';
 
-// Estado para manejar autenticación Google
+// --- Types (Idealmente mover a @/lib/types.ts) ---
+interface UserProfile {
+  name: string;
+  email: string;
+  picture?: string;
+}
+
 interface AuthState {
   isAuthenticated: boolean;
-  user: { name: string; email: string; picture?: string } | null;
+  user: UserProfile | null;
   loading: boolean;
 }
 
-// Hook personalizado para Google Auth
+// --- Custom Hook ---
 const useGoogleAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
@@ -26,22 +33,23 @@ const useGoogleAuth = () => {
       try {
         await googleAuthService.initialize();
 
-        // Suscribirse a cambios
+        // La suscripción actualiza el estado automáticamente cuando el servicio cambia
         const unsubscribe = googleAuthService.subscribe((user) => {
           setAuthState({
             isAuthenticated: !!user,
-            user: user,
+            user: user as UserProfile | null,
             loading: false
           });
         });
 
         return unsubscribe;
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error inicializando Google Auth:', error);
         setAuthState(prev => ({ ...prev, loading: false }));
       }
     };
 
+    // Ejecutar y limpiar
     const cleanupPromise = initAuth();
     return () => {
       cleanupPromise.then(cleanup => cleanup && cleanup());
@@ -63,45 +71,40 @@ const useGoogleAuth = () => {
   return { ...authState, login, logout };
 };
 
-// UI Components removed - using inline styles in LoginPage
+// --- Components ---
 
-// Página de login
-const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
+const LoginPage = ({ onLoginTrigger }: { onLoginTrigger: () => void }) => {
   return (
-    <main
-      className="flex min-h-screen items-center justify-center p-4"
-      style={{
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
-      }}
-    >
-      <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] p-10">
+    <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-300">
+      <div className="w-full max-w-[400px] bg-white rounded-2xl shadow-2xl p-10 animate-in fade-in zoom-in-95 duration-300">
+
         {/* Icon/Logo */}
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-md">
+          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
             <User className="h-8 w-8 text-white" />
           </div>
         </div>
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#1a1a1a' }}>
-          Control de Calidad
-        </h1>
-        <h2 className="text-xl font-bold text-center mb-6" style={{ color: '#1a1a1a' }}>
-          Análisis en Descongelado
-        </h2>
-
-        {/* Subtitle */}
-        <p className="text-sm text-center mb-8" style={{ color: '#666' }}>
-          Accede con tu cuenta corporativa para gestionar los análisis
-        </p>
-
-        {/* Google Login Button */}
-        <div className="mb-6">
-          <GoogleLoginButton onLoginSuccess={onLogin} />
+        {/* Titles */}
+        <div className="text-center space-y-2 mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">
+            Control de Calidad
+          </h1>
+          <h2 className="text-xl font-semibold text-slate-800">
+            Análisis en Descongelado
+          </h2>
+          <p className="text-sm text-slate-500 mt-2">
+            Accede con tu cuenta corporativa para gestionar los análisis
+          </p>
         </div>
 
-        {/* Copyright */}
-        <p className="text-xs text-center" style={{ color: '#999' }}>
+        {/* Login Action */}
+        <div className="mb-8">
+          <GoogleLoginButton onLoginSuccess={onLoginTrigger} />
+        </div>
+
+        {/* Footer */}
+        <p className="text-xs text-center text-slate-400">
           &copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.
         </p>
       </div>
@@ -109,46 +112,50 @@ const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
   );
 };
 
-// Componente de carga
 const LoadingScreen = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-    <div className="relative w-24 h-24">
-      <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
-      <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
+  <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white">
+    <div className="relative">
+      <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+      <Loader2 className="h-16 w-16 text-blue-500 animate-spin relative z-10" />
     </div>
-    <p className="mt-6 text-lg font-medium text-blue-400 animate-pulse">Cargando sistema...</p>
+    <p className="mt-6 text-lg font-medium text-blue-400 animate-pulse">
+      Iniciando sistema...
+    </p>
   </div>
 );
 
-// Header con información del usuario
-const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; picture?: string }; onLogout: () => void }) => {
+const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-white pt-6 pb-2 px-4 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
+    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all">
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
           {/* Title */}
-          <h1 className="text-3xl font-bold text-[#262626] leading-tight max-w-[70%]">
-            Análisis en<br />Descongelado
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
+            Análisis en <span className="text-blue-600">Descongelado</span>
           </h1>
 
           {/* User Profile */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="focus:outline-none group transition-transform active:scale-95"
+              className="focus:outline-none group transition-transform active:scale-95 flex items-center gap-2"
             >
               {user.picture ? (
-                <img
-                  src={user.picture}
-                  alt={user.name}
-                  referrerPolicy="no-referrer"
-                  className="w-14 h-14 rounded-full object-cover shadow-md hover:shadow-lg transition-shadow"
-                />
+                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+                  <Image
+                    src={user.picture}
+                    alt={user.name}
+                    fill
+                    className="object-cover"
+                    referrerPolicy="no-referrer"
+                    sizes="48px"
+                  />
+                </div>
               ) : (
-                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
-                  <span className="text-xl font-bold">{user.name.charAt(0)}</span>
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
+                  <span className="text-lg font-bold">{user.name.charAt(0)}</span>
                 </div>
               )}
             </button>
@@ -160,17 +167,17 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"
                   >
                     <LogOut size={16} />
                     Cerrar Sesión
@@ -185,55 +192,57 @@ const AppHeader = ({ user, onLogout }: { user: { name: string; email: string; pi
   );
 };
 
-// Componente principal
-const NO_OP = () => { };
+// --- Main Page ---
 
 export default function Home() {
   const { isAuthenticated, user, loading, login, logout } = useGoogleAuth();
   const [initialAnalyses, setInitialAnalyses] = useState<any[]>([]);
   const [loadingAnalyses, setLoadingAnalyses] = useState(false);
 
-  // Fetch analyses when authenticated
+  // Efecto para cargar datos SOLO cuando el usuario se autentica
   useEffect(() => {
-    if (isAuthenticated) {
+    let isMounted = true;
+
+    if (isAuthenticated && user) {
       const fetchAnalyses = async () => {
         setLoadingAnalyses(true);
         try {
-          // Import dynamically to avoid server-side issues if any
           const { getRecentAnalyses } = await import('@/lib/analysisService');
-
-          // Fetch recent history (last 100) instead of just today
           const data = await getRecentAnalyses(100);
-          setInitialAnalyses(data);
+
+          if (isMounted) {
+            setInitialAnalyses(data);
+          }
         } catch (error) {
           console.error('Error fetching initial analyses:', error);
         } finally {
-          setLoadingAnalyses(false);
+          if (isMounted) {
+            setLoadingAnalyses(false);
+          }
         }
       };
 
       fetchAnalyses();
     }
-  }, [isAuthenticated]);
 
-  // Loading state
-  if (loading) {
-    return <LoadingScreen />;
-  }
+    return () => { isMounted = false; };
+  }, [isAuthenticated, user]); // Dependencias corregidas
 
-  // Not authenticated - show login
+  if (loading) return <LoadingScreen />;
+
   if (!isAuthenticated || !user) {
-    return <LoginPage onLogin={NO_OP} />;
+    return <LoginPage onLoginTrigger={login} />;
   }
 
-  // Authenticated - show dashboard
   return (
-    <div className="min-h-screen pb-10">
+    <div className="min-h-screen bg-slate-50 pb-10">
       <AppHeader user={user} onLogout={logout} />
-      <main className="animate-fade-in">
+
+      <main className="animate-fade-in mt-6">
         {loadingAnalyses ? (
-          <div className="flex justify-center py-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+            <p className="text-slate-400 text-sm font-medium">Obteniendo registros recientes...</p>
           </div>
         ) : (
           <AnalysisDashboard initialAnalyses={initialAnalyses} />
