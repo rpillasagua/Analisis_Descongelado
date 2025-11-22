@@ -114,7 +114,7 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
               className="focus:outline-none group transition-transform active:scale-95 flex items-center gap-2"
             >
               {user.picture ? (
-                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md border-2 border-white bg-blue-100 flex items-center justify-center group-hover:ring-2 group-hover:ring-blue-400 transition-all" style={{ minWidth: '48px', minHeight: '48px', borderRadius: '50%' }}>
+                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-lg bg-blue-100 flex items-center justify-center group-hover:ring-4 group-hover:ring-blue-100 transition-all" style={{ minWidth: '48px', minHeight: '48px', borderRadius: '50%' }}>
                   {/* Usamos img estándar para evitar problemas con dominios externos en Next.js */}
                   <img
                     src={user.picture}
@@ -140,21 +140,25 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
                   className="fixed inset-0 z-40"
                   onClick={() => setIsDropdownOpen(false)}
                 ></div>
-                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                <div className="absolute right-0 mt-4 w-72 bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 ring-1 ring-black/5">
+                  <div className="p-6 bg-gradient-to-br from-blue-50/50 to-slate-50/50 border-b border-slate-100/50">
+                    <p className="text-base font-bold text-slate-800 truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate mt-1 font-medium">{user.email}</p>
                   </div>
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      onLogout();
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"
-                  >
-                    <LogOut size={16} />
-                    Cerrar Sesión
-                  </button>
+                  <div className="p-2">
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        onLogout();
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-3 transition-all font-semibold group/btn"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center group-hover/btn:bg-red-200 transition-colors">
+                        <LogOut size={14} className="text-red-600" />
+                      </div>
+                      Cerrar Sesión
+                    </button>
+                  </div>
                 </div>
               </>
             )}
