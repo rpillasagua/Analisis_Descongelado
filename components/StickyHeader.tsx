@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { AnalystColor, ANALYST_COLOR_HEX } from '@/lib/types';
+import { adjustColor } from '@/lib/colorUtils';
 
 interface StickyHeaderProps {
     lote: string;
