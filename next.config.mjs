@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Configuración para SPA + PWA
@@ -10,19 +9,19 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  
+
   // ⚡ PERFORMANCE OPTIMIZATIONS
   poweredByHeader: false, // Quitar header X-Powered-By por seguridad
-  
+
   // Permitir conexiones desde la red local
   allowedDevOrigins: ['192.168.100.174'],
-  
+
   // Configuración de trailing slash para compatibilidad
   trailingSlash: true,
-  
+
   // NOTA: swcMinify está habilitado por defecto en Next.js 15+
   // NOTA: compress no funciona con output: 'export' (requiere servidor)
-  
+
   webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       // Configuración del cliente para SPA
@@ -32,7 +31,7 @@ const nextConfig = {
         net: false,
         tls: false,
       };
-      
+
       // ⚡ OPTIMIZATION: Code splitting mejorado
       config.optimization = {
         ...config.optimization,
@@ -71,25 +70,25 @@ const nextConfig = {
           }
         }
       };
-      
+
       return config;
     }
-    
+
     // En el servidor, excluir módulos problemáticos
     config.externals = config.externals || [];
     config.externals.push({
       'undici': 'commonjs undici',
       '@firebase/storage': 'commonjs @firebase/storage',
     });
-    
+
     // Configurar el cache para que funcione mejor con OneDrive
     if (dev) {
       config.cache = false;
     }
-    
+
     return config;
   },
-  
+
   // NOTA: Los headers de seguridad se configuran en vercel.json o netlify.toml
   // No funcionan con output: 'export' porque requieren un servidor
 };
