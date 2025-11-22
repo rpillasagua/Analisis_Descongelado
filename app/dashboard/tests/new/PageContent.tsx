@@ -535,19 +535,13 @@ export default function NewMultiAnalysisPageContent() {
                             </h1>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <AutoSaveIndicatorNew
-                                isSaving={isSaving}
-                                lastSaved={lastSaved}
-                                error={saveError}
+                        {/* Solo el indicador de color del analista */}
+                        <div className="flex items-center gap-2">
+                            <div
+                                className="w-5 h-5 rounded-full border border-slate-700 shadow-sm"
+                                style={{ backgroundColor: colorHex }}
+                                title={`Color del analista: ${analystColor}`}
                             />
-                            <div className="flex items-center gap-2 pl-3 border-l border-slate-800">
-                                <div
-                                    className="w-5 h-5 rounded-full border border-slate-700 shadow-sm"
-                                    style={{ backgroundColor: colorHex }}
-                                    title={`Color del analista: ${analystColor}`}
-                                />
-                            </div>
                         </div>
                     </div>
 
