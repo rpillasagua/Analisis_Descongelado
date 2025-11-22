@@ -123,8 +123,8 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all">
-      <div className="max-w-5xl mx-auto px-4 py-4">
+    <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all" style={{ borderBottom: 'none' }}>
+      <div className="max-w-5xl mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
           {/* Title */}
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
