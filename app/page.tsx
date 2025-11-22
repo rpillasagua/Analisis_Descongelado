@@ -200,16 +200,10 @@ export default function Home() {
         setLoadingAnalyses(true);
         try {
           // Import dynamically to avoid server-side issues if any
-          const { getAnalysesByDate } = await import('@/lib/analysisService');
+          const { getRecentAnalyses } = await import('@/lib/analysisService');
 
-          // Get today's date in YYYY-MM-DD format
-          const now = new Date();
-          const year = now.getFullYear();
-          const month = String(now.getMonth() + 1).padStart(2, '0');
-          const day = String(now.getDate()).padStart(2, '0');
-          const today = `${year}-${month}-${day}`;
-
-          const data = await getAnalysesByDate(today);
+          // Fetch recent history (last 100) instead of just today
+          const data = await getRecentAnalyses(100);
           setInitialAnalyses(data);
         } catch (error) {
           console.error('Error fetching initial analyses:', error);

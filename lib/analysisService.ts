@@ -189,6 +189,36 @@ export const getAnalysesByDateRange = async (
 };
 
 /**
+ * Obtiene los análisis más recientes (sin filtrar por fecha)
+ */
+export const getRecentAnalyses = async (limitCount: number = 100): Promise<QualityAnalysis[]> => {
+  if (!db) {
+    throw new Error('Firestore no está configurado');
+  }
+
+  try {
+    const { limit } = await import('firebase/firestore');
+    const q = query(
+      collection(db, ANALYSES_COLLECTION),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const analyses: QualityAnalysis[] = [];
+
+    querySnapshot.forEach((doc) => {
+      analyses.push(doc.data() as QualityAnalysis);
+    });
+
+    return analyses;
+  } catch (error) {
+    console.error('❌ Error obteniendo análisis recientes:', error);
+    throw error;
+  }
+};
+
+/**
  * Obtiene análisis por turno
  */
 export const getAnalysesByShift = async (
@@ -369,6 +399,7 @@ export default {
   getAnalysisById,
   getAnalysesByDate,
   getAnalysesByDateRange,
+  getRecentAnalyses,
   getAnalysesByShift,
   deleteAnalysis,
   searchAnalyses,

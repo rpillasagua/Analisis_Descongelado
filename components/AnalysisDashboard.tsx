@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, FileText, CheckCircle, Plus, Ruler, QrCode } from 'lucide-react';
 import { QualityAnalysis, PRODUCT_TYPE_LABELS } from '@/lib/types';
-import { updateAnalysis } from '@/lib/analysisService';
 import DailyReportCard from './DailyReportCard';
 
 interface AnalysisDashboardProps {
@@ -16,23 +15,23 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
   const [analyses, setAnalyses] = useState<QualityAnalysis[]>(initialAnalyses);
   const [searchTerm, setSearchTerm] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<'ALL' | 'COMPLETADO' | 'EN_PROGRESO'>('ALL');
+  const [activeTab, setActiveTab] = useState<'todos' | 'en_progreso'>('todos');
 
   useEffect(() => {
     setAnalyses(initialAnalyses);
   }, [initialAnalyses]);
 
   const filteredAnalyses = analyses.filter(analysis => {
+    // Filter by search term
     const matchesSearch =
       analysis.lote.toLowerCase().includes(searchTerm.toLowerCase()) ||
       analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      filterStatus === 'ALL' ? true :
-        filterStatus === 'COMPLETADO' ? analysis.status === 'COMPLETADO' :
-          analysis.status !== 'COMPLETADO';
+    // Filter by tab
+    if (activeTab === 'todos') return matchesSearch;
+    if (activeTab === 'en_progreso') return matchesSearch && analysis.status !== 'COMPLETADO';
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   return (
@@ -68,35 +67,29 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
               placeholder="Buscar por lote o código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#f0f2f5] border-none rounded-lg pl-11 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-gray-500 text-gray-900"
+              className="w-full bg-white border border-gray-100 rounded-xl pl-11 pr-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-gray-400 text-gray-900 shadow-md"
             />
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex border-b border-gray-200 w-full">
+          <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl w-fit">
             <button
-              onClick={() => setFilterStatus('ALL')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors relative ${filterStatus === 'ALL'
-                ? 'text-[#0095f6]'
-                : 'text-gray-500 hover:text-gray-700'
+              onClick={() => setActiveTab('todos')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'todos'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                 }`}
             >
               Todos
-              {filterStatus === 'ALL' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0095f6] rounded-t-full mx-auto w-12" />
-              )}
             </button>
             <button
-              onClick={() => setFilterStatus('COMPLETADO')}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors relative ${filterStatus === 'COMPLETADO'
-                ? 'text-[#0095f6]'
-                : 'text-gray-500 hover:text-gray-700'
+              onClick={() => setActiveTab('en_progreso')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'en_progreso'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                 }`}
             >
-              Completado
-              {filterStatus === 'COMPLETADO' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0095f6] rounded-t-full mx-auto w-12" />
-              )}
+              En Progreso
             </button>
           </div>
         </div>
@@ -109,12 +102,12 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
         )}
 
         {/* Grid de Análisis */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
           {filteredAnalyses.map((analysis) => (
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="bg-white rounded-xl hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden group"
+              className="bg-white rounded-xl hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden group h-fit"
               style={{
                 borderLeft: `8px solid ${analysis.analystColor || '#3B82F6'}`,
                 boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)' // Constant-like shadow for floating effect
@@ -139,18 +132,18 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                 </div>
 
                 {/* Card Body Grid */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-2">
                   {/* Producto */}
-                  <div>
-                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5">Producto:</p>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none">Producto:</p>
                     <p className="text-xs font-bold text-gray-900 leading-none">
                       {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
                     </p>
                   </div>
 
                   {/* Código */}
-                  <div>
-                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5 flex items-center gap-1">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
                       <QrCode className="w-3 h-3" /> Código:
                     </p>
                     <p className="text-sm font-bold text-gray-800 leading-none">
@@ -159,8 +152,8 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                   </div>
 
                   {/* Talla */}
-                  <div className="mt-1">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5 flex items-center gap-1">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none flex items-center gap-1">
                       <Ruler className="w-3 h-3" /> Talla:
                     </p>
                     <p className="text-xs font-bold text-gray-900 leading-none">
@@ -169,14 +162,16 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                   </div>
 
                   {/* Turno */}
-                  <div className="mt-1">
-                    <p className="text-[10px] font-medium text-gray-500 leading-none mb-0.5">Turno:</p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm ${analysis.shift === 'NOCHE'
-                      ? 'bg-[#6B21A8] text-white'
-                      : 'bg-amber-400 text-gray-900'
-                      }`}>
-                      {analysis.shift}
-                    </span>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[10px] font-medium text-gray-500 leading-none">Turno:</p>
+                    <div className="flex">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
+                        ? 'bg-[#6B21A8] text-white'
+                        : 'bg-amber-400 text-gray-900'
+                        }`}>
+                        {analysis.shift}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
