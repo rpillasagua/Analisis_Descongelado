@@ -83,7 +83,7 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
       analysis.codigo.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Filter by tab
-    if (activeTab === 'todos') return matchesSearch;
+    if (activeTab === 'todos') return matchesSearch && analysis.status === 'COMPLETADO';
     if (activeTab === 'en_progreso') return matchesSearch && analysis.status !== 'COMPLETADO';
 
     return matchesSearch;
@@ -126,17 +126,26 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
             />
           </div>
 
-          {/* Tabs Navigation - Centered on 'Todos' */}
+          {/* Tabs Navigation - Centered */}
           <div className="flex justify-center">
             <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl">
               <button
                 onClick={() => setActiveTab('todos')}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'todos'
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'todos'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                   }`}
               >
                 Todos
+              </button>
+              <button
+                onClick={() => setActiveTab('en_progreso')}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'en_progreso'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                  }`}
+              >
+                En Progreso
               </button>
             </div>
           </div>
