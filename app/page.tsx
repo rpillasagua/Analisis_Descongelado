@@ -84,61 +84,145 @@ const LoginPage = ({ onLoginTrigger }: { onLoginTrigger: () => void }) => {
         <div className="mb-8"><GoogleLoginButton onLoginSuccess={onLoginTrigger} /></div>
         <p className="text-xs text-center text-slate-400">&copy; {new Date().getFullYear()} Aquagold S.A. Todos los derechos reservados.</p>
       </div>
-      const {isAuthenticated, user, loading, login, logout} = useGoogleAuth();
-      const [initialAnalyses, setInitialAnalyses] = useState<QualityAnalysis[]>([]);
-      const [initialLastDoc, setInitialLastDoc] = useState<any>(null);
-        const [loadingAnalyses, setLoadingAnalyses] = useState(false);
+    </main>
+  );
+};
+
+const LoadingScreen = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white">
+    <div className="relative">
+      <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+      <Loader2 className="h-16 w-16 text-blue-500 animate-spin relative z-10" />
+    </div>
+    <p className="mt-6 text-lg font-medium text-blue-400 animate-pulse">Iniciando sistema...</p>
+  </div>
+);
+
+const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  return (
+    <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all" style={{ borderBottom: 'none' }}>
+      <div className="max-w-5xl mx-auto px-4 py-2">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
+            Análisis en <span className="text-blue-600">Descongelado</span>
+          </h1>
+          <div className="relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="focus:outline-none group transition-transform active:scale-95 flex items-center gap-2"
+            >
+              {user.picture ? (
+                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md border-2 border-white bg-blue-100 flex items-center justify-center group-hover:ring-2 group-hover:ring-blue-400 transition-all" style={{ minWidth: '48px', minHeight: '48px', borderRadius: '50%' }}>
+                  {/* Usamos img estándar para evitar problemas con dominios externos en Next.js */}
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="h-full w-full object-cover rounded-full"
+                    style={{ borderRadius: '50%' }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement?.classList.add('fallback-avatar');
+                    }}
+                  />
+                  <span className="absolute text-lg font-bold text-blue-600 fallback-text hidden">{user.name.charAt(0)}</span>
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-md">
+                  <span className="text-lg font-bold">{user.name.charAt(0)}</span>
+                </div>
+              )}
+            </button>
+            {isDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsDropdownOpen(false)}
+                ></div>
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-4 py-3 border-b border-slate-50 bg-slate-50/50">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      onLogout();
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"
+                  >
+                    <LogOut size={16} />
+                    Cerrar Sesión
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+// --- Main Page ---
+
+export default function Home() {
+  const { isAuthenticated, user, loading, login, logout } = useGoogleAuth();
+  const [initialAnalyses, setInitialAnalyses] = useState<QualityAnalysis[]>([]);
+  const [initialLastDoc, setInitialLastDoc] = useState<any>(null);
+  const [loadingAnalyses, setLoadingAnalyses] = useState(false);
 
   // Efecto para cargar datos SOLO cuando el usuario se autentica
   useEffect(() => {
-          let isMounted = true;
+    let isMounted = true;
 
-        if (isAuthenticated && user) {
+    if (isAuthenticated && user) {
       const fetchAnalyses = async () => {
-          setLoadingAnalyses(true);
+        setLoadingAnalyses(true);
         try {
-          const {getPaginatedAnalyses} = await import('@/lib/analysisService');
-        const {analyses, lastDoc} = await getPaginatedAnalyses(20);
+          const { getPaginatedAnalyses } = await import('@/lib/analysisService');
+          const { analyses, lastDoc } = await getPaginatedAnalyses(20);
 
-        if (isMounted) {
-          setInitialAnalyses(analyses);
-        setInitialLastDoc(lastDoc);
+          if (isMounted) {
+            setInitialAnalyses(analyses);
+            setInitialLastDoc(lastDoc);
           }
         } catch (error) {
           logger.error('Error fetching initial analyses:', error);
         } finally {
           if (isMounted) {
-          setLoadingAnalyses(false);
+            setLoadingAnalyses(false);
           }
         }
       };
 
-        fetchAnalyses();
+      fetchAnalyses();
     }
 
-    return () => {isMounted = false; };
+    return () => { isMounted = false; };
   }, [isAuthenticated, user]);
 
-        if (loading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen />;
 
-        if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !user) {
     return <LoginPage onLoginTrigger={login} />;
   }
 
-        return (
-        <div className="min-h-screen bg-slate-50 pb-10">
-          <AppHeader user={user} onLogout={logout} />
+  return (
+    <div className="min-h-screen bg-slate-50 pb-10">
+      <AppHeader user={user} onLogout={logout} />
 
-          <main className="animate-fade-in mt-6">
-            {loadingAnalyses ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-                <p className="text-slate-400 text-sm font-medium">Obteniendo registros recientes...</p>
-              </div>
-            ) : (
-              <AnalysisDashboard initialAnalyses={initialAnalyses} initialLastDoc={initialLastDoc} />
-            )}
-          </main>
-        </div>
-        );
+      <main className="animate-fade-in mt-6">
+        {loadingAnalyses ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+            <p className="text-slate-400 text-sm font-medium">Obteniendo registros recientes...</p>
+          </div>
+        ) : (
+          <AnalysisDashboard initialAnalyses={initialAnalyses} initialLastDoc={initialLastDoc} />
+        )}
+      </main>
+    </div>
+  );
 }
