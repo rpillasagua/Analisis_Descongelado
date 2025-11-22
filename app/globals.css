@@ -2,15 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Instagram-inspired Professional Theme */
+/* Modern Professional Theme (Refined) */
 :root {
-  --ig-primary-button: #0095f6;
-  --ig-primary-button-hover: #1877f2;
-  --ig-secondary-background: #fafafa;
-  --ig-border-color: #dbdbdb;
-  --ig-text-primary: #262626;
-  --ig-text-secondary: #8e8e8e;
-  --ig-link: #00376b;
+  /* Deeper, more modern blue */
+  --ig-primary-button: #0077c9;
+  --ig-primary-button-hover: #0063a8;
+  /* Lighter/softer background */
+  --ig-secondary-background: #fcfcfc;
+  /* Subtler border/separator color */
+  --ig-border-color: #ededed;
+  --ig-text-primary: #1a1a1a;
+  --ig-text-secondary: #737373;
+  --ig-link: #0077c9;
 }
 
 body {
@@ -23,7 +26,8 @@ body {
 
 /* Clean, subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  /* Slightly thinner scrollbar */
 }
 
 ::-webkit-scrollbar-track {
@@ -31,147 +35,89 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c7c7c7;
-  border-radius: 5px;
+  background: #d0d0d0;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
 }
 
-/* Utilities */
+/* Utilities: Less reliance on borders, more on elevation/shadows */
 .ig-card {
   background-color: white;
-  border: 1px solid var(--ig-border-color);
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 12px;
+  /* Slightly more rounded corners */
+  /* Removed border: 1px solid var(--ig-border-color); */
+  /* Removed margin-bottom: 12px; */
 }
 
 .ig-input {
-  background: #fafafa;
+  background: #ffffff;
+  /* White background for input contrast */
   border: 1px solid var(--ig-border-color);
-  border-radius: 3px;
-  padding: 9px 8px 7px;
+  /* Maintain subtle border for input */
+  border-radius: 10px;
+  /* Rounded input */
+  padding: 12px 16px;
+  /* Larger padding for better touch targets */
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .ig-input:focus {
-  border-color: #a8a8a8;
+  border-color: var(--ig-primary-button);
+  box-shadow: 0 0 0 2px rgba(0, 119, 201, 0.2);
+  /* Soft focus ring */
 }
 
 .ig-button-primary {
   background-color: var(--ig-primary-button);
   color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
-  padding: 7px 16px;
-  transition: background-color 0.2s;
+  padding: 10px 20px;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 119, 201, 0.3);
+  /* Subtle button shadow */
 }
 
 .ig-button-primary:hover {
   background-color: var(--ig-primary-button-hover);
+  box-shadow: 0 6px 16px rgba(0, 119, 201, 0.4);
+}
+
+.ig-button-primary:active {
+  transform: scale(0.98);
 }
 
 .ig-button-secondary {
   background-color: transparent;
-  color: var(--ig-text-primary);
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+  color: var(--ig-primary-button);
+  /* Secondary button uses primary color for text */
+  border: 1px solid var(--ig-primary-button);
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: background-color 0.2s, transform 0.1s;
+}
 
-  /* Instagram-inspired Professional Theme */
-  :root {
-    --ig-primary-button: #0095f6;
-    --ig-primary-button-hover: #1877f2;
-    --ig-secondary-background: #fafafa;
-    --ig-border-color: #dbdbdb;
-    --ig-text-primary: #262626;
-    --ig-text-secondary: #8e8e8e;
-    --ig-link: #00376b;
-  }
+.ig-button-secondary:hover {
+  background-color: rgba(0, 119, 201, 0.05);
+  /* Light hover effect */
+}
 
-  body {
-    background-color: var(--ig-secondary-background);
-    color: var(--ig-text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+.ig-button-secondary:active {
+  transform: scale(0.98);
+}
 
-  /* Clean, subtle scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
+/* Mobile optimizations: Makes cards edge-to-edge for a feed-like appearance */
+@media (max-width: 640px) {
+  .ig-card-mobile-full {
+    /* New dedicated class for edge-to-edge */
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #c7c7c7;
-    border-radius: 5px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a0a0a0;
-  }
-
-  /* Utilities */
-  .ig-card {
-    background-color: white;
-    border: 1px solid var(--ig-border-color);
-    border-radius: 8px;
-    margin-bottom: 12px;
-  }
-
-  .ig-input {
-    background: #fafafa;
-    border: 1px solid var(--ig-border-color);
-    border-radius: 3px;
-    padding: 9px 8px 7px;
-    outline: none;
-  }
-
-  .ig-input:focus {
-    border-color: #a8a8a8;
-  }
-
-  .ig-button-primary {
-    background-color: var(--ig-primary-button);
-    color: white;
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 7px 16px;
-    transition: background-color 0.2s;
-  }
-
-  .ig-button-primary:hover {
-    background-color: var(--ig-primary-button-hover);
-  }
-
-  .ig-button-secondary {
-    background-color: transparent;
-    color: var(--ig-text-primary);
-    border: 1px solid var(--ig-border-color);
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 7px 16px;
-  }
-
-  .ig-button-secondary:hover {
-    background-color: #efefef;
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 640px) {
-    .ig-card {
-      border-left: none;
-      border-right: none;
-      border-radius: 0;
-    }
-  }
-
-  .font-instagram {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    letter-spacing: -0.025em;
-  }
+}
