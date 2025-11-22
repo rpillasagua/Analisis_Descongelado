@@ -159,78 +159,76 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
         )}
 
         {/* Grid de Análisis - Compacto y optimizado para móvil */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
           {filteredAnalyses.map((analysis) => (
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
               className="card-float cursor-pointer relative overflow-hidden group bg-white"
             >
-              {/* Gradient accent border - Thinner */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-600"
-              />
+              {/* Gradient accent border */}
+              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-600" />
 
-              <div className="p-1.5 pl-2">
+              <div className="p-1 pl-1.5">
                 {/* Header ultra compacto */}
-                <div className="flex justify-between items-center mb-0.5">
-                  <div className="flex items-center gap-1 min-w-0 flex-1">
-                    <h3 className="text-xs font-bold text-gray-900 leading-none truncate">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-0.5 min-w-0 flex-1">
+                    <h3 className="text-base font-bold text-gray-900 truncate" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       {analysis.lote}
                     </h3>
                     {analysis.status === 'COMPLETADO' && (
-                      <CheckCircle className="w-2.5 h-2.5 text-green-500 flex-shrink-0" />
+                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
                     )}
                   </div>
-                  <div className="flex items-center gap-0.5 text-[9px] text-gray-400 flex-shrink-0 ml-1 leading-none">
+                  <div className="flex items-center gap-0.5 text-[10px] text-gray-400 flex-shrink-0 ml-1">
                     <Calendar className="w-2 h-2" />
                     <span className="hidden sm:inline">{new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
 
-                {/* Grid ultra compacto 2x2 */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-0 text-[10px]">
+                {/* Flexbox ultra compacto 2x2 */}
+                <div className="flex flex-wrap gap-x-1.5" style={{ margin: 0, padding: 0, rowGap: 0 }}>
                   {/* Producto */}
-                  <div className="min-w-0">
-                    <p className="text-[8px] font-medium text-gray-500 leading-none">Producto</p>
-                    <p className="text-[10px] font-bold text-gray-900 leading-none truncate">
+                  <div style={{ margin: 0, padding: 0, width: 'calc(50% - 0.375rem)' }}>
+                    <div className="text-xs font-medium text-gray-500" style={{ margin: 0, padding: 0, lineHeight: 1 }}>Producto</div>
+                    <div className="text-sm font-bold text-gray-900 truncate" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       {PRODUCT_TYPE_LABELS[analysis.productType as keyof typeof PRODUCT_TYPE_LABELS]}
-                    </p>
+                    </div>
                   </div>
 
                   {/* Código */}
-                  <div className="min-w-0">
-                    <p className="text-[8px] font-medium text-gray-500 leading-none flex items-center gap-0.5">
+                  <div style={{ margin: 0, padding: 0, width: 'calc(50% - 0.375rem)' }}>
+                    <div className="text-xs font-medium text-gray-500 flex items-center gap-0.5" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       <QrCode className="w-2 h-2" /> Código
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-800 leading-none truncate">
+                    </div>
+                    <div className="text-sm font-bold text-gray-800 truncate" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       {analysis.codigo}
-                    </p>
+                    </div>
                   </div>
 
                   {/* Talla */}
-                  <div className="min-w-0">
-                    <p className="text-[8px] font-medium text-gray-500 leading-none flex items-center gap-0.5">
+                  <div style={{ margin: 0, padding: 0, width: 'calc(50% - 0.375rem)' }}>
+                    <div className="text-xs font-medium text-gray-500 flex items-center gap-0.5" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       <Ruler className="w-2 h-2" /> Talla
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-900 leading-none truncate">
+                    </div>
+                    <div className="text-sm font-bold text-gray-900 truncate" style={{ margin: 0, padding: 0, lineHeight: 1 }}>
                       {analysis.talla || '-'}
-                    </p>
+                    </div>
                   </div>
 
                   {/* Turno */}
-                  <div className="min-w-0">
-                    <p className="text-[8px] font-medium text-gray-500 leading-none">Turno</p>
-                    <span className={`inline-flex items-center px-1 py-0 rounded-full text-[8px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
+                  <div style={{ margin: 0, padding: 0, width: 'calc(50% - 0.375rem)' }}>
+                    <div className="text-xs font-medium text-gray-500" style={{ margin: 0, padding: 0, lineHeight: 1 }}>Turno</div>
+                    <span className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-bold tracking-wide uppercase shadow-sm ${analysis.shift === 'NOCHE'
                       ? 'bg-purple-100 text-purple-700'
                       : 'bg-amber-100 text-amber-700'
-                      }`}>
+                      }`} style={{ lineHeight: 1 }}>
                       {analysis.shift}
                     </span>
                   </div>
                 </div>
 
-                {/* Hover overlay sutil */}
+                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-600/0 group-hover:from-blue-500/5 group-hover:to-purple-600/5 transition-all pointer-events-none" />
               </div>
             </div>

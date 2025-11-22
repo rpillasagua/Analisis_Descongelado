@@ -80,42 +80,42 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
     const countNoche = analyses.filter(a => a.shift === 'NOCHE').length;
 
     return (
-        <div className="glass rounded-2xl p-4 sm:p-6 shadow-2xl relative animate-slide-up border border-white/20">
+        <div className="glass rounded-2xl p-2 sm:p-3 shadow-2xl relative animate-slide-up border border-white/20">
             <button
                 onClick={onClose}
-                className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-all hover:scale-110"
+                className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-gray-400 hover:text-gray-600 transition-all hover:scale-110"
                 aria-label="Cerrar"
             >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-5">
-                <div className="p-2.5 sm:p-3 gradient-blue rounded-2xl shadow-lg">
-                    <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+            <div className="flex items-center gap-1.5 mb-2">
+                <div className="p-1.5 gradient-blue rounded-xl shadow-lg">
+                    <Calendar className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Reporte Diario</h2>
-                    <p className="text-xs sm:text-sm text-gray-500">Selecciona fecha y turno para exportar</p>
+                    <h2 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">Reporte Diario</h2>
+                    <p className="text-[10px] sm:text-xs text-gray-500 leading-tight">Selecciona fecha y turno</p>
                 </div>
             </div>
 
             {/* Controles de Filtro */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
-                <div className="space-y-1.5">
-                    <label className="text-xs sm:text-sm font-semibold text-gray-700 ml-1">Fecha</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 mb-2">
+                <div className="space-y-0.5">
+                    <label className="text-[10px] sm:text-xs font-semibold text-gray-700 ml-1">Fecha</label>
                     <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full glass border-2 border-white/20 rounded-xl px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
+                        className="w-full glass border-2 border-white/20 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
                     />
                 </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs sm:text-sm font-semibold text-gray-700 ml-1">Turno</label>
+                <div className="space-y-0.5">
+                    <label className="text-[10px] sm:text-xs font-semibold text-gray-700 ml-1">Turno</label>
                     <select
                         value={selectedShift}
                         onChange={(e) => setSelectedShift(e.target.value as 'ALL' | WorkShift)}
-                        className="w-full glass border-2 border-white/20 rounded-xl px-3 py-2.5 sm:py-3 text-sm sm:text-base focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
+                        className="w-full glass border-2 border-white/20 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all shadow-md text-gray-900"
                     >
                         <option value="ALL">Todos los turnos</option>
                         <option value="DIA">Turno Día</option>
@@ -128,16 +128,16 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
             <button
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="w-full gradient-blue text-white py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full gradient-blue text-white py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
             >
                 {isLoading ? (
                     <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         <span>Buscando...</span>
                     </>
                 ) : (
                     <>
-                        <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         <span>Buscar Registros</span>
                     </>
                 )}
@@ -145,9 +145,9 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
 
             {/* Resultados y Descarga */}
             {analyses.length > 0 && (
-                <div className="mt-5 pt-5 border-t border-gray-200/50 space-y-4 animate-slide-up">
+                <div className="mt-2 pt-2 border-t border-gray-200/50 space-y-2 animate-slide-up">
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-3 gap-1.5">
                         <StatCard label="Total" value={analyses.length} highlight={true} />
                         <StatCard label="Día" value={countDia} highlight={countDia > 0} />
                         <StatCard label="Noche" value={countNoche} highlight={countNoche > 0} />
@@ -157,18 +157,18 @@ const DailyReportCard: React.FC<DailyReportCardProps> = ({ onClose }) => {
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="w-full gradient-primary text-white py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full gradient-primary text-white py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
                     >
                         {isGenerating ? (
                             <>
-                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                 <span>Generando Excel...</span>
                             </>
                         ) : (
                             <>
-                                <Download className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                 <span>Descargar Reporte (.xlsx)</span>
-                                <Sparkles className="h-4 w-4" />
+                                <Sparkles className="h-3.5 w-3.5" />
                             </>
                         )}
                     </button>
@@ -188,14 +188,14 @@ const StatCard = ({
     value: number;
     highlight?: boolean;
 }) => (
-    <div className={`glass p-3 rounded-xl text-center transition-all border ${highlight
+    <div className={`glass p-1.5 rounded-lg text-center transition-all border ${highlight
         ? 'border-blue-200 bg-blue-50/50'
         : 'border-white/20'
         } shadow-md hover:shadow-lg`}>
-        <span className="block text-[10px] sm:text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">
+        <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-gray-500 font-semibold leading-tight">
             {label}
         </span>
-        <span className={`block text-xl sm:text-2xl font-bold ${highlight ? 'text-blue-700' : 'text-gray-700'
+        <span className={`block text-base sm:text-lg font-bold leading-tight ${highlight ? 'text-blue-700' : 'text-gray-700'
             }`}>
             {value}
         </span>
