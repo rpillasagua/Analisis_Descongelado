@@ -405,6 +405,44 @@ export default function NewMultiAnalysisPageContent() {
         return uploadingPhotos.has(key);
     };
 
+    // Helper para extraer ID de archivo de URL de Google Drive
+    const extractFileIdFromUrl = (url: string): string | null => {
+        if (!url) return null;
+
+        // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
+        // o https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+        const match = url.match(/[?&]id=([^&]+)/);
+        if (match) return match[1];
+
+        // Formato: https://drive.google.com/file/d/FILE_ID/view
+        const match2 = url.match(/\/file\/d\/([^/]+)/);
+        if (match2) return match2[1];
+
+        return null;
+    };
+
+    // Handler for deleting peso bruto registro (including Drive cleanup)
+    const handlePesoBrutoDelete = async (registro: PesoBrutoRegistro) => {
+        // Si el registro tiene foto, intentar eliminarla de Google Drive
+        if (registro?.fotoUrl && !registro.fotoUrl.startsWith('blob:')) {
+            try {
+                const { googleDriveService } = await import('@/lib/googleDriveService');
+
+                // Extraer el ID del archivo desde la URL
+                const fileId = extractFileIdFromUrl(registro.fotoUrl);
+
+                if (fileId) {
+                    await googleDriveService.deleteFile(fileId);
+                    console.log('✅ Foto de peso bruto eliminada de Google Drive');
+                }
+            } catch (error) {
+                console.warn('⚠️ No se pudo eliminar la foto de Google Drive:', error);
+                // Continuar aunque falle la eliminación de la foto
+                throw error; // Re-throw para que el componente maneje el error
+            }
+        }
+    };
+
     // Handler for defects
     const handleDefectsChange = (defects: { [key: string]: number }) => {
         updateCurrentAnalysis({ defectos: defects });
@@ -646,6 +684,7 @@ export default function NewMultiAnalysisPageContent() {
                             registros={currentAnalysis.pesosBrutos || []}
                             onChange={handlePesosBrutosChange}
                             onPhotoCapture={handlePesoBrutoPhotoCapture}
+                            onDeleteRequest={handlePesoBrutoDelete}
                             isPhotoUploading={isPesoBrutoUploading}
                         />
                     )}

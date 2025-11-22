@@ -1,93 +1,84 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Trash2, Camera, Edit2, Check } from 'lucide-react';
-import PhotoCapture from './PhotoCapture';
+import { useState, useCallback, useMemo } from 'react';
+import { Plus, Camera, Edit2, Check } from 'lucide-react';
 import { PesoBrutoRegistro } from '@/lib/types';
+import { PesoItem } from './PesoItem';
 
 interface ControlPesosBrutosProps {
   registros: PesoBrutoRegistro[];
   onChange: (registros: PesoBrutoRegistro[]) => void;
   onPhotoCapture: (registroId: string, file: File) => void;
+  // Nueva prop para manejar el borrado externamente (limpieza de Drive)
+  onDeleteRequest: (registro: PesoBrutoRegistro) => Promise<void> | void;
   isPhotoUploading?: (registroId: string) => boolean;
   viewMode?: 'SUELTA' | 'COMPACTA';
 }
-
-const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) =>
-  <input {...props} className="flex h-8 sm:h-10 w-full rounded-lg border border-[#dbdbdb] bg-white text-[#262626] px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-gray-400 shadow-sm transition-all placeholder-gray-400" />;
-
-const Label = (props: React.LabelHTMLAttributes<HTMLLabelElement>) =>
-  <label {...props} className="text-xs sm:text-sm font-medium leading-tight text-[#262626]" />;
 
 export default function ControlPesosBrutos({
   registros,
   onChange,
   onPhotoCapture,
+  onDeleteRequest,
   isPhotoUploading = () => false,
   viewMode = 'COMPACTA'
 }: ControlPesosBrutosProps) {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
-  const agregarRegistro = () => {
+  // Uso de useCallback para estabilizar funciones
+  const agregarRegistro = useCallback(() => {
     const nuevoRegistro: PesoBrutoRegistro = {
-      id: `pb-${Date.now()}`,
+      id: crypto.randomUUID(), // Mejor que Date.now()
       peso: 0,
       timestamp: new Date().toISOString()
     };
     onChange([...registros, nuevoRegistro]);
-  };
+  }, [registros, onChange]);
 
-  const eliminarRegistro = async (id: string) => {
+  const manejarEliminacion = async (id: string) => {
     const registro = registros.find(r => r.id === id);
+    if (!registro) return;
 
-    // Si el registro tiene foto, intentar eliminarla de Google Drive
-    if (registro?.fotoUrl && !registro.fotoUrl.startsWith('blob:')) {
-      try {
-        const { googleDriveService } = await import('@/lib/googleDriveService');
+    // UX: Confirmación simple
+    if (!window.confirm('¿Estás seguro de eliminar este peso y su foto?')) return;
 
-        // Extraer el ID del archivo desde la URL
-        const fileId = extractFileIdFromUrl(registro.fotoUrl);
+    try {
+      setDeletingIds(prev => new Set(prev).add(id));
 
-        if (fileId) {
-          await googleDriveService.deleteFile(fileId);
-          console.log('✅ Foto de peso bruto eliminada de Google Drive');
-        }
-      } catch (error) {
-        console.warn('⚠️ No se pudo eliminar la foto de Google Drive:', error);
-        // Continuar con la eliminación del registro aunque falle la eliminación de la foto
-      }
+      // Delegamos la lógica "sucia" (borrar de Drive) al padre mediante prop
+      await onDeleteRequest(registro);
+
+      // Actualizamos el estado local
+      onChange(registros.filter(r => r.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar", error);
+      alert("Hubo un error al eliminar el registro");
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
-
-    // Eliminar el registro del array
-    onChange(registros.filter(r => r.id !== id));
   };
 
-  // Helper para extraer ID de archivo de URL de Google Drive
-  const extractFileIdFromUrl = (url: string): string | null => {
-    if (!url) return null;
-
-    // Formato: https://drive.google.com/uc?export=view&id=FILE_ID
-    // o https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
-    const match = url.match(/[?&]id=([^&]+)/);
-    if (match) return match[1];
-
-    // Formato: https://drive.google.com/file/d/FILE_ID/view
-    const match2 = url.match(/\/file\/d\/([^/]+)/);
-    if (match2) return match2[1];
-
-    return null;
-  };
-
-  const actualizarRegistro = (id: string, campo: keyof PesoBrutoRegistro, valor: any) => {
+  const actualizarPeso = useCallback((id: string, valor: number) => {
     onChange(registros.map(r =>
-      r.id === id ? { ...r, [campo]: valor } : r
+      r.id === id ? { ...r, peso: valor } : r
     ));
-  };
+  }, [registros, onChange]);
+
+  // Memoizamos el cálculo total
+  const totalPeso = useMemo(() =>
+    registros.reduce((sum, r) => sum + (r.peso || 0), 0),
+    [registros]);
 
   const isCompact = viewMode === 'COMPACTA';
 
   return (
     <div className={`${isCompact ? 'space-y-3' : 'space-y-4'} ${isCompact ? 'p-3' : 'p-6'} glass-panel rounded-2xl`}>
+      {/* Header Section */}
       <div className="flex items-center justify-between mb-2">
         <h3 className={`font-bold ${isCompact ? 'text-base' : 'text-xl'} text-white tracking-tight`}>
           Control de Pesos Brutos
@@ -101,7 +92,6 @@ export default function ControlPesosBrutos({
                 ? 'bg-green-600 hover:bg-green-700 text-white'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
-              title={isEditMode ? 'Finalizar edición' : 'Editar registros'}
             >
               {isEditMode ? (
                 <>
@@ -127,6 +117,7 @@ export default function ControlPesosBrutos({
         </div>
       </div>
 
+      {/* List Section */}
       {registros.length === 0 ? (
         <div className="text-center py-10 text-gray-400 border-2 border-dashed border-white/10 rounded-xl bg-white/5">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -138,76 +129,33 @@ export default function ControlPesosBrutos({
       ) : (
         <div className={`${isCompact ? 'space-y-3' : 'space-y-4'}`}>
           {registros.map((registro, index) => (
-            <div
+            <PesoItem
               key={registro.id}
-              className={`${isCompact ? 'p-3' : 'p-5'} glass-card rounded-xl border border-white/5`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">
-                  Registro #{index + 1}
-                </span>
-                {isEditMode && (
-                  <button
-                    type="button"
-                    onClick={() => eliminarRegistro(registro.id)}
-                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                    title="Eliminar registro"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              <div className={isCompact ? 'space-y-3' : 'space-y-4'}>
-                {/* Peso Bruto */}
-                <div className="space-y-2">
-                  <Label htmlFor={`peso-${registro.id}`} className="text-gray-300">Peso Bruto (kg) *</Label>
-                  <div className="relative">
-                    <Input
-                      id={`peso-${registro.id}`}
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="0.00"
-                      value={registro.peso || ''}
-                      onChange={(e) => actualizarRegistro(registro.id, 'peso', parseFloat(e.target.value) || 0)}
-                      className="modern-input w-full pl-4 pr-12 py-3 rounded-xl font-mono text-lg"
-                    />
-                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium">kg</span>
-                  </div>
-                </div>
-
-                {/* Foto */}
-                <div>
-                  <PhotoCapture
-                    label={`Peso Bruto #${index + 1}`}
-                    photoUrl={registro.fotoUrl}
-                    onPhotoCapture={(file) => onPhotoCapture(registro.id, file)}
-                    isUploading={isPhotoUploading(registro.id)}
-                  />
-                </div>
-              </div>
-            </div>
+              index={index}
+              registro={registro}
+              isEditMode={isEditMode}
+              isCompact={isCompact}
+              isUploading={isPhotoUploading(registro.id)}
+              isDeleting={deletingIds.has(registro.id)}
+              onUpdate={actualizarPeso}
+              onDelete={manejarEliminacion}
+              onPhotoCapture={onPhotoCapture}
+            />
           ))}
         </div>
       )}
 
+      {/* Footer/Totals Section */}
       {registros.length > 0 && (
         <div className="pt-4 border-t border-white/10 mt-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">
-              Total de registros:
-            </span>
-            <span className="font-bold text-white">
-              {registros.length}
-            </span>
+            <span className="text-gray-400">Total de registros:</span>
+            <span className="font-bold text-white">{registros.length}</span>
           </div>
           <div className="flex items-center justify-between text-sm mt-2">
-            <span className="text-gray-400">
-              Peso total:
-            </span>
+            <span className="text-gray-400">Peso total:</span>
             <span className="font-bold text-blue-400 text-lg">
-              {registros.reduce((sum, r) => sum + (r.peso || 0), 0).toFixed(2)} kg
+              {totalPeso.toFixed(2)} kg
             </span>
           </div>
         </div>
