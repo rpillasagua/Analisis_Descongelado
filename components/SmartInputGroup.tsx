@@ -175,17 +175,18 @@ export default function SmartInputGroup({
                     className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
                     onClick={() => setShowPhotoPreview(false)}
                 >
-                    <div className="relative max-w-4xl max-h-[90vh]">
+                    <div className="relative w-full max-w-2xl">
                         <button
                             onClick={() => setShowPhotoPreview(false)}
-                            className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+                            className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+                            aria-label="Cerrar"
                         >
-                            <X className="w-8 h-8" />
+                            <X className="w-6 h-6" />
                         </button>
                         <img
                             src={photoUrl}
                             alt="Preview grande"
-                            className="max-w-full max-h-[90vh] rounded-lg shadow-2xl"
+                            className="w-full h-auto max-h-[80vh] object-contain rounded-lg shadow-2xl"
                             onClick={(e) => e.stopPropagation()}
                         />
                     </div>
