@@ -138,7 +138,7 @@ const AppHeader = ({ user, onLogout }: { user: UserProfile; onLogout: () => void
               className="focus:outline-none group transition-transform active:scale-95 flex items-center gap-2"
             >
               {user.picture ? (
-                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+                <div className="relative h-12 w-12 rounded-full overflow-hidden shadow-md ring-2 ring-transparent group-hover:ring-blue-100 transition-all bg-slate-200">
                   <Image
                     src={user.picture}
                     alt={user.name}
