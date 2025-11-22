@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { AnalystColor } from '@/lib/types';
 import AnalystColorSelector from './AnalystColorSelector';
-import { AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { AlertCircle, Loader2, ArrowRight, FileText, Tag, Layers } from 'lucide-react';
 
-// 1. Definimos tipos más estrictos y reutilizables
+// 1. Tipado estricto y reutilizable
 interface AnalysisData {
     lote: string;
     codigo: string;
@@ -18,15 +18,16 @@ interface InitialFormProps {
     initialData?: Partial<AnalysisData>;
 }
 
-// 2. Input Component mejorado con soporte para errores y estilos Dark/Glass
-const Input = ({
-    error,
-    label,
-    id,
-    ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { error?: string; label: string }) => (
+// 2. Componente Input Reutilizable con estilo Dark Glass y manejo de errores
+interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label: string;
+    error?: string;
+    icon?: React.ElementType;
+}
+
+const Input = ({ error, label, id, icon: Icon, ...props }: CustomInputProps) => (
     <div className="space-y-1.5 group">
-        <label htmlFor={id} className="text-xs font-bold text-blue-200/80 uppercase tracking-wider ml-1">
+        <label htmlFor={id} className="text-xs font-bold text-blue-200/80 uppercase tracking-wider ml-1 flex items-center gap-2">
             {label} {props.required && <span className="text-blue-400">*</span>}
         </label>
         <div className="relative">
@@ -37,19 +38,28 @@ const Input = ({
           w-full bg-black/20 border rounded-xl px-4 py-3 text-white placeholder-white/20 
           transition-all duration-200 outline-none font-mono
           focus:bg-black/30 focus:ring-2 focus:ring-blue-500/20
+          ${Icon ? 'pl-11' : 'pl-4'}
           ${error
                         ? 'border-red-500/50 focus:border-red-500'
                         : 'border-white/10 focus:border-blue-500/50'
                     }
         `}
             />
-            {/* Icono de error si existe */}
+            {/* Icono decorativo a la izquierda */}
+            {Icon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-blue-400 transition-colors">
+                    <Icon className="w-4 h-4" />
+                </div>
+            )}
+
+            {/* Icono de alerta a la derecha si hay error */}
             {error && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 animate-pulse">
                     <AlertCircle className="w-5 h-5" />
                 </div>
             )}
         </div>
+
         {/* Mensaje de error animado */}
         <div className={`overflow-hidden transition-all duration-300 ${error ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
             <p className="text-xs text-red-400 ml-1 font-medium flex items-center gap-1">
@@ -60,7 +70,7 @@ const Input = ({
 );
 
 export default function InitialForm({ onComplete, initialData }: InitialFormProps) {
-    // 3. Estado unificado para limpieza y manejo más fácil
+    // 3. Estado unificado
     const [formData, setFormData] = useState<AnalysisData>({
         lote: initialData?.lote || '',
         codigo: initialData?.codigo || '',
@@ -69,41 +79,44 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
     });
 
     const [errors, setErrors] = useState<Partial<Record<keyof AnalysisData, string>>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState<Record<string, boolean>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Helper para actualizar campos
+    // Actualizar campos y limpiar errores
     const handleChange = (field: keyof AnalysisData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-
-        // Limpiar error al escribir
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
-    // Helper para marcar campo como "tocado" (blur)
+    // Marcar campo como tocado al salir (onBlur)
     const handleBlur = (field: string) => {
         setTouched(prev => ({ ...prev, [field]: true }));
+        validateField(field as keyof AnalysisData);
     };
 
-    const validate = (): boolean => {
-        const newErrors: typeof errors = {};
+    const validateField = (field: keyof AnalysisData) => {
+        let error = '';
+        if (field === 'lote' && !formData.lote.trim()) error = 'El lote es requerido';
+        if (field === 'codigo' && !formData.codigo.trim()) error = 'El código es requerido';
+        if (field === 'talla' && !formData.talla.trim()) error = 'La talla es requerida';
+        if (field === 'color' && !formData.color) error = 'Selecciona un color';
 
-        if (!formData.lote.trim()) newErrors.lote = 'El lote es requerido';
-        if (!formData.codigo.trim()) newErrors.codigo = 'El código es requerido';
-        if (!formData.talla.trim()) newErrors.talla = 'La talla es requerida';
-        if (!formData.color) newErrors.color = 'Selecciona un color';
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        setErrors(prev => ({ ...prev, [field]: error || undefined }));
+        return !error;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!validate()) {
-            // Marcar todos como tocados para mostrar errores visuales si el usuario intenta enviar vacío
+        // Validar todo antes de enviar
+        const isLoteValid = validateField('lote');
+        const isCodigoValid = validateField('codigo');
+        const isTallaValid = validateField('talla');
+        const isColorValid = validateField('color');
+
+        if (!isLoteValid || !isCodigoValid || !isTallaValid || !isColorValid) {
             setTouched({ lote: true, codigo: true, talla: true, color: true });
             return;
         }
@@ -112,7 +125,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
         try {
             await onComplete(formData);
         } catch (error) {
-            console.error(error);
+            console.error("Error submitting form:", error);
         } finally {
             setIsSubmitting(false);
         }
@@ -120,12 +133,15 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
 
     return (
         <div className="w-full max-w-xl mx-auto">
-            <div className="relative glass-panel-pro p-8 rounded-2xl overflow-hidden bg-gray-900/80 backdrop-blur-xl border border-white/10 shadow-2xl">
-                {/* Efecto de fondo decorativo */}
+            {/* Contenedor Glass Panel */}
+            <div className="relative bg-gray-900/80 backdrop-blur-xl border border-white/10 shadow-2xl p-8 rounded-2xl overflow-hidden">
+
+                {/* Efecto de fondo (brillo azul) */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-                <div className="relative z-10 mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
+                {/* Header */}
+                <div className="relative z-10 mb-8 border-b border-white/5 pb-6">
+                    <h2 className="text-2xl font-bold text-white mb-2 tracking-tight flex items-center gap-2">
                         Nuevo Análisis
                     </h2>
                     <p className="text-blue-200/60 text-sm">
@@ -134,11 +150,12 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                    {/* Grid para inputs */}
+                    {/* Inputs */}
                     <div className="space-y-5">
                         <Input
                             id="lote"
                             label="Lote de Producción"
+                            icon={Layers}
                             placeholder="Ej: L-2024-001"
                             value={formData.lote}
                             onChange={(e) => handleChange('lote', e.target.value)}
@@ -152,6 +169,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             <Input
                                 id="codigo"
                                 label="Código Referencia"
+                                icon={FileText}
                                 placeholder="Ej: REF-882"
                                 value={formData.codigo}
                                 onChange={(e) => handleChange('codigo', e.target.value)}
@@ -163,6 +181,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                             <Input
                                 id="talla"
                                 label="Talla / Calibre"
+                                icon={Tag}
                                 placeholder="Ej: 40-50"
                                 value={formData.talla}
                                 onChange={(e) => handleChange('talla', e.target.value)}
@@ -173,27 +192,32 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                         </div>
                     </div>
 
-                    {/* Sección de Color con mejor UI */}
+                    {/* Selector de Color con estilo integrado */}
                     <div className={`p-4 rounded-xl border transition-all duration-300 ${errors.color && touched.color
                             ? 'bg-red-500/5 border-red-500/30'
                             : 'bg-white/5 border-white/10'
                         }`}>
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-blue-200/80 uppercase tracking-wider">
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-xs font-bold text-blue-200/80 uppercase tracking-wider flex items-center gap-2">
                                 Color del Analista *
                             </span>
                             {errors.color && touched.color && (
-                                <span className="text-xs text-red-400 font-medium animate-pulse">Requerido</span>
+                                <span className="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded border border-red-500/20">
+                                    Requerido
+                                </span>
                             )}
                         </div>
 
                         <AnalystColorSelector
                             selectedColor={formData.color || ''}
-                            onSelect={(c) => handleChange('color', c)}
+                            onSelect={(c) => {
+                                handleChange('color', c);
+                                if (touched.color) validateField('color');
+                            }}
                         />
                     </div>
 
-                    {/* Botón de acción con estados de carga */}
+                    {/* Botón de Acción */}
                     <div className="pt-4">
                         <button
                             type="submit"
@@ -206,7 +230,10 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
                                 }
               `}
                         >
-                            <div className="flex items-center justify-center gap-2">
+                            {/* Fondo con brillo animado */}
+                            {!isSubmitting && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />}
+
+                            <div className="flex items-center justify-center gap-2 relative z-10">
                                 {isSubmitting ? (
                                     <>
                                         <Loader2 className="w-5 h-5 animate-spin" />
