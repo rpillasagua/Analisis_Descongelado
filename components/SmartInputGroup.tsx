@@ -144,10 +144,10 @@ export default function SmartInputGroup({
                         <img
                             src={photoUrl}
                             alt="Preview"
-                            className="w-12 h-12 rounded object-cover border border-gray-300 group-hover:scale-105 transition-transform"
+                            className="w-8 h-8 rounded object-cover border border-gray-300 group-hover:scale-105 transition-transform"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded flex items-center justify-center transition-colors">
-                            <Eye className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Eye className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                     </button>
 
