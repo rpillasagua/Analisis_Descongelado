@@ -114,15 +114,15 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
-              className="bg-white rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden group mb-4"
+              className="bg-white rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden group mb-1"
               style={{
                 borderLeft: `8px solid ${analysis.analystColor || '#3B82F6'}`,
                 boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)'
               }}
             >
-              <div className="p-4">
+              <div className="p-3">
                 {/* Card Header */}
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-bold text-gray-900 leading-none">
                       {analysis.lote}
@@ -132,20 +132,17 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-medium text-gray-400 mb-0.5">
-                      {new Date(analysis.date).toLocaleDateString()}
-                    </div>
                     <div className="text-xs font-medium text-gray-400">
-                      {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(analysis.date).toLocaleDateString()} {new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                 </div>
 
                 {/* Card Body Grid */}
-                <div className="grid grid-cols-2 gap-y-3 gap-x-3">
+                <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                   {/* Producto */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0.5">Producto:</p>
+                    <p className="text-xs font-medium text-gray-500 mb-0">Producto:</p>
                     <p className="text-sm font-semibold text-gray-900 leading-tight">
                       {PRODUCT_TYPE_LABELS[analysis.productType] || analysis.productType}
                     </p>
@@ -153,7 +150,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
                   {/* Código */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0.5 flex items-center gap-1">
+                    <p className="text-xs font-medium text-gray-500 mb-0 flex items-center gap-1">
                       <QrCode className="w-3.5 h-3.5" /> Código:
                     </p>
                     <p className="text-lg font-bold text-gray-800">
@@ -163,7 +160,7 @@ export default function AnalysisDashboard({ initialAnalyses }: AnalysisDashboard
 
                   {/* Talla */}
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-0.5 flex items-center gap-1">
+                    <p className="text-xs font-medium text-gray-500 mb-0 flex items-center gap-1">
                       <Ruler className="w-3.5 h-3.5" /> Talla:
                     </p>
                     <p className="text-sm font-semibold text-gray-900">
