@@ -593,8 +593,8 @@ export default function NewMultiAnalysisPageContent() {
                                 <CardTitle>⚖️ Pesos</CardTitle>
                                 <CardDescription>Registra los pesos con fotos</CardDescription>
                             </CardHeader>
-                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6'}>
-                                <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6'}>
+                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
+                                <div className={viewMode === 'compact' ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4'}>
                                     {/* Peso Bruto */}
                                     <SmartInputGroup
                                         label="Peso Bruto"
@@ -669,8 +669,8 @@ export default function NewMultiAnalysisPageContent() {
                             <CardHeader>
                                 <CardTitle>📏 Uniformidad</CardTitle>
                             </CardHeader>
-                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6'}>
-                                <div className={viewMode === 'compact' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
+                            <CardContent className={viewMode === 'compact' ? 'p-4 space-y-4' : 'p-6 space-y-6 md:p-4 md:space-y-4'}>
+                                <div className={viewMode === 'compact' ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-4'}>
                                     {/* Grandes */}
                                     <div className="space-y-3">
                                         <Label>Grandes (kg)</Label>
