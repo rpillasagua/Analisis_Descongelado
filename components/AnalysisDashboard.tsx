@@ -159,69 +159,69 @@ export default function AnalysisDashboard({ initialAnalyses, initialLastDoc }: A
         )}
 
         {/* Grid de Análisis - Compacto y optimizado para móvil */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2">
           {filteredAnalyses.map((analysis) => (
             <div
               key={analysis.id}
               onClick={() => router.push(`/dashboard/tests/edit?id=${analysis.id}`)}
               className="card-float cursor-pointer relative overflow-hidden group bg-white"
             >
-              {/* Gradient accent border */}
+              {/* Gradient accent border - Thinner */}
               <div
-                className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-600"
+                className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-purple-600"
               />
 
-              <div className="p-2">
-                {/* Header compacto */}
-                <div className="flex justify-between items-start mb-1.5">
-                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-none truncate">
+              <div className="p-1.5 pl-2">
+                {/* Header ultra compacto */}
+                <div className="flex justify-between items-center mb-0.5">
+                  <div className="flex items-center gap-1 min-w-0 flex-1">
+                    <h3 className="text-xs font-bold text-gray-900 leading-none truncate">
                       {analysis.lote}
                     </h3>
                     {analysis.status === 'COMPLETADO' && (
-                      <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                      <CheckCircle className="w-2.5 h-2.5 text-green-500 flex-shrink-0" />
                     )}
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-gray-400 flex-shrink-0 ml-1">
-                    <Calendar className="w-2.5 h-2.5" />
+                  <div className="flex items-center gap-0.5 text-[9px] text-gray-400 flex-shrink-0 ml-1 leading-none">
+                    <Calendar className="w-2 h-2" />
                     <span className="hidden sm:inline">{new Date(analysis.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
 
-                {/* Grid compacto 2x2 */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px]">
+                {/* Grid ultra compacto 2x2 */}
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0 text-[10px]">
                   {/* Producto */}
                   <div className="min-w-0">
-                    <p className="text-[9px] font-medium text-gray-500 leading-none mb-0.5">Producto</p>
-                    <p className="text-xs font-bold text-gray-900 leading-none truncate">
-                      {PRODUCT_TYPE_LABELS[analysis.productType]}
+                    <p className="text-[8px] font-medium text-gray-500 leading-none">Producto</p>
+                    <p className="text-[10px] font-bold text-gray-900 leading-none truncate">
+                      {PRODUCT_TYPE_LABELS[analysis.productType as keyof typeof PRODUCT_TYPE_LABELS]}
                     </p>
                   </div>
 
                   {/* Código */}
                   <div className="min-w-0">
-                    <p className="text-[9px] font-medium text-gray-500 leading-none flex items-center gap-1 mb-0.5">
-                      <QrCode className="w-2.5 h-2.5" /> Código
+                    <p className="text-[8px] font-medium text-gray-500 leading-none flex items-center gap-0.5">
+                      <QrCode className="w-2 h-2" /> Código
                     </p>
-                    <p className="text-xs font-bold text-gray-800 leading-none truncate">
+                    <p className="text-[10px] font-bold text-gray-800 leading-none truncate">
                       {analysis.codigo}
                     </p>
                   </div>
 
                   {/* Talla */}
                   <div className="min-w-0">
-                    <p className="text-[9px] font-medium text-gray-500 leading-none flex items-center gap-1 mb-0.5">
-                      <Ruler className="w-2.5 h-2.5" /> Talla
+                    <p className="text-[8px] font-medium text-gray-500 leading-none flex items-center gap-0.5">
+                      <Ruler className="w-2 h-2" /> Talla
                     </p>
-                    <p className="text-xs font-bold text-gray-900 leading-none truncate">
+                    <p className="text-[10px] font-bold text-gray-900 leading-none truncate">
                       {analysis.talla || '-'}
                     </p>
                   </div>
 
                   {/* Turno */}
                   <div className="min-w-0">
-                    <p className="text-[9px] font-medium text-gray-500 leading-none mb-0.5">Turno</p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
+                    <p className="text-[8px] font-medium text-gray-500 leading-none">Turno</p>
+                    <span className={`inline-flex items-center px-1 py-0 rounded-full text-[8px] font-bold tracking-wide uppercase shadow-sm leading-none ${analysis.shift === 'NOCHE'
                       ? 'bg-purple-100 text-purple-700'
                       : 'bg-amber-100 text-amber-700'
                       }`}>
