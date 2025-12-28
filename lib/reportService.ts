@@ -151,7 +151,7 @@ const flattenAnalyses = (analyses: QualityAnalysis[]): FlattenedAnalysis[] => {
             lote: doc.lote,
             codigo: doc.codigo,
             talla: doc.talla || '-',
-            // @ts-ignore - Index access safe defined in types
+            // @ts-expect-error - Index access safe defined in types
             analystColor: ANALYST_COLOR_LABELS[doc.analystColor] || doc.analystColor,
             observations: (isLegacy ? doc.observations : item.observations) || doc.observations || '-',
             status: doc.status,

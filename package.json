@@ -56,6 +56,8 @@
     "@capacitor/android": "^7.4.3",
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
     "concurrently": "^9.2.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.6",

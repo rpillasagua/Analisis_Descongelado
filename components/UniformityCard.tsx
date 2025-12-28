@@ -23,7 +23,7 @@ interface UniformityCardProps {
     isCompleted?: boolean;
 }
 
-export const UniformityCard = React.memo<UniformityCardProps>(({
+export const UniformityCard = React.memo<UniformityCardProps>(function UniformityCard({
     showUniformity,
     uniformidad,
     onUniformityChange,
@@ -35,7 +35,7 @@ export const UniformityCard = React.memo<UniformityCardProps>(({
     uniformityRatio,
     validation,
     isCompleted = false
-}) => {
+}) {
     if (!showUniformity) return null;
 
     return (

@@ -10,7 +10,6 @@
 /**
  * Información detallada del producto (Ficha Técnica)
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface ProductInfo {
   client: string;
   type: ProductType;

@@ -16,13 +16,13 @@ interface ConteoCardProps {
     isCompleted?: boolean;
 }
 
-export const ConteoCard = React.memo<ConteoCardProps>(({
+export const ConteoCard = React.memo<ConteoCardProps>(function ConteoCard({
     showConteo,
     conteo,
     onConteoChange,
     validation,
     isCompleted = false
-}) => {
+}) {
     if (!showConteo) return null;
 
     return (
