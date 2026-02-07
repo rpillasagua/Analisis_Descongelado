@@ -19,7 +19,7 @@ interface WeightsSectionProps {
     isCompleted: boolean;
 }
 
-export const WeightsSection = React.memo<WeightsSectionProps>(({
+export const WeightsSection = React.memo<WeightsSectionProps>(function WeightsSection({
     handleWeightChange,
     handlePhotoCapture,
     isFieldUploading,
@@ -28,7 +28,7 @@ export const WeightsSection = React.memo<WeightsSectionProps>(({
     viewMode,
     isGalleryMode,
     isCompleted
-}) => {
+}) {
     const {
         currentAnalysis,
         activeAnalysisIndex,

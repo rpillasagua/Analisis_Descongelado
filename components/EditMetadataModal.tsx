@@ -109,11 +109,11 @@ export default function EditMetadataModal({ isOpen, onClose, onSave, initialData
     };
 
     const getNormalizedLote = (input: string, type?: ProductType) => {
-        let trimmed = input.trim().toUpperCase();
+        const trimmed = input.trim().toUpperCase();
         if (!trimmed) return trimmed;
 
         let mainPart = trimmed.split('-')[0].trim().replace(/\s*VA\s*$/, '');
-        let yearPart = trimmed.includes('-') ? trimmed.split('-')[1].trim() : '25';
+        const yearPart = trimmed.includes('-') ? trimmed.split('-')[1].trim() : '25';
 
         if (/^\d+$/.test(mainPart)) {
             mainPart = mainPart.padStart(7, '0');

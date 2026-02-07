@@ -19,7 +19,7 @@ interface DefectsCardProps {
     isCompleted?: boolean;
 }
 
-export const DefectsCard = React.memo<DefectsCardProps>(({
+export const DefectsCard = React.memo<DefectsCardProps>(function DefectsCard({
     showDefects,
     productType,
     currentAnalysis,
@@ -31,7 +31,7 @@ export const DefectsCard = React.memo<DefectsCardProps>(({
     activeAnalysisIndex,
     isGalleryMode,
     isCompleted = false
-}) => {
+}) {
     const [isEditMode, setIsEditMode] = React.useState(false);
 
     if (!showDefects) return null;

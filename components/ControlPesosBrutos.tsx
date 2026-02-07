@@ -21,7 +21,7 @@ interface ControlPesosBrutosProps {
 
 // using default export allows cleaner memo usage in React Fast Refresh dev environments but wrapping it works too
 // We need to name the component inside memo for better devtools debugging
-const ControlPesosBrutos = React.memo<ControlPesosBrutosProps>(({
+const ControlPesosBrutos = React.memo<ControlPesosBrutosProps>(function ControlPesosBrutos({
   registros,
   onChange,
   onPhotoCapture,
@@ -32,7 +32,7 @@ const ControlPesosBrutos = React.memo<ControlPesosBrutosProps>(({
   analysisId,
   forceGalleryMode = false,
   isCompleted = false
-}) => {
+}) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const isCompact = viewMode === 'COMPACTA';

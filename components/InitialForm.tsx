@@ -193,7 +193,7 @@ export default function InitialForm({ onComplete, initialData }: InitialFormProp
 
     // Helper para normalizar lote
     const getNormalizedLote = (input: string, type?: ProductType) => {
-        let trimmed = input.trim().toUpperCase();
+        const trimmed = input.trim().toUpperCase();
         if (!trimmed) return trimmed;
 
         // Limpiar mainPart de 'VA' si lo tiene pegado o separado

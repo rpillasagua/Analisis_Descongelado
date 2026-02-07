@@ -36,13 +36,13 @@ export default function DriveDiagnostic() {
                 addLog('✅ Servicio inicializado');
 
                 // 4. Check Root Folder
-                // @ts-ignore - accessing private property for diagnostic
+                // @ts-expect-error - accessing private property for diagnostic
                 const rootId = googleDriveService.rootFolderId;
                 addLog(`📂 Root Folder ID en uso: ${rootId}`);
 
                 if (rootId) {
                     addLog('Verificando contenido de carpeta raíz...');
-                    // @ts-ignore
+                    // @ts-expect-error - accessing private method for diagnostic
                     const fileData = await googleDriveService.getFile(rootId);
                     addLog(`Nombre de carpeta raíz: ${fileData.name}`);
 
